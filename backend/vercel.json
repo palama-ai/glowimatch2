@@ -16,6 +16,7 @@
     "GLOWMATCH_JWT_SECRET": "@glowmatch_jwt_secret",
     "GLOWMATCH_ADMIN_EMAIL": "@glowmatch_admin_email",
     "GLOWMATCH_ADMIN_PASSWORD": "@glowmatch_admin_password",
-    "GLOWMATCH_DB_PATH": "/tmp/data.db"
+    "GLOWMATCH_DB_PATH": "/tmp/data.db",
+    "NODE_ENV": "production"
   }
 }

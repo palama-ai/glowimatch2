@@ -40,7 +40,7 @@ const app = express();
 app.use(cors());
 // simple request logger to aid debugging
 app.use((req, res, next) => {
-  try { console.log('[backend] incoming request', req.method, req.originalUrl); } catch (e) {}
+  try { console.log('[backend] incoming request', req.method, req.originalUrl); } catch (e) { }
   next();
 });
 // Increase JSON body limit to allow base64 image uploads from the frontend
@@ -51,7 +51,7 @@ try {
   console.log('[backend] OPENAI_API_KEY present:', !!process.env.OPENAI_API_KEY);
   console.log('[backend] GEMINI_API_KEY present:', !!process.env.GEMINI_API_KEY);
   console.log('[backend] GOOGLE_VISION_API_KEY present:', !!process.env.GOOGLE_VISION_API_KEY);
-} catch (e) {}
+} catch (e) { }
 
 init();
 
@@ -92,6 +92,11 @@ app.use('/reports', express.static(path.join(__dirname, 'uploads', 'reports')));
 
 app.get('/', (req, res) => res.json({ ok: true, msg: 'GlowMatch backend running' }));
 
-app.listen(PORT, () => {
-  console.log(`GlowMatch backend listening on http://localhost:${PORT}`);
-});
+// Only start the server if running directly (not imported)
+if (require.main === module) {
+  app.listen(PORT, () => {
+    console.log(`GlowMatch backend listening on http://localhost:${PORT}`);
+  });
+}
+
+module.exports = app;
