@@ -4,15 +4,40 @@ const Database = require('better-sqlite3');
 const bcrypt = require('bcrypt');
 const { v4: uuidv4 } = require('uuid');
 
-const DB_PATH = process.env.GLOWMATCH_DB_PATH || path.join(__dirname, 'data.db');
+// Use environment variable or fallback to /tmp for serverless environments
+let DB_PATH = process.env.GLOWMATCH_DB_PATH;
+
+// If no path specified, use /tmp in production, ./data.db in development
+if (!DB_PATH) {
+  DB_PATH = process.env.NODE_ENV === 'production' ? '/tmp/data.db' : path.join(__dirname, 'data.db');
+}
 
 // Ensure directory exists for database file
 const dbDir = path.dirname(DB_PATH);
-if (!fs.existsSync(dbDir)) {
-  fs.mkdirSync(dbDir, { recursive: true });
+try {
+  if (!fs.existsSync(dbDir)) {
+    fs.mkdirSync(dbDir, { recursive: true });
+  }
+} catch (err) {
+  console.warn(`[db] Could not create directory ${dbDir}:`, err.message);
 }
 
-const db = new Database(DB_PATH);
+let db;
+try {
+  db = new Database(DB_PATH);
+  console.log(`[db] Database opened at: ${DB_PATH}`);
+} catch (err) {
+  console.error(`[db] Failed to open database at ${DB_PATH}:`, err && err.message ? err.message : err);
+  console.warn('[db] Falling back to in-memory database. Changes will NOT be persisted across restarts.');
+  try {
+    db = new Database(':memory:');
+    console.log('[db] Opened in-memory database');
+  } catch (memErr) {
+    console.error('[db] Failed to open in-memory database as fallback:', memErr && memErr.message ? memErr.message : memErr);
+    // rethrow the original error if we cannot open any database
+    throw err;
+  }
+}
 
 function init() {
   // users table
