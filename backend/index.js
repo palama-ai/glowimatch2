@@ -70,6 +70,15 @@ app.use('/api/contact', contactRoutes);
 app.use('/api/referrals', referralsRoutes);
 app.use('/api/notifications', notificationsRoutes);
 
+// Basic API root - helpful for health checks and to avoid "Cannot GET /api" responses
+app.get('/api', (req, res) => {
+  try {
+    res.json({ ok: true, message: 'GlowMatch API', routes: '/__routes' });
+  } catch (e) {
+    res.status(500).json({ ok: false, error: String(e) });
+  }
+});
+
 // debug: list registered routes for quick inspection
 app.get('/__routes', (req, res) => {
   try {
