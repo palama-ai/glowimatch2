@@ -50,7 +50,7 @@ const ImageUploadAnalysis = () => {
       const quizData = JSON.parse(localStorage.getItem('glowmatch-quiz-data') || '{}');
       const payload = { quizData, images: b64 ? [{ filename: fileName || 'upload.jpg', data: b64 }] : [] };
       
-      const API_BASE = import.meta.env?.VITE_BACKEND_URL || 'http://localhost:4000/api';
+      const API_BASE = import.meta.env?.VITE_BACKEND_URL || 'https://glowimatch-ebon.vercel.app/api';
       
       setUploadProgress(30);
       

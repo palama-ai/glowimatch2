@@ -284,7 +284,7 @@ const ResultsDashboard = () => {
       (async (provider = expandProvider) => {
         try {
           setExpandLoading(true); setExpandError(null);
-          const API_BASE = import.meta.env?.VITE_BACKEND_URL || 'http://localhost:4000/api';
+                    const API_BASE = import.meta.env?.VITE_BACKEND_URL || 'https://glowimatch-ebon.vercel.app/api';
           const resp = await fetch(`${API_BASE}/analysis/expand`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -465,7 +465,7 @@ const ResultsDashboard = () => {
                     if (!analysisData) return alert('No analysis found in localStorage');
                     const parsed = JSON.parse(analysisData);
                     setExpandLoading(true); setExpandError(null);
-                    const API_BASE = import.meta.env?.VITE_BACKEND_URL || 'http://localhost:4000/api';
+                    const API_BASE = import.meta.env?.VITE_BACKEND_URL || 'https://glowimatch-ebon.vercel.app/api';
                     const resp = await fetch(`${API_BASE}/analysis/expand`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ analysis: parsed, provider: expandProvider }) });
                     if (!resp.ok) { const t = await resp.text().catch(()=>null); setExpandError(`Regenerate failed: ${resp.status} ${t||''}`); return; }
                     const j = await resp.json(); const gen = j?.data?.generated || null;
@@ -498,7 +498,7 @@ const ResultsDashboard = () => {
                     if (!analysisData) return alert('No analysis found in localStorage');
                     const parsed = JSON.parse(analysisData);
                     setExpandLoading(true); setExpandError(null);
-                    const API_BASE = import.meta.env?.VITE_BACKEND_URL || 'http://localhost:4000/api';
+                    const API_BASE = import.meta.env?.VITE_BACKEND_URL || 'https://glowimatch-ebon.vercel.app/api';
                     const resp = await fetch(`${API_BASE}/analysis/expand`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ analysis: parsed, provider: expandProvider }) });
                     if (!resp.ok) { const t = await resp.text().catch(()=>null); setExpandError(`Regenerate failed: ${resp.status} ${t||''}`); return; }
                     const j = await resp.json(); const gen = j?.data?.generated || null;

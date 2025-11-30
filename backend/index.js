@@ -107,7 +107,7 @@ if (fs.existsSync(buildPath)) {
 // Only start the server if running directly (not imported)
 if (require.main === module) {
   app.listen(PORT, () => {
-    console.log(`GlowMatch backend listening on http://localhost:${PORT}`);
+    console.log(`GlowMatch backend listening on port ${PORT}`);
   });
 }
 

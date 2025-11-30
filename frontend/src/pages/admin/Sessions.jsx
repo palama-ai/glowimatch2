@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import AdminLayout from '../../components/admin/AdminLayout';
 import Icon from '../../components/AppIcon';
 
-const API_BASE = import.meta.env?.VITE_BACKEND_URL || 'http://localhost:4000/api';
+const API_BASE = import.meta.env?.VITE_BACKEND_URL || 'https://glowimatch-ebon.vercel.app/api';
 
 function getAuthHeaders() {
   const raw = localStorage.getItem('gm_auth');

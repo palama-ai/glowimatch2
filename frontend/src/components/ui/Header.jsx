@@ -7,7 +7,7 @@ import { useModal } from '../../contexts/ModalContext';
 import Button from './Button';
 import Icon from '../AppIcon';
 
-const API_BASE = import.meta.env?.VITE_BACKEND_URL || 'http://localhost:4000/api';
+const API_BASE = import.meta.env?.VITE_BACKEND_URL || 'https://glowimatch-ebon.vercel.app/api';
 
 const Header = () => {
   const navigate = useNavigate();

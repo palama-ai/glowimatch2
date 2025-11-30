@@ -4,7 +4,7 @@ import Button from '../../components/ui/Button';
 import Input from '../../components/ui/Input';
 import Icon from '../../components/AppIcon';
 
-const API_BASE = import.meta.env?.VITE_BACKEND_URL || 'http://localhost:4000/api';
+const API_BASE = import.meta.env?.VITE_BACKEND_URL || 'https://glowimatch-ebon.vercel.app/api';
 
 const Blogs = () => {
   const [blogs, setBlogs] = useState([]);

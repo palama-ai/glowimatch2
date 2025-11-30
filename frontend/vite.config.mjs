@@ -19,9 +19,9 @@ export default defineConfig({
     allowedHosts: ['.amazonaws.com', '.builtwithrocket.new'],
     proxy: {
       '/api': {
-        target: 'http://localhost:4000',
+        target: 'https://glowimatch-ebon.vercel.app',
         changeOrigin: true,
-        secure: false
+        secure: true
       }
     }
   }
