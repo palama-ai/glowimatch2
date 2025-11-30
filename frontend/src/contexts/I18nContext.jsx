@@ -139,7 +139,6 @@ const translations = {
     save: 'Save',
     delete: 'Delete',
     edit: 'Edit',
-    cancel: 'Cancel',
     search: 'Search',
   },
   fr: {
@@ -280,7 +279,6 @@ const translations = {
     save: 'Enregistrer',
     delete: 'Supprimer',
     edit: 'Modifier',
-    cancel: 'Annuler',
     search: 'Rechercher',
   },
   ar: {
@@ -421,7 +419,6 @@ const translations = {
     save: 'حفظ',
     delete: 'حذف',
     edit: 'تعديل',
-    cancel: 'إلغاء',
     search: 'بحث',
   }
 };
