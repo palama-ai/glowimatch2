@@ -1,15 +1,8 @@
 {
   "buildCommand": "npm run build",
-  "outputDirectory": "build",
-  "ignoreCommand": "git diff --quiet HEAD^ HEAD -- src/ package.json || exit 1",
-  "rewrites": [
-    {
-      "source": "/api/(.*)",
-      "destination": "/api/index.js"
-    }
-  ],
+  "outputDirectory": "frontend/build",
+  "ignoreCommand": "git diff --quiet HEAD^ HEAD -- frontend/ backend/ package.json || exit 0",
   "env": {
-    "VITE_BACKEND_URL": "/api",
-    "GLOWMATCH_DB_PATH": "/tmp/data.db"
+    "VITE_BACKEND_URL": "https://backend-three-sigma-81.vercel.app/api"
   }
 }
