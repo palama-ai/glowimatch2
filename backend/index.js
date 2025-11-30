@@ -2,20 +2,22 @@
 // If the server is started from the `backend` folder, prefer loading the
 // `.env` file from the project root so keys placed there are picked up.
 const path = require('path');
+const fs = require('fs');
 try {
-  const fs = require('fs');
   const dotenv = require('dotenv');
   const backendEnv = path.join(__dirname, '.env');
   const rootEnv = path.join(__dirname, '..', '.env');
   if (fs.existsSync(backendEnv)) {
+    console.log('[backend] Loading .env from backend folder');
     dotenv.config({ path: backendEnv });
   } else if (fs.existsSync(rootEnv)) {
+    console.log('[backend] Loading .env from root folder');
     dotenv.config({ path: rootEnv });
   } else {
-    // fallback to default behavior
+    console.log('[backend] No specific .env found, using default');
     dotenv.config();
   }
-} catch (e) { /* dotenv optional */ }
+} catch (e) { console.error('[backend] Error loading .env:', e); }
 
 const express = require('express');
 const cors = require('cors');
@@ -90,7 +92,17 @@ app.get('/__routes', (req, res) => {
 // Serve uploaded reports as static files
 app.use('/reports', express.static(path.join(__dirname, 'uploads', 'reports')));
 
-app.get('/', (req, res) => res.json({ ok: true, msg: 'GlowMatch backend running' }));
+// Serve static files from the React app build directory
+const buildPath = path.join(__dirname, '../build');
+if (fs.existsSync(buildPath)) {
+  app.use(express.static(buildPath));
+  // Catch-all route for SPA - MUST use app.use() not app.get('*') in Express v5
+  app.use((req, res) => {
+    res.sendFile(path.join(buildPath, 'index.html'));
+  });
+} else {
+  app.get('/', (req, res) => res.json({ ok: true, msg: 'GlowMatch backend running' }));
+}
 
 // Only start the server if running directly (not imported)
 if (require.main === module) {

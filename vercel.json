@@ -1,7 +1,7 @@
 {
   "buildCommand": "npm run build",
   "outputDirectory": "build",
-  "ignoreCommand": "git diff --quiet HEAD^ HEAD -- src/ package.json || exit 0",
+  "ignoreCommand": "git diff --quiet HEAD^ HEAD -- src/ package.json || exit 1",
   "rewrites": [
     {
       "source": "/api/(.*)",
