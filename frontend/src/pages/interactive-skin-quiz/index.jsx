@@ -398,7 +398,7 @@ const InteractiveSkinQuiz = () => {
 
     setFetchingReferral(true);
     try {
-      const API_BASE = import.meta.env?.VITE_BACKEND_URL || 'https://glowimatch-ebon.vercel.app/api';
+      const API_BASE = import.meta.env?.VITE_BACKEND_URL || 'https://backend-three-sigma-81.vercel.app/api';
       const resp = await fetch(`${API_BASE}/referrals/me`, {
         headers: { 'Content-Type': 'application/json', ...getAuthHeader() }
       });
@@ -630,7 +630,7 @@ const InteractiveSkinQuiz = () => {
       }
 
       // Try to run AI analysis (best-effort). This analyzes quiz answers (images will be uploaded on next page).
-      const API_BASE = import.meta.env?.VITE_BACKEND_URL || 'https://glowimatch-ebon.vercel.app/api';
+      const API_BASE = import.meta.env?.VITE_BACKEND_URL || 'https://backend-three-sigma-81.vercel.app/api';
       const getAuthHeader = () => {
         try {
           const raw = localStorage.getItem('gm_auth');

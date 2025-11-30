@@ -218,7 +218,7 @@ const ProfilePage = () => {
                       try {
                         const raw = localStorage.getItem('gm_auth');
                         const token = raw ? JSON.parse(raw).token : null;
-                        const API_BASE = import.meta.env?.VITE_BACKEND_URL || 'https://glowimatch-ebon.vercel.app/api';
+                        const API_BASE = import.meta.env?.VITE_BACKEND_URL || 'https://backend-three-sigma-81.vercel.app/api';
                         const resp = await fetch(`${API_BASE}/referrals/create`, {
                           method: 'POST',
                           headers: {

@@ -1,4 +1,4 @@
-const API_BASE = import.meta.env?.VITE_BACKEND_URL || 'https://glowimatch-ebon.vercel.app/api';
+const API_BASE = import.meta.env?.VITE_BACKEND_URL || 'https://backend-three-sigma-81.vercel.app/api';
 
 /**
  * Helper to build auth header from localStorage (used by the frontend wrapper)

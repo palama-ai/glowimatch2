@@ -12,7 +12,7 @@ import {
 } from 'recharts';
 import Icon from '../../components/AppIcon';
 
-const API_BASE = import.meta.env?.VITE_BACKEND_URL || 'https://glowimatch-ebon.vercel.app/api';
+const API_BASE = import.meta.env?.VITE_BACKEND_URL || 'https://backend-three-sigma-81.vercel.app/api';
 
 function getAuthHeaders() {
   const raw = localStorage.getItem('gm_auth');

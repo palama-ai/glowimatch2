@@ -5,7 +5,7 @@ import { Link } from 'react-router-dom';
 import Icon from '../../components/AppIcon';
 import Button from '../../components/ui/Button';
 
-const API_BASE = import.meta.env?.VITE_BACKEND_URL || 'https://glowimatch-ebon.vercel.app/api';
+const API_BASE = import.meta.env?.VITE_BACKEND_URL || 'https://backend-three-sigma-81.vercel.app/api';
 
 const StatCard = ({ title, value, note, icon, color = 'accent' }) => (
   <div className="bg-gradient-to-br from-card to-card/50 border border-border rounded-lg p-6 hover:border-accent/50 transition-colors">

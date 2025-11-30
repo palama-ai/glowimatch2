@@ -2,7 +2,7 @@
 // so the frontend can continue importing the same symbols: `supabase`, `quizService`,
 // `subscriptionService`, and `profileService` but the implementation uses fetch.
 
-const API_BASE = import.meta.env?.VITE_BACKEND_URL || 'https://glowimatch-ebon.vercel.app/api';
+const API_BASE = import.meta.env?.VITE_BACKEND_URL || 'https://backend-three-sigma-81.vercel.app/api';
 
 function makeResp(ok, data, error) {
   return { ok, data, error };
