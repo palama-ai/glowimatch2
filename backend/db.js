@@ -1,9 +1,16 @@
 const path = require('path');
+const fs = require('fs');
 const Database = require('better-sqlite3');
 const bcrypt = require('bcrypt');
 const { v4: uuidv4 } = require('uuid');
 
 const DB_PATH = process.env.GLOWMATCH_DB_PATH || path.join(__dirname, 'data.db');
+
+// Ensure directory exists for database file
+const dbDir = path.dirname(DB_PATH);
+if (!fs.existsSync(dbDir)) {
+  fs.mkdirSync(dbDir, { recursive: true });
+}
 
 const db = new Database(DB_PATH);
 
