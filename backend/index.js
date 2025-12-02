@@ -55,7 +55,41 @@ try {
   console.log('[backend] GOOGLE_VISION_API_KEY present:', !!process.env.GOOGLE_VISION_API_KEY);
 } catch (e) { }
 
-init();
+// Initialize database asynchronously on first request (Vercel serverless compatibility)
+let dbReady = false;
+let dbInitializing = false;
+let dbInitPromise = null;
+
+function ensureDbInitialized() {
+  if (dbReady) return Promise.resolve();
+  if (dbInitializing) return dbInitPromise;
+  
+  dbInitializing = true;
+  dbInitPromise = init()
+    .then(() => {
+      dbReady = true;
+      console.log('[backend] Database initialized successfully');
+    })
+    .catch(err => {
+      console.error('[backend] Database initialization failed:', err);
+      dbInitializing = false;
+      dbInitPromise = null;
+      throw err;
+    });
+  
+  return dbInitPromise;
+}
+
+// Middleware to ensure DB is initialized before handling requests
+app.use(async (req, res, next) => {
+  try {
+    await ensureDbInitialized();
+    next();
+  } catch (err) {
+    console.error('[backend] DB initialization error during request:', err);
+    next(); // Continue anyway for non-DB routes
+  }
+});
 
 app.use('/api/auth', authRoutes);
 app.use('/api/profile', profileRoutes);
@@ -73,7 +107,7 @@ app.use('/api/notifications', notificationsRoutes);
 // Basic API root - helpful for health checks and to avoid "Cannot GET /api" responses
 app.get('/api', (req, res) => {
   try {
-    res.json({ ok: true, message: 'GlowMatch API', routes: '/__routes' });
+    res.json({ ok: true, message: 'GlowMatch API', routes: '/__routes', db_ready: dbReady });
   } catch (e) {
     res.status(500).json({ ok: false, error: String(e) });
   }
