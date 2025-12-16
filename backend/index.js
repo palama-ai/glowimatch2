@@ -39,7 +39,31 @@ const notificationsRoutes = require('./routes/notifications');
 const PORT = process.env.PORT || 4000;
 
 const app = express();
-app.use(cors());
+
+// Configure CORS properly
+const allowedOrigins = [
+  'http://localhost:4028',
+  'http://localhost:3000',
+  'http://localhost:5173',
+  process.env.FRONTEND_URL || 'https://glowimatch.vercel.app',
+  'https://glowimatch.vercel.app',
+  'https://glowimatch-ebon.vercel.app'
+];
+
+app.use(cors({
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    
+    if (allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('CORS not allowed'));
+    }
+  },
+  credentials: true
+}));
+
 // simple request logger to aid debugging
 app.use((req, res, next) => {
   try { console.log('[backend] incoming request', req.method, req.originalUrl); } catch (e) { }
@@ -82,13 +106,44 @@ function ensureDbInitialized() {
 
 // Middleware to ensure DB is initialized before handling requests
 app.use(async (req, res, next) => {
-  try {
-    await ensureDbInitialized();
-    next();
-  } catch (err) {
-    console.error('[backend] DB initialization error during request:', err);
-    next(); // Continue anyway for non-DB routes
+  // Routes that don't need DB initialization
+  const skipDbInit = ['/api', '/__routes', '/favicon.ico'];
+  const isSkipPath = skipDbInit.some(path => req.path === path || req.path.startsWith(path + '/'));
+  
+  // Also skip health check endpoint
+  if (isSkipPath || req.path === '/api/health') {
+    return next();
   }
+  
+  // For /api/* endpoints, always ensure DB is initialized
+  if (req.path.startsWith('/api/')) {
+    try {
+      await ensureDbInitialized();
+      return next();
+    } catch (err) {
+      console.error('[backend] DB initialization error during request:', err);
+      
+      // Check if this is a DATABASE_URL missing error
+      const isDatabaseUrlMissing = err.message && err.message.includes('DATABASE_URL');
+      
+      if (isDatabaseUrlMissing) {
+        return res.status(503).json({ 
+          error: 'Database configuration missing', 
+          message: 'DATABASE_URL environment variable is not set in Vercel project settings.',
+          help: 'Go to Vercel Dashboard > Project Settings > Environment Variables and add DATABASE_URL',
+          details: err.message 
+        });
+      }
+      
+      return res.status(503).json({ 
+        error: 'Database not ready', 
+        message: 'The database is still initializing. Please try again in a moment.',
+        details: err.message 
+      });
+    }
+  }
+  
+  next();
 });
 
 app.use('/api/auth', authRoutes);
@@ -107,7 +162,14 @@ app.use('/api/notifications', notificationsRoutes);
 // Basic API root - helpful for health checks and to avoid "Cannot GET /api" responses
 app.get('/api', (req, res) => {
   try {
-    res.json({ ok: true, message: 'GlowMatch API', routes: '/__routes', db_ready: dbReady });
+    res.json({ 
+      ok: true, 
+      message: 'GlowMatch API', 
+      routes: '/__routes', 
+      db_ready: dbReady,
+      db_initializing: dbInitializing,
+      database_url_present: !!process.env.DATABASE_URL
+    });
   } catch (e) {
     res.status(500).json({ ok: false, error: String(e) });
   }
@@ -131,6 +193,40 @@ app.get('/__routes', (req, res) => {
     res.status(500).json({ error: msg });
   }
 });
+
+// Health check with detailed database status
+app.get('/api/health', (req, res) => {
+  try {
+    const dbUrl = process.env.DATABASE_URL;
+    const hasDbUrl = !!dbUrl;
+    const dbUrlMasked = hasDbUrl ? dbUrl.substring(0, 20) + '...' : 'NOT SET';
+    
+    res.json({
+      status: dbReady ? 'healthy' : 'initializing',
+      db_ready: dbReady,
+      db_initializing: dbInitializing,
+      database_url_present: hasDbUrl,
+      database_url_preview: dbUrlMasked,
+      timestamp: new Date().toISOString()
+    });
+  } catch (e) {
+    res.status(500).json({ status: 'error', error: String(e) });
+  }
+});
+
+// Serve favicon
+const faviconPath = path.join(__dirname, '../public/favicon.ico');
+if (fs.existsSync(faviconPath)) {
+  app.get('/favicon.ico', (req, res) => {
+    res.sendFile(faviconPath);
+  });
+} else {
+  // Fallback: serve a 1x1 transparent pixel favicon
+  app.get('/favicon.ico', (req, res) => {
+    res.set('Content-Type', 'image/x-icon');
+    res.send(Buffer.from('AAABAAEAEBAAAAEAIABoBAAAFgAAACgAAAAQAAAAIAAAAAEAIAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=', 'base64'));
+  });
+}
 
 // Serve uploaded reports as static files
 app.use('/reports', express.static(path.join(__dirname, 'uploads', 'reports')));

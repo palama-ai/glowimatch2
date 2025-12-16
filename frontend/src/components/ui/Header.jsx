@@ -9,6 +9,29 @@ import Icon from '../AppIcon';
 
 const API_BASE = import.meta.env?.VITE_BACKEND_URL || 'https://backend-three-sigma-81.vercel.app/api';
 
+// Navigation Link Component with Animation
+const NavLink = ({ to, label }) => {
+  const [isActive, setIsActive] = useState(false);
+  
+  return (
+    <Link
+      to={to}
+      onMouseEnter={() => setIsActive(true)}
+      onMouseLeave={() => setIsActive(false)}
+      className={`relative px-3 py-1 font-medium transition-all duration-300 rounded-lg ${
+        isActive 
+          ? 'text-pink-600 bg-white/60' 
+          : 'text-gray-700 hover:text-pink-600'
+      }`}
+    >
+      <span className="relative z-10">{label}</span>
+      {isActive && (
+        <div className="absolute inset-0 bg-gradient-to-r from-pink-100 to-rose-100 rounded-lg -z-0 animate-pulse" />
+      )}
+    </Link>
+  );
+};
+
 const Header = () => {
   const navigate = useNavigate();
   const { user, userProfile, signOut, isAdmin } = useAuth();
@@ -17,7 +40,7 @@ const Header = () => {
   const { lang, setLang, t } = useI18n();
   const { theme, toggle } = useTheme();
   const [showUserMenu, setShowUserMenu] = useState(false);
-  const [showLangMenu, setShowLangMenu] = useState(false);
+  const [showSettingsMenu, setShowSettingsMenu] = useState(false);
   const { openAnalysisPrompt } = useModal();
 
   const handleSignOut = async () => {
@@ -62,12 +85,10 @@ const Header = () => {
             const messages = data.data || [];
             const unread = messages.filter(m => !m.read).length;
             
-            // عندما تصل رسالة جديدة، اعرض العدد لمدة 5 ثواني ثم أخفيه
             if (unread > 0) {
               setUnreadCount(unread);
               setShowCount(true);
               
-              // إخفاء العدد بعد 5 ثواني والاحتفاظ بالنقطة الحمراء
               if (countTimer) clearTimeout(countTimer);
               countTimer = setTimeout(() => {
                 setShowCount(false);
@@ -95,7 +116,6 @@ const Header = () => {
 
     if (user) {
       fetchUnread();
-      // Refresh every 10 seconds for faster detection of new messages
       const interval = setInterval(fetchUnread, 10000);
       return () => {
         clearInterval(interval);
@@ -108,266 +128,181 @@ const Header = () => {
   }, [user, isAdmin]);
 
   return (
-    <header className="sticky top-0 z-50 bg-gradient-to-r from-background/95 to-background/90 backdrop-blur-md border-b border-gradient-to-r border-border/50 shadow-sm">
+    <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-pink-100/50 shadow-sm">
       <div className="max-w-7xl mx-auto px-5 lg:px-8">
-        <div className="flex items-center justify-between h-16">
-          {/* Logo */}
-          <Link to="/" className="flex items-center space-x-3 group">
-            <div className="p-2 bg-gradient-to-br from-accent/20 to-pink-500/20 rounded-lg group-hover:from-accent/30 group-hover:to-pink-500/30 transition-colors">
-              <Icon name="Sparkles" size={20} className="text-accent" />
-            </div>
-            <span className="text-xl font-bold bg-gradient-to-r from-pink-500 to-rose-500 bg-clip-text text-transparent">GlowMatch</span>
+        <div className="flex items-center justify-between h-16 gap-4">
+          {/* Logo - Left */}
+          <Link to="/" className="flex items-center space-x-2 group flex-shrink-0">
+            <span className="text-2xl font-bold bg-gradient-to-r from-pink-500 to-rose-500 bg-clip-text text-transparent hidden sm:inline">GlowMatch</span>
           </Link>
 
-          {/* Navigation */}
-          <nav className="hidden md:flex items-center space-x-6">
-            {/* Public Navigation (Always visible) */}
-            <Link to="/" className="text-muted-foreground hover:text-foreground transition-colors">
-              {t('home')}
-            </Link>
-            <Link to="/about" className="text-muted-foreground hover:text-foreground transition-colors">
-              {t('about')}
-            </Link>
-            <Link to="/contact" className="text-muted-foreground hover:text-foreground transition-colors">
-              {t('contact')}
-            </Link>
-            <Link to="/blog" className="text-muted-foreground hover:text-foreground transition-colors">
-              {t('blog')}
-            </Link>
-
-            {/* Authenticated User Navigation */}
-            {user && (
-              <>
-                <Link
-                  to="/interactive-skin-quiz"
-                  className="text-muted-foreground hover:text-foreground transition-colors"
-                >
-                  {t('skin_quiz')}
-                </Link>
-                <button
-                  onClick={openAnalysisPrompt}
-                  className="text-muted-foreground hover:text-foreground transition-colors border-none bg-transparent px-0"
-                >
-                  {t('analysis')}
-                </button>
-              </>
-            )}
-
-            {isAdmin && isAdmin() && (
-              <Link to="/admin" className="text-muted-foreground hover:text-foreground transition-colors">
-                {t('admin')}
-              </Link>
-            )}
+          {/* Navigation - Center */}
+          <nav className="hidden lg:flex items-center flex-1 justify-center">
+            <div className="flex items-center space-x-1 px-4 py-1.5 bg-gradient-to-r from-pink-50/80 to-rose-50/80 rounded-full border border-pink-200/50 backdrop-blur-sm">
+              <NavLink to="/" label={t('home')} />
+              <NavLink to="/about" label={t('about')} />
+              <NavLink to="/contact" label={t('contact')} />
+              <NavLink to="/blog" label={t('blog')} />
+              {user && <NavLink to="/interactive-skin-quiz" label={t('skin_quiz')} />}
+              {user && isAdmin && isAdmin() && <NavLink to="/admin" label={t('admin')} />}
+            </div>
           </nav>
 
-          {/* User Actions */}
-          <div className="flex items-center space-x-4">
+          {/* Right Section */}
+          <div className="flex items-center gap-2 flex-shrink-0">
             {user ? (
-              <div className="relative flex items-center">
-                {/* Notifications/Messages Icon */}
+              <>
+                {/* Notifications - Circular */}
                 <Link 
                   to={isAdmin && isAdmin() ? "/admin/messages" : "/notifications"} 
-                  className="inline-flex items-center mr-3 relative"
+                  className="inline-flex items-center relative"
                 >
-                  <div className="p-1 rounded-md hover:bg-muted/50 inline-flex items-center justify-center transition-all">
+                  <button className="p-2.5 rounded-full hover:bg-pink-100 inline-flex items-center justify-center transition-all duration-300 hover:scale-110">
                     <Icon 
                       name={isAdmin && isAdmin() ? "Mail" : "Bell"} 
-                      size={18}
-                      className="text-muted-foreground hover:text-foreground transition-colors"
+                      size={20}
+                      className="text-gray-700"
                     />
                     {unreadCount > 0 && (
                       <>
                         {showCount ? (
-                          // Show number badge for 5 seconds
-                          <span className="absolute -top-1 -right-1 inline-flex items-center justify-center px-1.5 py-0.5 text-xs font-semibold leading-none text-white bg-red-600 rounded-full animate-pulse">
+                          <span className="absolute -top-0.5 -right-0.5 inline-flex items-center justify-center px-1.5 py-0.5 text-xs font-bold text-white bg-red-600 rounded-full animate-pulse">
                             {unreadCount}
                           </span>
                         ) : (
-                          // Show red dot after 5 seconds
-                          <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-red-600 rounded-full animate-pulse"></span>
+                          <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-red-600 rounded-full animate-pulse"></span>
                         )}
                       </>
                     )}
-                  </div>
+                  </button>
                 </Link>
 
-                <div className="flex items-center space-x-2 mr-3">
-                  {/* Language Selector - Icon Only */}
-                  <div className="relative inline-block">
-                    <button
-                      onClick={() => setShowLangMenu(!showLangMenu)}
-                      className="p-2 rounded-lg hover:bg-accent/10 transition-all duration-200 group relative"
-                      title="Change language"
-                    >
-                      <Icon
-                        name="Globe"
-                        size={18}
-                        className="text-accent group-hover:text-accent group-hover:scale-110 transition-transform"
-                      />
-                    </button>
+                {/* Settings Menu - Circular */}
+                <div className="relative">
+                  <button
+                    onClick={() => setShowSettingsMenu(!showSettingsMenu)}
+                    className="p-2.5 rounded-full hover:bg-pink-100 inline-flex items-center justify-center transition-all duration-300 hover:scale-110"
+                    title="Settings"
+                  >
+                    <Icon name="Settings" size={20} className="text-gray-700" />
+                  </button>
 
-                    {/* Language Dropdown */}
-                    {showLangMenu && (
-                      <div className="absolute right-0 top-full mt-2 w-32 bg-background border border-border rounded-lg shadow-lg py-1 z-50">
+                  {showSettingsMenu && (
+                    <div className="absolute right-0 top-full mt-2 w-48 bg-white border border-pink-200 rounded-xl shadow-xl overflow-hidden z-50">
+                      {/* Settings Header */}
+                      <div className="px-4 py-3 bg-gradient-to-r from-pink-100 to-rose-100 border-b border-pink-200">
+                        <p className="text-sm font-bold text-gray-900">{t('settings') || 'Settings'}</p>
+                      </div>
+
+                      {/* Settings Items */}
+                      <div className="py-2">
+                        {/* Theme Toggle */}
                         <button
                           onClick={() => {
-                            setLang('en');
-                            setShowLangMenu(false);
+                            toggle();
+                            setShowSettingsMenu(false);
                           }}
-                          className={`block w-full text-left px-4 py-2 text-sm transition-colors ${
-                            lang === 'en'
-                              ? 'bg-accent/10 text-accent font-semibold'
-                              : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
+                          className="w-full flex items-center space-x-3 px-4 py-2.5 text-sm text-gray-700 hover:text-pink-600 hover:bg-pink-50 transition-colors"
+                        >
+                          <Icon name={theme === 'dark' ? 'Sun' : 'Moon'} size={16} className="text-pink-500" />
+                          <span>{theme === 'dark' ? ` ${t('light_mode') || 'Light Mode'}` : ` ${t('dark_mode') || 'Dark Mode'}`}</span>
+                        </button>
+
+                        <div className="border-t border-pink-200 my-1" />
+
+                        {/* Language Options */}
+                        <button
+                          onClick={() => setLang('en')}
+                          className={`w-full flex items-center space-x-3 px-4 py-2.5 text-sm transition-colors ${
+                            lang === 'en' ? 'bg-pink-100 text-pink-600 font-semibold' : 'text-gray-700 hover:text-pink-600 hover:bg-pink-50'
                           }`}
                         >
-                          🇺🇸 English
+                          <span>🇺🇸</span>
+                          <span>English</span>
                         </button>
                         <button
-                          onClick={() => {
-                            setLang('fr');
-                            setShowLangMenu(false);
-                          }}
-                          className={`block w-full text-left px-4 py-2 text-sm transition-colors ${
-                            lang === 'fr'
-                              ? 'bg-accent/10 text-accent font-semibold'
-                              : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
+                          onClick={() => setLang('fr')}
+                          className={`w-full flex items-center space-x-3 px-4 py-2.5 text-sm transition-colors ${
+                            lang === 'fr' ? 'bg-pink-100 text-pink-600 font-semibold' : 'text-gray-700 hover:text-pink-600 hover:bg-pink-50'
                           }`}
                         >
-                          🇫🇷 Français
+                          <span>🇫🇷</span>
+                          <span>Français</span>
                         </button>
                         <button
-                          onClick={() => {
-                            setLang('ar');
-                            setShowLangMenu(false);
-                          }}
-                          className={`block w-full text-left px-4 py-2 text-sm transition-colors ${
-                            lang === 'ar'
-                              ? 'bg-accent/10 text-accent font-semibold'
-                              : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
+                          onClick={() => setLang('ar')}
+                          className={`w-full flex items-center space-x-3 px-4 py-2.5 text-sm transition-colors ${
+                            lang === 'ar' ? 'bg-pink-100 text-pink-600 font-semibold' : 'text-gray-700 hover:text-pink-600 hover:bg-pink-50'
                           }`}
                         >
-                          🇸🇦 العربية
+                          <span>🇸🇦</span>
+                          <span>العربية</span>
                         </button>
                       </div>
-                    )}
-                  </div>
-
-                  {/* Theme Toggle */}
-                  <button
-                    onClick={toggle}
-                    title="Toggle theme"
-                    className="p-2 rounded-lg hover:bg-accent/10 transition-all duration-200 group"
-                  >
-                    <Icon
-                      name={theme === 'dark' ? 'Sun' : 'Moon'}
-                      size={18}
-                      className="text-accent group-hover:text-accent group-hover:scale-110 transition-transform"
-                    />
-                  </button>
+                    </div>
+                  )}
                 </div>
 
-                <button
-                  onClick={() => setShowUserMenu(!showUserMenu)}
-                  className="flex items-center space-x-2 text-muted-foreground hover:text-foreground transition-colors"
-                >
-                  <Icon name="User" size={20} />
-                  <span className="hidden sm:inline">
-                    {userProfile?.full_name?.split(' ')?.[0] || 'User'}
-                  </span>
-                  <Icon name="ChevronDown" size={16} />
-                </button>
+                {/* User Profile - Circular */}
+                <div className="relative">
+                  <button
+                    onClick={() => setShowUserMenu(!showUserMenu)}
+                    className="p-2.5 rounded-full hover:bg-pink-100 inline-flex items-center justify-center transition-all duration-300 hover:scale-110"
+                    title={userProfile?.full_name || 'User'}
+                  >
+                    <Icon name="User" size={20} className="text-gray-700" />
+                  </button>
 
-                {showUserMenu && (
-                  <div className="absolute right-0 top-full mt-2 w-56 bg-gradient-to-br from-card to-card/95 border border-border/50 rounded-xl shadow-xl overflow-hidden z-50">
-                    {/* Header */}
-                    <div className="px-4 py-3 bg-gradient-to-r from-accent/10 to-pink-500/10 border-b border-border/50">
-                      <p className="text-xs text-muted-foreground font-semibold uppercase tracking-wide">Account</p>
-                      <p className="text-sm font-semibold text-foreground mt-1">
-                        {userProfile?.full_name || 'User'}
-                      </p>
-                      <p className="text-xs text-muted-foreground mt-0.5">{userProfile?.email}</p>
-                    </div>
-
-                    {/* Menu Items */}
-                    <div className="py-2">
-                      {/* Profile */}
-                      <Link
-                        to="/profile"
-                        className="flex items-center space-x-3 px-4 py-2.5 text-sm text-muted-foreground hover:text-foreground hover:bg-accent/10 transition-colors group"
-                        onClick={() => setShowUserMenu(false)}
-                      >
-                        <Icon name="User" size={16} className="text-accent group-hover:scale-110 transition-transform" />
-                        <span>{t('profile')}</span>
-                        <Icon name="ArrowRight" size={14} className="ml-auto opacity-0 group-hover:opacity-100 transition-opacity" />
-                      </Link>
-
-                      {/* Plans */}
-                      <Link
-                        to="/subscription"
-                        className="flex items-center space-x-3 px-4 py-2.5 text-sm text-muted-foreground hover:text-foreground hover:bg-accent/10 transition-colors group"
-                        onClick={() => setShowUserMenu(false)}
-                      >
-                        <Icon name="Zap" size={16} className="text-accent group-hover:scale-110 transition-transform" />
-                        <span>{t('plans')}</span>
-                        <Icon name="ArrowRight" size={14} className="ml-auto opacity-0 group-hover:opacity-100 transition-opacity" />
-                      </Link>
-
-                      {/* History */}
-                      <Link
-                        to="/quiz-history"
-                        className="flex items-center space-x-3 px-4 py-2.5 text-sm text-muted-foreground hover:text-foreground hover:bg-accent/10 transition-colors group"
-                        onClick={() => setShowUserMenu(false)}
-                      >
-                        <Icon name="History" size={16} className="text-accent group-hover:scale-110 transition-transform" />
-                        <span>{t('quiz_history')}</span>
-                        <Icon name="ArrowRight" size={14} className="ml-auto opacity-0 group-hover:opacity-100 transition-opacity" />
-                      </Link>
-
-                      {/* Admin Link */}
-                      {isAdmin && isAdmin() && (
-                        <Link
-                          to="/admin"
-                          className="flex items-center space-x-3 px-4 py-2.5 text-sm text-muted-foreground hover:text-foreground hover:bg-accent/10 transition-colors group"
-                          onClick={() => setShowUserMenu(false)}
-                        >
-                          <Icon name="ShieldCheck" size={16} className="text-accent group-hover:scale-110 transition-transform" />
-                          <span>{t('admin')}</span>
-                          <Icon name="ArrowRight" size={14} className="ml-auto opacity-0 group-hover:opacity-100 transition-opacity" />
+                  {showUserMenu && (
+                    <div className="absolute right-0 top-full mt-2 w-56 bg-white border border-pink-200 rounded-xl shadow-xl overflow-hidden z-50">
+                      <div className="px-4 py-3 bg-gradient-to-r from-pink-100 to-rose-100 border-b border-pink-200">
+                        <p className="text-sm font-bold text-gray-900">{userProfile?.full_name || 'User'}</p>
+                        <p className="text-xs text-gray-600 mt-0.5">{userProfile?.email}</p>
+                      </div>
+                      <div className="py-2">
+                        <Link to="/profile" className="flex items-center space-x-3 px-4 py-2.5 text-sm text-gray-700 hover:text-pink-600 hover:bg-pink-50 transition-colors" onClick={() => setShowUserMenu(false)}>
+                          <Icon name="User" size={16} className="text-pink-500" />
+                          <span>{t('profile')}</span>
                         </Link>
-                      )}
+                        <Link to="/subscription" className="flex items-center space-x-3 px-4 py-2.5 text-sm text-gray-700 hover:text-pink-600 hover:bg-pink-50 transition-colors" onClick={() => setShowUserMenu(false)}>
+                          <Icon name="Zap" size={16} className="text-pink-500" />
+                          <span>{t('plans')}</span>
+                        </Link>
+                        <Link to="/quiz-history" className="flex items-center space-x-3 px-4 py-2.5 text-sm text-gray-700 hover:text-pink-600 hover:bg-pink-50 transition-colors" onClick={() => setShowUserMenu(false)}>
+                          <Icon name="History" size={16} className="text-pink-500" />
+                          <span>{t('quiz_history')}</span>
+                        </Link>
+                        {isAdmin && isAdmin() && (
+                          <Link to="/admin" className="flex items-center space-x-3 px-4 py-2.5 text-sm text-gray-700 hover:text-pink-600 hover:bg-pink-50 transition-colors" onClick={() => setShowUserMenu(false)}>
+                            <Icon name="ShieldCheck" size={16} className="text-pink-500" />
+                            <span>{t('admin')}</span>
+                          </Link>
+                        )}
+                      </div>
+                      <div className="border-t border-pink-200" />
+                      <button onClick={() => { handleSignOut(); setShowUserMenu(false); }} className="w-full flex items-center space-x-3 px-4 py-2.5 text-sm text-red-600 hover:text-red-700 hover:bg-red-50 transition-colors">
+                        <Icon name="LogOut" size={16} />
+                        <span>{t('logout')}</span>
+                      </button>
                     </div>
-
-                    {/* Divider */}
-                    <div className="border-t border-border/50" />
-
-                    {/* Logout Button */}
-                    <button
-                      onClick={handleSignOut}
-                      className="w-full flex items-center space-x-3 px-4 py-2.5 text-sm text-destructive hover:text-destructive hover:bg-destructive/10 transition-colors group"
-                    >
-                      <Icon name="LogOut" size={16} className="group-hover:scale-110 transition-transform" />
-                      <span>{t('logout')}</span>
-                      <Icon name="ArrowRight" size={14} className="ml-auto opacity-0 group-hover:opacity-100 transition-opacity" />
-                    </button>
-                  </div>
-                )}
-              </div>
+                  )}
+                </div>
+              </>
             ) : (
-              <div className="flex items-center space-x-2">
-                <Button
-                  variant="ghost"
-                  size="sm"
+              <>
+                <button
                   onClick={() => navigate('/login')}
+                  className="px-6 py-2.5 text-gray-700 font-semibold hover:text-pink-600 transition-all duration-300 hover:bg-pink-50 rounded-full border border-pink-200 hover:border-pink-400"
                 >
                   {t('sign_in')}
-                </Button>
-                <Button
-                  size="sm"
+                </button>
+                <button
                   onClick={() => navigate('/signup')}
+                  className="px-6 py-2.5 text-white font-semibold bg-gradient-to-r from-pink-500 to-rose-500 rounded-full hover:shadow-lg hover:shadow-pink-400/50 transition-all duration-300 transform hover:scale-105"
                 >
                   {t('sign_up')}
-                </Button>
-              </div>
+                </button>
+              </>
             )}
           </div>
         </div>
