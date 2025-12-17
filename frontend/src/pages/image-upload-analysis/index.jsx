@@ -44,32 +44,32 @@ const ImageUploadAnalysis = () => {
     setError(null);
     setResult(null);
     setUploadProgress(0);
-    
+
     try {
       const b64 = fileDataUrl ? String(fileDataUrl).split(',')[1] : null;
       const quizData = JSON.parse(localStorage.getItem('glowmatch-quiz-data') || '{}');
       const payload = { quizData, images: b64 ? [{ filename: fileName || 'upload.jpg', data: b64 }] : [] };
-      
-      const API_BASE = import.meta.env?.VITE_BACKEND_URL || 'https://backend-three-sigma-81.vercel.app/api';
-      
+
+      const API_BASE = import.meta.env?.VITE_BACKEND_URL || 'http://localhost:4000/api';
+
       setUploadProgress(30);
-      
+
       const resp = await fetch(`${API_BASE}/analysis`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
       });
-      
+
       setUploadProgress(70);
-      
+
       if (!resp.ok) {
         const txt = await resp.text().catch(() => null);
         throw new Error(txt || `Server error ${resp.status}`);
       }
-      
+
       const json = await resp.json().catch(() => null);
       const data = (json && (json.data || json)) || null;
-      
+
       // Normalize minimal result object
       const parsed = data && (data.analysis || data.result || data.analysis || data) || {};
       const out = {
@@ -80,11 +80,11 @@ const ImageUploadAnalysis = () => {
         explanation: (parsed.explanation || parsed.text) || '',
         raw: data
       };
-      
+
       setResult(out);
       setUploadProgress(100);
       localStorage.setItem('glowmatch-analysis', JSON.stringify(out));
-      
+
       // Auto-navigate to results after 2 seconds
       setTimeout(() => {
         navigate('/results-dashboard', { replace: true });
@@ -113,9 +113,9 @@ const ImageUploadAnalysis = () => {
           <div className="space-y-6">
             {/* File Input Area */}
             <div className="border-2 border-dashed border-border rounded-lg p-8 text-center hover:border-accent/50 transition-colors cursor-pointer relative">
-              <input 
-                type="file" 
-                accept="image/*" 
+              <input
+                type="file"
+                accept="image/*"
                 onChange={onFileChange}
                 className="absolute inset-0 cursor-pointer opacity-0"
                 disabled={loading}
@@ -151,7 +151,7 @@ const ImageUploadAnalysis = () => {
                   <span className="font-medium">{Math.round(uploadProgress)}%</span>
                 </div>
                 <div className="w-full bg-muted rounded-full h-2 overflow-hidden">
-                  <div 
+                  <div
                     className="bg-accent h-full rounded-full transition-all duration-300"
                     style={{ width: `${uploadProgress}%` }}
                   />
@@ -190,17 +190,17 @@ const ImageUploadAnalysis = () => {
 
             {/* Action Buttons */}
             <div className="flex flex-col sm:flex-row items-center gap-3 pt-2">
-              <Button 
-                onClick={submitAnalysis} 
+              <Button
+                onClick={submitAnalysis}
                 disabled={!fileDataUrl || loading}
                 iconName={loading ? "Loader2" : "Zap"}
                 className={loading ? "" : ""}
               >
                 {loading ? 'Analyzing...' : 'Run Analysis'}
               </Button>
-              
+
               {fileDataUrl && !loading && (
-                <Button 
+                <Button
                   variant="outline"
                   onClick={() => {
                     setFileDataUrl(null);
@@ -214,8 +214,8 @@ const ImageUploadAnalysis = () => {
                 </Button>
               )}
 
-              <Button 
-                variant="ghost" 
+              <Button
+                variant="ghost"
                 onClick={() => navigate('/results-dashboard')}
                 iconName="ArrowRight"
                 className="ml-auto"

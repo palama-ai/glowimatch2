@@ -2,12 +2,12 @@ import React, { useEffect, useState } from 'react';
 import AdminLayout from '../../components/admin/AdminLayout';
 import Icon from '../../components/AppIcon';
 
-const API_BASE = import.meta.env?.VITE_BACKEND_URL || 'https://backend-three-sigma-81.vercel.app/api';
+const API_BASE = import.meta.env?.VITE_BACKEND_URL || 'http://localhost:4000/api';
 
 function getAuthHeaders() {
   const raw = localStorage.getItem('gm_auth');
   if (raw) {
-    try { const p = JSON.parse(raw); if (p && p.token) return { Authorization: `Bearer ${p.token}` }; } catch (e) {}
+    try { const p = JSON.parse(raw); if (p && p.token) return { Authorization: `Bearer ${p.token}` }; } catch (e) { }
   }
   const alt = localStorage.getItem('admin_dashboard_token');
   if (alt) return { Authorization: `Bearer ${alt}` };
@@ -92,13 +92,13 @@ export default function AdminSessions() {
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <input value={filter} onChange={e=>setFilter(e.target.value)} placeholder="Search session / path / user" className="px-3 py-2 border border-border rounded" />
-          <label className="ml-2 flex items-center gap-2 text-sm"><input type="checkbox" checked={liveOnly} onChange={e=>setLiveOnly(e.target.checked)} /> Live only</label>
+          <input value={filter} onChange={e => setFilter(e.target.value)} placeholder="Search session / path / user" className="px-3 py-2 border border-border rounded" />
+          <label className="ml-2 flex items-center gap-2 text-sm"><input type="checkbox" checked={liveOnly} onChange={e => setLiveOnly(e.target.checked)} /> Live only</label>
           <button onClick={fetchDebug} className="px-3 py-2 bg-accent text-white rounded">Refresh</button>
         </div>
 
         <div className="mt-3 flex items-center gap-2">
-          <input value={adminToken} onChange={e=>setAdminToken(e.target.value)} placeholder="Paste admin JWT here" className="px-3 py-2 border border-border rounded w-80" />
+          <input value={adminToken} onChange={e => setAdminToken(e.target.value)} placeholder="Paste admin JWT here" className="px-3 py-2 border border-border rounded w-80" />
           <button onClick={applyAdminToken} className="px-3 py-2 bg-primary text-white rounded">Set token</button>
           {tokenSavedMsg && <div className="text-sm text-muted-foreground">{tokenSavedMsg}</div>}
         </div>
@@ -151,7 +151,7 @@ export default function AdminSessions() {
                 {views.filter(v => {
                   if (!filter) return true;
                   const q = filter.toLowerCase();
-                  return (v.id||'').toLowerCase().includes(q) || (v.path||'').toLowerCase().includes(q) || (v.session_id||'').toLowerCase().includes(q);
+                  return (v.id || '').toLowerCase().includes(q) || (v.path || '').toLowerCase().includes(q) || (v.session_id || '').toLowerCase().includes(q);
                 }).map(v => (
                   <tr key={v.id} className="border-t">
                     <td className="px-2 truncate max-w-xs">{v.id}</td>

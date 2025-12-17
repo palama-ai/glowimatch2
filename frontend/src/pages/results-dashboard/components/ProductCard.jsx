@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import Image from '../../../components/AppImage';
 import Icon from '../../../components/AppIcon';
-import Button from '../../../components/ui/Button';
 
 const ProductCard = ({ product }) => {
   const [isHovered, setIsHovered] = useState(false);
@@ -17,112 +16,89 @@ const ProductCard = ({ product }) => {
     })?.format(price);
   };
 
-  const getRatingStars = (rating) => {
-    const stars = [];
-    const fullStars = Math.floor(rating);
-    const hasHalfStar = rating % 1 !== 0;
-
-    for (let i = 0; i < fullStars; i++) {
-      stars?.push(<Icon key={i} name="Star" size={14} className="text-yellow-400 fill-current" />);
-    }
-
-    if (hasHalfStar) {
-      stars?.push(<Icon key="half" name="StarHalf" size={14} className="text-yellow-400 fill-current" />);
-    }
-
-    const emptyStars = 5 - Math.ceil(rating);
-    for (let i = 0; i < emptyStars; i++) {
-      stars?.push(<Icon key={`empty-${i}`} name="Star" size={14} className="text-gray-300" />);
-    }
-
-    return stars;
-  };
+  const discount = product?.originalPrice
+    ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
+    : null;
 
   return (
-    <div 
-      className={`bg-card border border-border rounded-xl overflow-hidden transition-all duration-300 animate-scale-hover ${
-        isHovered ? 'shadow-lg shadow-accent/20 border-accent/30' : 'hover:shadow-md'
-      }`}
+    <div
+      className={`group relative bg-background rounded-2xl overflow-hidden border transition-all duration-300 ${isHovered
+          ? 'border-accent/40 shadow-xl shadow-accent/10'
+          : 'border-border/50 hover:border-border'
+        }`}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      <div className="relative overflow-hidden h-48">
+      {/* Image Section */}
+      <div className="relative aspect-square overflow-hidden bg-muted/30">
         <Image
           src={product?.image}
           alt={product?.imageAlt}
-          className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
+          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
         />
-        {product?.badge && (
-          <div className="absolute top-3 left-3 bg-accent text-accent-foreground px-2 py-1 rounded-full text-xs font-medium">
-            {product?.badge}
-          </div>
-        )}
-        <div className="absolute top-3 right-3">
-          <button className="w-8 h-8 bg-background/80 backdrop-blur rounded-full flex items-center justify-center hover:bg-background transition-colors">
-            <Icon name="Heart" size={16} className="text-muted-foreground hover:text-accent" />
-          </button>
-        </div>
-      </div>
-      <div className="p-4">
-        <div className="mb-2">
-          <h3 className="font-semibold text-foreground text-lg leading-tight mb-1">
-            {product?.name}
-          </h3>
-          <p className="text-sm text-muted-foreground">{product?.brand}</p>
-        </div>
 
-        <div className="flex items-center space-x-2 mb-3">
-          <div className="flex items-center space-x-1">
-            {getRatingStars(product?.rating)}
-          </div>
-          <span className="text-sm text-muted-foreground">
-            ({product?.reviewCount} reviews)
-          </span>
-        </div>
-
-        <p className="text-sm text-foreground mb-4 line-clamp-2">
-          {product?.description}
-        </p>
-
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center space-x-2">
-            <span className="text-xl font-bold text-foreground">
-              {formatPrice(product?.price)}
+        {/* Badges */}
+        <div className="absolute top-3 left-3 flex flex-col gap-2">
+          {product?.badge && (
+            <span className="px-2.5 py-1 bg-foreground text-background text-xs font-medium rounded-full">
+              {product.badge}
             </span>
-            {product?.originalPrice && (
-              <span className="text-sm text-muted-foreground line-through">
-                {formatPrice(product?.originalPrice)}
-              </span>
-            )}
-          </div>
-          {product?.originalPrice && (
-            <div className="bg-success/10 text-success px-2 py-1 rounded-full text-xs font-medium">
-              Save {Math.round(((product?.originalPrice - product?.price) / product?.originalPrice) * 100)}%
-            </div>
+          )}
+          {discount && (
+            <span className="px-2.5 py-1 bg-accent text-white text-xs font-medium rounded-full">
+              -{discount}%
+            </span>
           )}
         </div>
 
-        <div className="space-y-2">
-          <Button
-            variant="default"
-            fullWidth
+        {/* Favorite Button */}
+        <button className="absolute top-3 right-3 w-9 h-9 bg-background/90 backdrop-blur-sm rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-sm hover:bg-background">
+          <Icon name="Heart" size={16} className="text-muted-foreground hover:text-accent transition-colors" />
+        </button>
+
+        {/* Quick Action Overlay */}
+        <div className="absolute inset-x-0 bottom-0 p-3 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
+          <button
             onClick={() => handlePurchaseClick(product?.purchaseUrl)}
-            iconName="ShoppingCart"
-            iconPosition="left"
-            className="animate-scale-hover"
+            className="w-full py-2.5 bg-white text-foreground text-sm font-medium rounded-xl hover:bg-accent hover:text-white transition-colors flex items-center justify-center gap-2"
           >
-            Buy Now
-          </Button>
-          <Button
-            variant="outline"
-            fullWidth
-            onClick={() => handlePurchaseClick(product?.detailsUrl)}
-            iconName="ExternalLink"
-            iconPosition="right"
-            className="text-sm"
-          >
-            View Details
-          </Button>
+            <Icon name="ShoppingBag" size={16} />
+            Quick Buy
+          </button>
+        </div>
+      </div>
+
+      {/* Content Section */}
+      <div className="p-4">
+        {/* Brand */}
+        <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">
+          {product?.brand}
+        </p>
+
+        {/* Name */}
+        <h3 className="font-medium text-foreground mb-2 line-clamp-2 leading-snug">
+          {product?.name}
+        </h3>
+
+        {/* Rating */}
+        <div className="flex items-center gap-1.5 mb-3">
+          <div className="flex items-center">
+            <Icon name="Star" size={14} className="text-amber-400 fill-amber-400" />
+          </div>
+          <span className="text-sm font-medium text-foreground">{product?.rating}</span>
+          <span className="text-xs text-muted-foreground">({product?.reviewCount?.toLocaleString()})</span>
+        </div>
+
+        {/* Price */}
+        <div className="flex items-center gap-2">
+          <span className="text-lg font-bold text-foreground">
+            {formatPrice(product?.price)}
+          </span>
+          {product?.originalPrice && (
+            <span className="text-sm text-muted-foreground line-through">
+              {formatPrice(product.originalPrice)}
+            </span>
+          )}
         </div>
       </div>
     </div>

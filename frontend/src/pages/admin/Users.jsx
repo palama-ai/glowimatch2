@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import Header from '../../components/ui/Header';
 
-const API_BASE = import.meta.env?.VITE_BACKEND_URL || 'https://backend-three-sigma-81.vercel.app/api';
+const API_BASE = import.meta.env?.VITE_BACKEND_URL || 'http://localhost:4000/api';
 
 const Users = () => {
   const [users, setUsers] = useState([]);

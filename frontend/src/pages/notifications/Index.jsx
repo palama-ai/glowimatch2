@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Icon from '../../components/AppIcon';
 
-const API_BASE = import.meta.env?.VITE_BACKEND_URL || 'https://backend-three-sigma-81.vercel.app/api';
+const API_BASE = import.meta.env?.VITE_BACKEND_URL || 'http://localhost:4000/api';
 
 const NotificationsPage = () => {
   const [notifications, setNotifications] = useState([]);
@@ -15,7 +15,7 @@ const NotificationsPage = () => {
       const getAuthHeaders = () => {
         const raw = localStorage.getItem('gm_auth');
         if (raw) {
-          try { const p = JSON.parse(raw); if (p && p.token) return { Authorization: `Bearer ${p.token}` }; } catch (e) {}
+          try { const p = JSON.parse(raw); if (p && p.token) return { Authorization: `Bearer ${p.token}` }; } catch (e) { }
         }
         const alt = localStorage.getItem('admin_dashboard_token');
         if (alt) return { Authorization: `Bearer ${alt}` };
@@ -24,23 +24,23 @@ const NotificationsPage = () => {
 
       const headers = getAuthHeaders();
       console.log('[NotificationsPage] Fetching from:', `${API_BASE}/notifications/me`, 'with auth:', !!headers.Authorization);
-      
+
       const res = await fetch(`${API_BASE}/notifications/me`, { headers });
       console.log('[NotificationsPage] Response status:', res.status);
-      
+
       if (!res.ok) {
         const errorText = await res.text();
         console.error('[NotificationsPage] Error response:', errorText);
         throw new Error(`HTTP ${res.status}: ${errorText}`);
       }
-      
+
       const data = await res.json();
       console.log('[NotificationsPage] Fetched data:', data);
-      
+
       // API returns { data: rows } or an array
       const list = Array.isArray(data) ? data : (data.data || data.notifications || []);
       console.log('[NotificationsPage] Parsed list:', list);
-      
+
       setNotifications(list);
     } catch (e) {
       console.error('[NotificationsPage] Load notifications error', e);
@@ -57,7 +57,7 @@ const NotificationsPage = () => {
       const getAuthHeaders = () => {
         const raw = localStorage.getItem('gm_auth');
         if (raw) {
-          try { const p = JSON.parse(raw); if (p && p.token) return { Authorization: `Bearer ${p.token}` }; } catch (e) {}
+          try { const p = JSON.parse(raw); if (p && p.token) return { Authorization: `Bearer ${p.token}` }; } catch (e) { }
         }
         const alt = localStorage.getItem('admin_dashboard_token');
         if (alt) return { Authorization: `Bearer ${alt}` };

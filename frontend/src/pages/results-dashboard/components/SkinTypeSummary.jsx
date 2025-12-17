@@ -1,6 +1,40 @@
 import React from 'react';
 import Icon from '../../../components/AppIcon';
 
+// Circular Progress Component
+const CircularProgress = ({ value, size = 80, strokeWidth = 6, color = 'var(--color-accent)' }) => {
+  const radius = (size - strokeWidth) / 2;
+  const circumference = radius * 2 * Math.PI;
+  const offset = circumference - (value / 100) * circumference;
+
+  return (
+    <div className="circular-progress" style={{ width: size, height: size }}>
+      <svg width={size} height={size}>
+        <circle
+          className="circular-progress-track"
+          cx={size / 2}
+          cy={size / 2}
+          r={radius}
+          strokeWidth={strokeWidth}
+        />
+        <circle
+          className="circular-progress-fill"
+          cx={size / 2}
+          cy={size / 2}
+          r={radius}
+          strokeWidth={strokeWidth}
+          stroke={color}
+          strokeDasharray={circumference}
+          strokeDashoffset={offset}
+        />
+      </svg>
+      <div className="absolute inset-0 flex items-center justify-center">
+        <span className="text-xl font-bold text-foreground">{value}%</span>
+      </div>
+    </div>
+  );
+};
+
 const SkinTypeSummary = ({ skinType, confidence, characteristics }) => {
   const getSkinTypeIcon = (type) => {
     switch (type) {
@@ -12,75 +46,105 @@ const SkinTypeSummary = ({ skinType, confidence, characteristics }) => {
     }
   };
 
+  const getSkinTypeGradient = (type) => {
+    switch (type) {
+      case 'oily': return 'from-blue-400/20 to-cyan-400/20';
+      case 'dry': return 'from-orange-400/20 to-amber-400/20';
+      case 'sensitive': return 'from-rose-400/20 to-pink-400/20';
+      case 'combination': return 'from-purple-400/20 to-violet-400/20';
+      default: return 'from-accent/20 to-secondary/20';
+    }
+  };
+
   const getSkinTypeColor = (type) => {
     switch (type) {
-      case 'oily': return 'text-blue-600';
-      case 'dry': return 'text-orange-600';
-      case 'sensitive': return 'text-red-600';
-      case 'combination': return 'text-purple-600';
+      case 'oily': return 'text-blue-500';
+      case 'dry': return 'text-orange-500';
+      case 'sensitive': return 'text-rose-500';
+      case 'combination': return 'text-purple-500';
       default: return 'text-accent';
+    }
+  };
+
+  const getSkinTypeBg = (type) => {
+    switch (type) {
+      case 'oily': return 'bg-blue-500/10';
+      case 'dry': return 'bg-orange-500/10';
+      case 'sensitive': return 'bg-rose-500/10';
+      case 'combination': return 'bg-purple-500/10';
+      default: return 'bg-accent/10';
     }
   };
 
   const getSkinTypeDescription = (type) => {
     switch (type) {
       case 'oily':
-        return "Your skin produces excess sebum, particularly in the T-zone area. This can lead to enlarged pores and occasional breakouts.";
+        return "Your skin produces excess sebum, particularly in the T-zone. We recommend oil-control products.";
       case 'dry':
-        return "Your skin lacks moisture and natural oils, which may cause tightness, flaking, or rough texture.";
+        return "Your skin needs extra moisture. Focus on hydrating and nourishing products.";
       case 'sensitive':
-        return "Your skin reacts easily to products and environmental factors, requiring gentle, fragrance-free formulations.";
+        return "Your skin requires gentle care. Choose fragrance-free, hypoallergenic formulas.";
       case 'combination':
-        return "Your skin has both oily and dry areas, typically with an oily T-zone and drier cheeks.";
+        return "Your skin has both oily and dry areas. Use targeted products for each zone.";
       default:
-        return "Your unique skin type has been analyzed based on your responses and image analysis.";
+        return "Your personalized skincare plan is ready based on your unique skin profile.";
     }
   };
 
+  // Limit characteristics to first 4 for cleaner look
+  const displayCharacteristics = characteristics?.slice(0, 4) || [];
+
   return (
-    <div className="bg-card border border-border rounded-xl p-6 mb-8 animate-fade-in">
-      <div className="flex items-start justify-between mb-6">
-        <div className="flex items-center space-x-4">
-          <div className={`w-16 h-16 rounded-full bg-gradient-to-br from-accent/20 to-secondary/20 flex items-center justify-center ${getSkinTypeColor(skinType)}`}>
-            <Icon name={getSkinTypeIcon(skinType)} size={32} />
+    <div className="relative overflow-hidden rounded-2xl mb-8 animate-fade-in">
+      {/* Glassmorphism Background */}
+      <div className={`absolute inset-0 bg-gradient-to-br ${getSkinTypeGradient(skinType)} opacity-60`} />
+      <div className="absolute inset-0 glass" />
+
+      {/* Content */}
+      <div className="relative p-6 md:p-8">
+        {/* Header Row */}
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 mb-6">
+          {/* Skin Type Info */}
+          <div className="flex items-center gap-4">
+            <div className={`w-16 h-16 md:w-20 md:h-20 rounded-2xl ${getSkinTypeBg(skinType)} flex items-center justify-center animate-float`}>
+              <Icon name={getSkinTypeIcon(skinType)} size={36} className={getSkinTypeColor(skinType)} />
+            </div>
+            <div>
+              <h2 className="text-2xl md:text-3xl font-bold text-foreground capitalize">
+                {skinType} <span className="text-muted-foreground font-normal">Skin</span>
+              </h2>
+              <p className="text-sm text-muted-foreground mt-1">
+                Analyzed on {new Date()?.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+              </p>
+            </div>
           </div>
-          <div>
-            <h2 className="text-2xl font-semibold text-foreground capitalize mb-1">
-              {skinType} Skin
-            </h2>
-            <p className="text-muted-foreground">
-              Analysis completed on {new Date()?.toLocaleDateString('en-US', { 
-                month: 'long', 
-                day: 'numeric', 
-                year: 'numeric' 
-              })}
-            </p>
+
+          {/* Confidence Score */}
+          <div className="flex items-center gap-4">
+            <CircularProgress value={confidence || 87} />
+            <div className="hidden sm:block">
+              <p className="text-xs text-muted-foreground uppercase tracking-wide">Confidence</p>
+              <p className="text-sm font-medium text-foreground">Match Score</p>
+            </div>
           </div>
         </div>
-        
-        <div className="text-right">
-          <div className="flex items-center space-x-2 mb-2">
-            <Icon name="Target" size={16} className="text-accent" />
-            <span className="text-sm font-medium text-foreground">Confidence</span>
-          </div>
-          <div className="text-2xl font-bold text-accent">{confidence}%</div>
-        </div>
-      </div>
-      <div className="mb-6">
-        <p className="text-foreground leading-relaxed">
+
+        {/* Description */}
+        <p className="text-foreground/80 mb-6 max-w-2xl">
           {getSkinTypeDescription(skinType)}
         </p>
-      </div>
-      <div>
-        <h3 className="text-lg font-semibold text-foreground mb-4 flex items-center">
-          <Icon name="CheckCircle" size={20} className="text-accent mr-2" />
-          Key Characteristics Identified
-        </h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          {characteristics?.map((characteristic, index) => (
-            <div key={index} className="flex items-center space-x-3 p-3 bg-muted/50 rounded-lg">
-              <div className="w-2 h-2 bg-accent rounded-full flex-shrink-0" />
-              <span className="text-sm text-foreground">{characteristic}</span>
+
+        {/* Characteristics Cards */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 stagger-children">
+          {displayCharacteristics.map((characteristic, index) => (
+            <div
+              key={index}
+              className="bg-background/60 backdrop-blur-sm rounded-xl p-3 border border-border/50 card-hover"
+            >
+              <div className="flex items-start gap-2">
+                <div className={`w-1.5 h-1.5 rounded-full ${getSkinTypeBg(skinType).replace('/10', '')} mt-2 flex-shrink-0`} />
+                <span className="text-sm text-foreground leading-tight">{characteristic}</span>
+              </div>
             </div>
           ))}
         </div>

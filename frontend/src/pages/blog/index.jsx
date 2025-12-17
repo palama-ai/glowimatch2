@@ -5,7 +5,7 @@ import { useI18n } from '../../contexts/I18nContext';
 import Icon from '../../components/AppIcon';
 import { IMAGES } from '../../utils/imageConstants';
 
-const API_BASE = import.meta.env?.VITE_BACKEND_URL || 'https://backend-three-sigma-81.vercel.app/api';
+const API_BASE = import.meta.env?.VITE_BACKEND_URL || 'http://localhost:4000/api';
 
 const Blog = () => {
   const { t } = useI18n();
@@ -18,14 +18,14 @@ const Blog = () => {
         console.log('[Blog] Fetching from:', `${API_BASE}/blogs`);
         const response = await fetch(`${API_BASE}/blogs`);
         console.log('[Blog] Response status:', response.status);
-        
+
         if (!response.ok) {
           throw new Error(`HTTP ${response.status}`);
         }
-        
+
         const data = await response.json();
         console.log('[Blog] Fetched data:', data);
-        
+
         if (data.data && Array.isArray(data.data)) {
           // Map blogs to display format
           const mappedBlogs = data.data.map((blog) => ({
@@ -38,7 +38,7 @@ const Blog = () => {
             date: new Date(blog.created_at || Date.now()).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }),
             readTime: `${Math.ceil((blog.content?.length || 0) / 200)} min read`
           }));
-          
+
           console.log('[Blog] Mapped blogs:', mappedBlogs);
           setPosts(mappedBlogs);
         } else {
@@ -54,10 +54,10 @@ const Blog = () => {
     };
 
     fetchBlogs();
-    
+
     // Refresh blogs every 30 seconds to catch updates from admin panel
     const interval = setInterval(fetchBlogs, 30000);
-    
+
     return () => clearInterval(interval);
   }, []);
   return (
@@ -94,7 +94,7 @@ const Blog = () => {
                   <article key={p.id} className="group bg-card border border-border rounded-xl overflow-hidden hover:border-accent hover:shadow-xl transition-all duration-300">
                     {/* Image */}
                     <div className="relative h-56 overflow-hidden bg-muted">
-                      <img 
+                      <img
                         src={p.image}
                         alt={p.title}
                         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
@@ -118,10 +118,10 @@ const Blog = () => {
                           {p.readTime}
                         </span>
                       </div>
-                      
+
                       <h3 className="text-lg font-semibold text-foreground mb-2 group-hover:text-accent transition-colors line-clamp-2">{p.title}</h3>
                       <p className="text-sm text-muted-foreground mb-4 line-clamp-3">{p.excerpt}</p>
-                      
+
                       <Link to={`/blog/${p.slug}`} className="inline-flex items-center text-accent font-semibold hover:gap-3 transition-all gap-2">
                         Read More <Icon name="ArrowRight" size={16} />
                       </Link>
@@ -139,12 +139,12 @@ const Blog = () => {
             <h2 className="text-4xl font-bold text-foreground mb-4">Stay Updated</h2>
             <p className="text-lg text-muted-foreground mb-8">Get the latest skincare tips and beauty insights delivered to your inbox</p>
             <form className="flex flex-col sm:flex-row gap-3">
-              <input 
-                type="email" 
-                placeholder="Enter your email" 
+              <input
+                type="email"
+                placeholder="Enter your email"
                 className="flex-1 px-6 py-3 bg-background border border-border rounded-lg focus:border-accent focus:ring-2 focus:ring-accent/20 transition-all"
               />
-              <button 
+              <button
                 type="submit"
                 className="px-8 py-3 bg-gradient-to-r from-pink-500 to-rose-500 text-white font-semibold rounded-lg hover:shadow-lg hover:shadow-pink-500/40 transition-all hover:scale-105"
               >

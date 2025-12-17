@@ -15,7 +15,8 @@ const SignupPage = () => {
     fullName: '',
     email: '',
     password: '',
-    confirmPassword: ''
+    confirmPassword: '',
+    accountType: 'user' // 'user' or 'seller'
   });
   const [referralCode, setReferralCode] = useState(() => localStorage.getItem('referral_code') || '');
   const location = useLocation();
@@ -55,15 +56,20 @@ const SignupPage = () => {
 
     // store referral code locally (if present in the form)
     if (referralCode) localStorage.setItem('referral_code', referralCode);
-    const { error } = await signUp(formData?.email, formData?.password, formData?.fullName);
-    
+    const { error } = await signUp(formData?.email, formData?.password, formData?.fullName, formData?.accountType);
+
     if (error) {
       setError(error?.message);
     } else {
       setSuccess(t('account_created'));
-      setTimeout(() => navigate('/login'), 3000);
+      // Redirect sellers to seller dashboard, users to login
+      if (formData?.accountType === 'seller') {
+        setTimeout(() => navigate('/seller'), 2000);
+      } else {
+        setTimeout(() => navigate('/login'), 3000);
+      }
     }
-    
+
     setLoading(false);
   };
 
@@ -92,7 +98,7 @@ const SignupPage = () => {
         <div className="bg-card border border-border/50 rounded-2xl shadow-lg overflow-hidden">
           {/* Header gradient */}
           <div className="h-1 bg-gradient-to-r from-pink-500 via-rose-500 to-pink-600" />
-          
+
           <div className="p-8 space-y-6">
             <div className="text-center">
               <h2 className="text-2xl font-bold text-foreground mb-1">
@@ -104,6 +110,41 @@ const SignupPage = () => {
             </div>
 
             <form className="space-y-5" onSubmit={handleSubmit}>
+              {/* Account Type Toggle */}
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-3">Account Type</label>
+                <div className="flex p-1 bg-muted/50 rounded-xl">
+                  <button
+                    type="button"
+                    onClick={() => setFormData({ ...formData, accountType: 'user' })}
+                    className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg text-sm font-medium transition-all ${formData?.accountType === 'user'
+                        ? 'bg-background shadow-sm text-foreground'
+                        : 'text-muted-foreground hover:text-foreground'
+                      }`}
+                  >
+                    <Icon name="User" size={16} />
+                    User
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setFormData({ ...formData, accountType: 'seller' })}
+                    className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg text-sm font-medium transition-all ${formData?.accountType === 'seller'
+                        ? 'bg-accent text-white shadow-sm'
+                        : 'text-muted-foreground hover:text-foreground'
+                      }`}
+                  >
+                    <Icon name="Store" size={16} />
+                    Seller
+                  </button>
+                </div>
+                <p className="text-xs text-muted-foreground mt-2">
+                  {formData?.accountType === 'seller'
+                    ? 'Sell your skincare products on GlowMatch'
+                    : 'Find the perfect skincare routine for you'
+                  }
+                </p>
+              </div>
+
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-foreground mb-2">{t('full_name')}</label>

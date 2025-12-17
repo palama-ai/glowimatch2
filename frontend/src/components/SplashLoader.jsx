@@ -3,9 +3,16 @@ import React, { useEffect, useState } from 'react';
 const SplashLoader = ({ isVisible, onComplete }) => {
   const [stage, setStage] = useState('drawing');
   const [progress, setProgress] = useState(0);
+  const [shouldRender, setShouldRender] = useState(isVisible);
 
   useEffect(() => {
-    if (!isVisible) return;
+    if (isVisible) {
+      setShouldRender(true);
+    }
+  }, [isVisible]);
+
+  useEffect(() => {
+    if (!isVisible || !shouldRender) return;
 
     // Stage 1: Drawing animation (0-1.2s)
     const drawingTimer = setTimeout(() => {
@@ -24,8 +31,9 @@ const SplashLoader = ({ isVisible, onComplete }) => {
       setStage('complete');
     }, 2000);
 
-    // Stage 4: Fade out (2.8-3.8s)
+    // Stage 4: Fade out and complete (2.8-3.8s)
     const fadeTimer = setTimeout(() => {
+      setShouldRender(false);
       onComplete && onComplete();
     }, 2800);
 
@@ -35,9 +43,9 @@ const SplashLoader = ({ isVisible, onComplete }) => {
       clearTimeout(loadingTimer);
       clearTimeout(fadeTimer);
     };
-  }, [isVisible, onComplete]);
+  }, [isVisible, shouldRender, onComplete]);
 
-  if (!isVisible) return null;
+  if (!shouldRender) return null;
 
   const fadeOutClass = progress === 100 && stage === 'complete' ? 'opacity-0 scale-95' : 'opacity-100 scale-100';
 

@@ -52,7 +52,7 @@ export const AuthProvider = ({ children }) => {
     onChange: (event, session) => {
       setUser(session?.user ?? null);
       setLoading(false);
-      
+
       if (session?.user) {
         profileOperations?.load(session?.user?.id);
       } else {
@@ -73,17 +73,20 @@ export const AuthProvider = ({ children }) => {
     return () => subscription?.unsubscribe();
   }, []);
 
-  const signUp = async (email, password, fullName) => {
+  const signUp = async (email, password, fullName, accountType = 'user') => {
     // include referral code from localStorage if present
     const referralCode = localStorage.getItem('admin_dashboard_token') ? null : (localStorage.getItem('referral_code') || null);
+    // Validate accountType - only allow 'user' or 'seller'
+    const role = accountType === 'seller' ? 'seller' : 'user';
     const { data, error } = await supabase?.auth?.signUp({
       email,
       password,
       options: {
         data: {
           full_name: fullName,
-          role: 'user',
-          referral_code: referralCode
+          role: role,
+          referral_code: referralCode,
+          account_type: accountType
         }
       }
     });
@@ -130,7 +133,7 @@ export const AuthProvider = ({ children }) => {
 
   const updateProfile = async (updates) => {
     if (!user) return { error: new Error('No user logged in') };
-    
+
     const { data, error } = await profileService.updateProfile(user.id, updates);
     if (!error) {
       setUserProfile(data);
@@ -165,7 +168,7 @@ export const AuthProvider = ({ children }) => {
 
   const purchaseQuizAttempts = async (quantity) => {
     if (!user) return { error: new Error('No user logged in') };
-    
+
     try {
       // إضافة محاولتين مجانيتين عند شراء 5 محاولات
       const totalAttempts = quantity >= 5 ? quantity + 2 : quantity;
@@ -186,7 +189,7 @@ export const AuthProvider = ({ children }) => {
     if (!user) {
       return { error: { code: 'AUTH_ERROR', message: 'No user logged in' } };
     }
-    
+
     if (!isAdmin() && !canTakeQuiz()) {
       return { error: { code: 'SUBSCRIPTION_ERROR', message: 'Active subscription required' } };
     }
@@ -198,7 +201,7 @@ export const AuthProvider = ({ children }) => {
         quizData,
         results
       );
-      
+
       if (error) {
         throw {
           code: error.code || 'SAVE_ERROR',
@@ -206,17 +209,17 @@ export const AuthProvider = ({ children }) => {
           details: error.details || error
         };
       }
-      
+
       // Reload profile data for regular users to update attempt counts
       if (!isAdmin()) {
         await profileOperations?.load(user?.id);
       }
-      
+
       return { data, error: null };
     } catch (error) {
       console.error('Error recording quiz attempt:', error);
-      return { 
-        data: null, 
+      return {
+        data: null,
         error: {
           code: error.code || 'UNKNOWN_ERROR',
           message: error.message || 'An unexpected error occurred while saving your quiz attempt',

@@ -4,7 +4,7 @@ import Button from '../../components/ui/Button';
 import Input from '../../components/ui/Input';
 import Icon from '../../components/AppIcon';
 
-const API_BASE = import.meta.env?.VITE_BACKEND_URL || 'https://backend-three-sigma-81.vercel.app/api';
+const API_BASE = import.meta.env?.VITE_BACKEND_URL || 'http://localhost:4000/api';
 
 const Notifications = () => {
   const [list, setList] = useState([]);
@@ -18,7 +18,7 @@ const Notifications = () => {
   function getAuthHeaders() {
     const raw = localStorage.getItem('gm_auth');
     if (raw) {
-      try { const p = JSON.parse(raw); if (p && p.token) return { Authorization: `Bearer ${p.token}` }; } catch (e) {}
+      try { const p = JSON.parse(raw); if (p && p.token) return { Authorization: `Bearer ${p.token}` }; } catch (e) { }
     }
     const alt = localStorage.getItem('admin_dashboard_token');
     if (alt) return { Authorization: `Bearer ${alt}` };
@@ -32,13 +32,13 @@ const Notifications = () => {
       console.log('[Notifications] Fetching notifications with headers:', !!headers.Authorization);
       const r = await fetch(`${API_BASE}/notifications/admin`, { headers });
       console.log('[Notifications] Response status:', r.status);
-      
+
       if (!r.ok) {
         const errorText = await r.text();
         console.error('[Notifications] Error response:', errorText);
         throw new Error(`HTTP ${r.status}: ${errorText}`);
       }
-      
+
       const j = await r.json();
       console.log('[Notifications] Fetched data:', j);
       setList(j.data || []);
@@ -54,7 +54,7 @@ const Notifications = () => {
   const sendAll = async () => {
     setError('');
     setSuccess('');
-    
+
     if (!title.trim() || !body.trim()) {
       setError('Title and message are required');
       return;
@@ -64,11 +64,11 @@ const Notifications = () => {
     try {
       const headers = { 'Content-Type': 'application/json', ...getAuthHeaders() };
       console.log('[Notifications] Sending notification:', { title, body });
-      
-      const r = await fetch(`${API_BASE}/notifications/admin`, { 
-        method: 'POST', 
-        headers, 
-        body: JSON.stringify({ title, body, target: 'all' }) 
+
+      const r = await fetch(`${API_BASE}/notifications/admin`, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({ title, body, target: 'all' })
       });
 
       if (!r.ok) {
@@ -83,7 +83,7 @@ const Notifications = () => {
       setTitle('');
       setBody('');
       setSuccess('✓ Notification sent to all users successfully!');
-      
+
       // Refresh list
       await fetchList();
 
@@ -219,12 +219,12 @@ const Notifications = () => {
                     )}
                   </div>
                   <div className="text-xs text-muted-foreground">
-                    {new Date(n.created_at).toLocaleString('en-US', { 
-                      year: 'numeric', 
-                      month: 'short', 
-                      day: 'numeric', 
-                      hour: '2-digit', 
-                      minute: '2-digit' 
+                    {new Date(n.created_at).toLocaleString('en-US', {
+                      year: 'numeric',
+                      month: 'short',
+                      day: 'numeric',
+                      hour: '2-digit',
+                      minute: '2-digit'
                     })}
                   </div>
                 </div>

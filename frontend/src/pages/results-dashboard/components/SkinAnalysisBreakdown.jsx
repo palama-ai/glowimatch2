@@ -1,103 +1,150 @@
 import React from 'react';
 import Icon from '../../../components/AppIcon';
 
+// Circular Progress Component for metrics
+const CircularMetric = ({ score, icon, name, size = 100 }) => {
+  const strokeWidth = 6;
+  const radius = (size - strokeWidth) / 2;
+  const circumference = radius * 2 * Math.PI;
+  const offset = circumference - (score / 100) * circumference;
+
+  const getColor = (score) => {
+    if (score >= 80) return '#10B981'; // success green
+    if (score >= 60) return '#F59E0B'; // warning amber
+    return '#EF4444'; // error red
+  };
+
+  const getBgColor = (score) => {
+    if (score >= 80) return 'bg-emerald-50 dark:bg-emerald-950/30';
+    if (score >= 60) return 'bg-amber-50 dark:bg-amber-950/30';
+    return 'bg-red-50 dark:bg-red-950/30';
+  };
+
+  return (
+    <div className={`flex flex-col items-center p-4 rounded-2xl ${getBgColor(score)} card-hover`}>
+      <div className="circular-progress relative" style={{ width: size, height: size }}>
+        <svg width={size} height={size}>
+          <circle
+            className="circular-progress-track"
+            cx={size / 2}
+            cy={size / 2}
+            r={radius}
+            strokeWidth={strokeWidth}
+            style={{ stroke: 'rgba(0,0,0,0.1)' }}
+          />
+          <circle
+            className="circular-progress-fill"
+            cx={size / 2}
+            cy={size / 2}
+            r={radius}
+            strokeWidth={strokeWidth}
+            stroke={getColor(score)}
+            strokeDasharray={circumference}
+            strokeDashoffset={offset}
+          />
+        </svg>
+        <div className="absolute inset-0 flex flex-col items-center justify-center">
+          <Icon name={icon || 'Circle'} size={20} className="text-muted-foreground mb-1" />
+          <span className="text-lg font-bold text-foreground">{score}</span>
+        </div>
+      </div>
+      <span className="mt-3 text-sm font-medium text-foreground text-center">{name}</span>
+    </div>
+  );
+};
+
+// Tip Card Component
+const TipCard = ({ tip, index }) => (
+  <div className="flex items-start gap-3 p-4 bg-background/60 rounded-xl border border-border/50">
+    <div className="w-6 h-6 rounded-full bg-accent/10 flex items-center justify-center flex-shrink-0">
+      <span className="text-xs font-bold text-accent">{index + 1}</span>
+    </div>
+    <p className="text-sm text-foreground leading-relaxed">{tip}</p>
+  </div>
+);
+
 const SkinAnalysisBreakdown = ({ analysisData }) => {
-  const getScoreColor = (score) => {
-    if (score >= 80) return 'text-success';
-    if (score >= 60) return 'text-warning';
-    return 'text-destructive';
-  };
-
-  const getScoreBgColor = (score) => {
-    if (score >= 80) return 'bg-success/10';
-    if (score >= 60) return 'bg-warning/10';
-    return 'bg-destructive/10';
-  };
-
-  const getProgressColor = (score) => {
-    if (score >= 80) return 'bg-success';
-    if (score >= 60) return 'bg-warning';
-    return 'bg-destructive';
-  };
-
   const metrics = analysisData?.metrics || [];
 
   return (
-    <div className="bg-card border border-border rounded-xl p-6 animate-fade-in">
-      <div className="flex items-center space-x-2 mb-6">
-        <Icon name="BarChart3" size={24} className="text-accent" />
-        <h3 className="text-xl font-semibold text-foreground">Detailed Skin Analysis</h3>
-      </div>
-      <div className="space-y-6">
+    <div className="space-y-6 animate-fade-in">
+      {/* Metrics Section */}
+      <div className="glass-accent rounded-2xl p-6">
+        <div className="flex items-center gap-3 mb-6">
+          <div className="w-10 h-10 rounded-xl bg-accent/10 flex items-center justify-center">
+            <Icon name="BarChart3" size={20} className="text-accent" />
+          </div>
+          <div>
+            <h3 className="text-lg font-semibold text-foreground">Skin Metrics</h3>
+            <p className="text-xs text-muted-foreground">Detailed breakdown of your skin analysis</p>
+          </div>
+        </div>
+
         {metrics.length === 0 ? (
-          <div className="text-sm text-muted-foreground">No detailed metric breakdown available. View recommendations or run image analysis for a deeper report.</div>
+          <div className="text-center py-8">
+            <Icon name="PieChart" size={40} className="mx-auto text-muted-foreground/50 mb-3" />
+            <p className="text-sm text-muted-foreground">
+              No detailed metrics available. Complete an image analysis for deeper insights.
+            </p>
+          </div>
         ) : (
-          metrics
-            .slice()
-            .sort((a,b) => (b?.score || 0) - (a?.score || 0))
-            .map((metric, index) => (
-              <div key={index} className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-2">
-                    <Icon name={metric?.icon} size={18} className="text-accent" />
-                    <span className="font-medium text-foreground">{metric?.name}</span>
-                  </div>
-                  <div className={`px-3 py-1 rounded-full text-sm font-medium ${getScoreBgColor(metric?.score)} ${getScoreColor(metric?.score)}`}>
-                    {metric?.score}/100
-                  </div>
-                </div>
-
-                <div className="w-full bg-muted rounded-full h-2">
-                  <div
-                    className={`h-2 rounded-full transition-all duration-500 ${getProgressColor(metric?.score)}`}
-                    style={{ width: `${metric?.score}%` }}
-                  />
-                </div>
-
-                <p className="text-sm text-muted-foreground">{metric?.description}</p>
-              </div>
-            ))
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 stagger-children">
+            {metrics
+              .slice()
+              .sort((a, b) => (b?.score || 0) - (a?.score || 0))
+              .map((metric, index) => (
+                <CircularMetric
+                  key={index}
+                  score={metric?.score || 0}
+                  icon={metric?.icon}
+                  name={metric?.name}
+                  size={90}
+                />
+              ))}
+          </div>
         )}
       </div>
-      <div className="mt-8 p-4 bg-muted/50 rounded-lg">
-        <h4 className="font-semibold text-foreground mb-3 flex items-center">
-          <Icon name="Lightbulb" size={18} className="text-accent mr-2" />
-          Personalized Skincare Tips
-        </h4>
-        {analysisData?.tips?.length > 0 ? (
-          <ul className="space-y-2">
-            {analysisData?.tips?.map((tip, index) => (
-              <li key={index} className="flex items-start space-x-2 text-sm text-foreground">
-                <div className="w-1.5 h-1.5 bg-accent rounded-full mt-2 flex-shrink-0" />
-                <span>{tip}</span>
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <div className="text-sm text-muted-foreground">No tips available. Try retaking the quiz or uploading a clearer image for better recommendations.</div>
-        )}
-      </div>
-      {analysisData?.raw?.explanation && (
-        <div className="mt-6 p-4 border border-accent/20 bg-accent/5 rounded-lg">
-          <div className="flex items-start space-x-3">
-            <Icon name="Info" size={20} className="text-accent flex-shrink-0 mt-0.5" />
+
+      {/* Tips Section */}
+      {analysisData?.tips?.length > 0 && (
+        <div className="glass rounded-2xl p-6">
+          <div className="flex items-center gap-3 mb-5">
+            <div className="w-10 h-10 rounded-xl bg-amber-500/10 flex items-center justify-center">
+              <Icon name="Lightbulb" size={20} className="text-amber-500" />
+            </div>
             <div>
-              <h5 className="font-medium text-foreground mb-1">Analysis Explanation</h5>
-              <p className="text-sm text-muted-foreground">{analysisData?.raw?.explanation}</p>
+              <h3 className="text-lg font-semibold text-foreground">Personalized Tips</h3>
+              <p className="text-xs text-muted-foreground">Recommendations based on your skin profile</p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 stagger-children">
+            {analysisData.tips.slice(0, 4).map((tip, index) => (
+              <TipCard key={index} tip={tip} index={index} />
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Analysis Explanation */}
+      {analysisData?.raw?.explanation && (
+        <div className="bg-accent/5 border border-accent/20 rounded-2xl p-5">
+          <div className="flex items-start gap-3">
+            <Icon name="Info" size={18} className="text-accent mt-0.5 flex-shrink-0" />
+            <div>
+              <h5 className="font-medium text-foreground mb-1 text-sm">AI Analysis Summary</h5>
+              <p className="text-sm text-muted-foreground leading-relaxed">{analysisData.raw.explanation}</p>
             </div>
           </div>
         </div>
       )}
-      <div className="mt-6 p-4 border border-accent/20 bg-accent/5 rounded-lg">
-        <div className="flex items-start space-x-3">
-          <Icon name="Info" size={20} className="text-accent flex-shrink-0 mt-0.5" />
-          <div>
-            <h5 className="font-medium text-foreground mb-1">Analysis Method</h5>
-            <p className="text-sm text-muted-foreground">
-              Results are based on your quiz responses{analysisData?.raw ? ' and the uploaded image analysis' : ''}. Confidence indicates the model&apos;s estimated accuracy for the detected skin traits.
-            </p>
-          </div>
-        </div>
+
+      {/* Analysis Method Note */}
+      <div className="flex items-center gap-3 p-4 bg-muted/30 rounded-xl text-sm">
+        <Icon name="Shield" size={16} className="text-muted-foreground" />
+        <span className="text-muted-foreground">
+          Analysis based on your quiz responses{analysisData?.raw ? ' and uploaded image' : ''}.
+        </span>
       </div>
     </div>
   );

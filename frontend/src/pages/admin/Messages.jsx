@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import Header from '../../components/ui/Header';
 
-const API_BASE = import.meta.env?.VITE_BACKEND_URL || 'https://backend-three-sigma-81.vercel.app/api';
+const API_BASE = import.meta.env?.VITE_BACKEND_URL || 'http://localhost:4000/api';
 
 const Messages = () => {
   const [messages, setMessages] = useState([]);
@@ -35,7 +35,7 @@ const Messages = () => {
           <div>
             <div className="space-y-2">
               {messages.map(m => (
-                <div key={m.id} onClick={() => openMessage(m.id)} className={`p-3 rounded-lg border ${m.read ? 'bg-muted/20' : 'bg-card'} cursor-pointer`}> 
+                <div key={m.id} onClick={() => openMessage(m.id)} className={`p-3 rounded-lg border ${m.read ? 'bg-muted/20' : 'bg-card'} cursor-pointer`}>
                   <div className="font-medium">{m.name}</div>
                   <div className="text-xs text-muted-foreground">{m.email}</div>
                   <div className="text-xs text-muted-foreground">{new Date(m.created_at).toLocaleString()}</div>

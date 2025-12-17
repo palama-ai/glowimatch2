@@ -5,7 +5,7 @@
 */
 import { useEffect, useRef } from 'react';
 
-const API_BASE = import.meta.env?.VITE_BACKEND_URL || 'https://backend-three-sigma-81.vercel.app/api';
+const API_BASE = import.meta.env?.VITE_BACKEND_URL || 'http://localhost:4000/api';
 
 function genId() {
   // small RFC4122-lite random id
@@ -52,7 +52,7 @@ export default function useEventsTracker() {
     const origPush = history.pushState;
     history.pushState = function (...args) {
       origPush.apply(this, args);
-      try { post('/view', { sessionId, path: window.location.pathname }); } catch (e) {}
+      try { post('/view', { sessionId, path: window.location.pathname }); } catch (e) { }
     };
 
     // also catch popstate
@@ -66,8 +66,8 @@ export default function useEventsTracker() {
         // send synchronously if possible
         navigator.sendBeacon && navigator.sendBeacon(`${API_BASE}/events/end`, JSON.stringify({ sessionId, duration }));
         // also send async fallback
-        fetch(`${API_BASE}/events/end`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ sessionId, duration }) }).catch(()=>{});
-      } catch (e) {}
+        fetch(`${API_BASE}/events/end`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ sessionId, duration }) }).catch(() => { });
+      } catch (e) { }
     };
     window.addEventListener('beforeunload', onBefore);
 
@@ -80,8 +80,8 @@ export default function useEventsTracker() {
       // attempt final end
       try {
         const duration = Math.round((Date.now() - startedAtRef.current) / 1000);
-        fetch(`${API_BASE}/events/end`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ sessionId, duration }) }).catch(()=>{});
-      } catch (e) {}
+        fetch(`${API_BASE}/events/end`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ sessionId, duration }) }).catch(() => { });
+      } catch (e) { }
     };
   }, []);
 }

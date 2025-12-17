@@ -5,7 +5,7 @@ import { Link } from 'react-router-dom';
 import Icon from '../../components/AppIcon';
 import Button from '../../components/ui/Button';
 
-const API_BASE = import.meta.env?.VITE_BACKEND_URL || 'https://backend-three-sigma-81.vercel.app/api';
+const API_BASE = import.meta.env?.VITE_BACKEND_URL || 'http://localhost:4000/api';
 
 const StatCard = ({ title, value, note, icon, color = 'accent' }) => (
   <div className="bg-gradient-to-br from-card to-card/50 border border-border rounded-lg p-6 hover:border-accent/50 transition-colors">
@@ -131,27 +131,27 @@ const Dashboard = () => {
       {/* Key Metrics */}
       {stats && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-          <StatCard 
-            title="Total Users" 
+          <StatCard
+            title="Total Users"
             value={stats.total ?? 0}
             icon="Users"
             color="blue"
           />
-          <StatCard 
-            title="Active Users" 
+          <StatCard
+            title="Active Users"
             value={stats.active ?? 0}
             note={`${getActivePercentage()}% of total`}
             icon="UserCheck"
             color="green"
           />
-          <StatCard 
-            title="Disabled Users" 
+          <StatCard
+            title="Disabled Users"
             value={stats.disabled ?? 0}
             icon="UserX"
             color="red"
           />
-          <StatCard 
-            title="Subscribed" 
+          <StatCard
+            title="Subscribed"
             value={stats.subscribed ?? 0}
             note={`${getSubscriptionPercentage()}% of total`}
             icon="CreditCard"
@@ -190,7 +190,7 @@ const Dashboard = () => {
                       <span className="text-lg font-bold text-accent">{count}</span>
                     </div>
                     <div className="w-full bg-muted rounded-full h-3 overflow-hidden">
-                      <div 
+                      <div
                         className="h-3 bg-gradient-to-r from-accent to-secondary rounded-full transition-all duration-500"
                         style={{ width: `${Math.max(5, percentage)}%` }}
                       />

@@ -31,6 +31,10 @@ import SignupPage from './pages/auth/SignupPage';
 import ProfilePage from './pages/ProfilePage';
 // Subscription page removed per new referral-only model
 import QuizHistory from './pages/quiz-history';
+import SellerDashboard from './pages/seller/Dashboard';
+import SellerProducts from './pages/seller/Products';
+import SellerNews from './pages/seller/News';
+import SellerProfile from './pages/seller/Profile';
 
 const Routes = () => {
   const ReferrerHandler = () => {
@@ -67,37 +71,43 @@ const Routes = () => {
                 <ReferrerHandler />
                 <ScrollToTop />
                 <RouterRoutes>
-            {/* Public routes */}
-            <Route path="/" element={<Home />} />
-            <Route path="/landing-page" element={<LandingPage />} />
-            <Route path="/home" element={<Home />} />
-            <Route path="/about" element={<About />} />
-            <Route path="/blog" element={<Blog />} />
-            <Route path="/blog/:slug" element={<BlogPost />} />
-            <Route path="/contact" element={<Contact />} />
-            <Route path="/interactive-skin-quiz" element={<InteractiveSkinQuiz />} />
-            <Route path="/image-upload-analysis" element={<ImageUploadAnalysis />} />
-            <Route path="/results-dashboard" element={<ResultsDashboard />} />
-            {/* /subscription removed - referrals replace subscription attempts */}
+                  {/* Public routes */}
+                  <Route path="/" element={<Home />} />
+                  <Route path="/landing-page" element={<LandingPage />} />
+                  <Route path="/home" element={<Home />} />
+                  <Route path="/about" element={<About />} />
+                  <Route path="/blog" element={<Blog />} />
+                  <Route path="/blog/:slug" element={<BlogPost />} />
+                  <Route path="/contact" element={<Contact />} />
+                  <Route path="/interactive-skin-quiz" element={<InteractiveSkinQuiz />} />
+                  <Route path="/image-upload-analysis" element={<ImageUploadAnalysis />} />
+                  <Route path="/results-dashboard" element={<ResultsDashboard />} />
+                  {/* /subscription removed - referrals replace subscription attempts */}
 
-            {/* Auth routes */}
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/signup" element={<SignupPage />} />
-            <Route path="/profile" element={<ProfilePage />} />
-            <Route path="/quiz-history" element={<QuizHistory />} />
-            <Route path="/notifications" element={<NotificationsPage />} />
-            
-            {/* Admin routes (simple client-side access, server enforces admin token) */}
-            <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
-            <Route path="/admin/users" element={<AdminRoute><AdminUsers /></AdminRoute>} />
-            <Route path="/admin/blogs" element={<AdminRoute><AdminBlogs /></AdminRoute>} />
-            <Route path="/admin/messages" element={<AdminRoute><AdminMessages /></AdminRoute>} />
-            <Route path="/admin/notifications" element={<AdminRoute><AdminNotifications /></AdminRoute>} />
-            <Route path="/admin/sessions" element={<AdminRoute><AdminSessions /></AdminRoute>} />
-            
-            <Route path="*" element={<NotFound />} />
-          </RouterRoutes>
-          <AnalysisModal />
+                  {/* Auth routes */}
+                  <Route path="/login" element={<LoginPage />} />
+                  <Route path="/signup" element={<SignupPage />} />
+                  <Route path="/profile" element={<ProfilePage />} />
+                  <Route path="/quiz-history" element={<QuizHistory />} />
+                  <Route path="/notifications" element={<NotificationsPage />} />
+
+                  {/* Admin routes (simple client-side access, server enforces admin token) */}
+                  <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
+                  <Route path="/admin/users" element={<AdminRoute><AdminUsers /></AdminRoute>} />
+                  <Route path="/admin/blogs" element={<AdminRoute><AdminBlogs /></AdminRoute>} />
+                  <Route path="/admin/messages" element={<AdminRoute><AdminMessages /></AdminRoute>} />
+                  <Route path="/admin/notifications" element={<AdminRoute><AdminNotifications /></AdminRoute>} />
+                  <Route path="/admin/sessions" element={<AdminRoute><AdminSessions /></AdminRoute>} />
+
+                  {/* Seller routes */}
+                  <Route path="/seller" element={<SellerDashboard />} />
+                  <Route path="/seller/products" element={<SellerProducts />} />
+                  <Route path="/seller/news" element={<SellerNews />} />
+                  <Route path="/seller/profile" element={<SellerProfile />} />
+
+                  <Route path="*" element={<NotFound />} />
+                </RouterRoutes>
+                <AnalysisModal />
               </ErrorBoundary>
             </AuthProvider>
           </ThemeProvider>

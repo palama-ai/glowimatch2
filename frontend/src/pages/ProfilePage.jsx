@@ -34,11 +34,11 @@ const ProfilePage = () => {
         full_name: userProfile?.full_name || '',
         email: userProfile?.email || ''
       });
-      console.log('[Profile] User profile loaded:', { 
-        hasReferralCode: !!userProfile?.referral_code, 
+      console.log('[Profile] User profile loaded:', {
+        hasReferralCode: !!userProfile?.referral_code,
         code: userProfile?.referral_code,
         stats: userProfile?.referralStats,
-        allData: userProfile 
+        allData: userProfile
       });
     }
   }, [userProfile]);
@@ -53,14 +53,14 @@ const ProfilePage = () => {
     setUpdateLoading(true);
     setMessage('');
 
-        const { error } = await updateProfile(formData);
-    
+    const { error } = await updateProfile(formData);
+
     if (error) {
       setMessage(error?.message);
     } else {
       setMessage(t('profile_updated'));
       setEditing(false);
-    }    setUpdateLoading(false);
+    } setUpdateLoading(false);
   };
 
   const handleInputChange = (e) => {
@@ -126,10 +126,9 @@ const ProfilePage = () => {
               </div>
 
               {message && (
-                <div className={`px-4 py-3 rounded-lg ${
-                  message?.includes('successfully') 
-                    ? 'bg-green-50 border border-green-200 text-green-700' :'bg-red-50 border border-red-200 text-red-700'
-                }`}>
+                <div className={`px-4 py-3 rounded-lg ${message?.includes('successfully')
+                    ? 'bg-green-50 border border-green-200 text-green-700' : 'bg-red-50 border border-red-200 text-red-700'
+                  }`}>
                   {message}
                 </div>
               )}
@@ -218,7 +217,7 @@ const ProfilePage = () => {
                       try {
                         const raw = localStorage.getItem('gm_auth');
                         const token = raw ? JSON.parse(raw).token : null;
-                        const API_BASE = import.meta.env?.VITE_BACKEND_URL || 'https://backend-three-sigma-81.vercel.app/api';
+                        const API_BASE = import.meta.env?.VITE_BACKEND_URL || 'http://localhost:4000/api';
                         const resp = await fetch(`${API_BASE}/referrals/create`, {
                           method: 'POST',
                           headers: {
@@ -231,7 +230,7 @@ const ProfilePage = () => {
                           const d = json.data || json;
                           const link = d.referral_link || d.link || (d.referral_code ? `${window.location.origin}/?ref=${d.referral_code}` : null);
                           setReferralLink(link);
-                          try { await refreshProfile(); } catch(e) { console.debug('refreshProfile failed', e); }
+                          try { await refreshProfile(); } catch (e) { console.debug('refreshProfile failed', e); }
                           if (link) {
                             navigator.clipboard?.writeText(link);
                             setMessage(t('referral_generated'));

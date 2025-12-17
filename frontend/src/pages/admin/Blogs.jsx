@@ -4,7 +4,7 @@ import Button from '../../components/ui/Button';
 import Input from '../../components/ui/Input';
 import Icon from '../../components/AppIcon';
 
-const API_BASE = import.meta.env?.VITE_BACKEND_URL || 'https://backend-three-sigma-81.vercel.app/api';
+const API_BASE = import.meta.env?.VITE_BACKEND_URL || 'http://localhost:4000/api';
 
 const Blogs = () => {
   const [blogs, setBlogs] = useState([]);
@@ -119,27 +119,27 @@ const Blogs = () => {
 
     const raw = localStorage.getItem('gm_auth');
     const headers = { 'Content-Type': 'application/json', ...(raw ? { Authorization: `Bearer ${JSON.parse(raw).token}` } : {}) };
-    
+
     try {
-      const payload = { 
-        ...formData, 
-        published: formData.published ? 1 : 0 
+      const payload = {
+        ...formData,
+        published: formData.published ? 1 : 0
       };
       console.log('[Blogs Admin] Saving blog with payload:', payload);
-      
+
       const url = editingBlog ? `${API_BASE}/admin/blogs/${editingBlog.id}` : `${API_BASE}/admin/blogs`;
       const method = editingBlog ? 'PUT' : 'POST';
-      const response = await fetch(url, { 
-        method, 
-        headers, 
-        body: JSON.stringify(payload) 
+      const response = await fetch(url, {
+        method,
+        headers,
+        body: JSON.stringify(payload)
       });
 
       if (!response.ok) throw new Error('Failed to save blog');
-      
+
       const result = await response.json();
       console.log('[Blogs Admin] Save result:', result);
-      
+
       setSuccess(editingBlog ? 'Blog updated successfully' : 'Blog created successfully');
       setTimeout(() => {
         setShowModal(false);
@@ -157,15 +157,15 @@ const Blogs = () => {
     try {
       console.log('[Blogs Admin] Deleting blog:', id);
       const response = await fetch(`${API_BASE}/admin/blogs/${id}`, { method: 'DELETE', headers });
-      
+
       if (!response.ok) throw new Error('Failed to delete blog');
-      
+
       // Update UI immediately
       setBlogs(prevBlogs => prevBlogs.filter(b => b.id !== id));
       setSuccess('Blog deleted successfully');
-      
+
       console.log('[Blogs Admin] Blog deleted successfully');
-      
+
       // Refresh from server after a short delay to ensure consistency
       setTimeout(() => {
         fetchBlogs();
@@ -227,8 +227,8 @@ const Blogs = () => {
                     <p className="text-sm text-muted-foreground line-clamp-2">{b.excerpt}</p>
                   </div>
                   <div className="flex items-center gap-2 flex-shrink-0">
-                    <Button 
-                      variant="outline" 
+                    <Button
+                      variant="outline"
                       size="sm"
                       onClick={() => openEditModal(b)}
                       className="flex items-center gap-2"
@@ -236,7 +236,7 @@ const Blogs = () => {
                       <Icon name="Edit" size={16} />
                       Edit
                     </Button>
-                    <Button 
+                    <Button
                       variant="outline"
                       size="sm"
                       onClick={() => deleteBlog(b.id)}
@@ -415,7 +415,7 @@ const Blogs = () => {
               <Button variant="outline" onClick={() => setShowModal(false)}>
                 Cancel
               </Button>
-              <Button 
+              <Button
                 onClick={saveBlog}
                 className="bg-gradient-to-r from-pink-500 to-rose-500"
               >

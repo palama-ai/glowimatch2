@@ -7,22 +7,21 @@ import { useModal } from '../../contexts/ModalContext';
 import Button from './Button';
 import Icon from '../AppIcon';
 
-const API_BASE = import.meta.env?.VITE_BACKEND_URL || 'https://backend-three-sigma-81.vercel.app/api';
+const API_BASE = import.meta.env?.VITE_BACKEND_URL || 'http://localhost:4000/api';
 
 // Navigation Link Component with Animation
 const NavLink = ({ to, label }) => {
   const [isActive, setIsActive] = useState(false);
-  
+
   return (
     <Link
       to={to}
       onMouseEnter={() => setIsActive(true)}
       onMouseLeave={() => setIsActive(false)}
-      className={`relative px-3 py-1 font-medium transition-all duration-300 rounded-lg ${
-        isActive 
-          ? 'text-pink-600 bg-white/60' 
+      className={`relative px-3 py-1 font-medium transition-all duration-300 rounded-lg ${isActive
+          ? 'text-pink-600 bg-white/60'
           : 'text-gray-700 hover:text-pink-600'
-      }`}
+        }`}
     >
       <span className="relative z-10">{label}</span>
       {isActive && (
@@ -52,18 +51,18 @@ const Header = () => {
   // Fetch unread messages/notifications
   useEffect(() => {
     let countTimer;
-    
+
     const fetchUnread = async () => {
       try {
         let headers = {};
         const raw = localStorage.getItem('gm_auth');
         if (raw) {
-          try { 
-            const p = JSON.parse(raw); 
+          try {
+            const p = JSON.parse(raw);
             if (p && p.token) {
               headers.Authorization = `Bearer ${p.token}`;
             }
-          } catch (e) {}
+          } catch (e) { }
         }
         if (!headers.Authorization) {
           const alt = localStorage.getItem('admin_dashboard_token');
@@ -84,11 +83,11 @@ const Header = () => {
             const data = await res.json();
             const messages = data.data || [];
             const unread = messages.filter(m => !m.read).length;
-            
+
             if (unread > 0) {
               setUnreadCount(unread);
               setShowCount(true);
-              
+
               if (countTimer) clearTimeout(countTimer);
               countTimer = setTimeout(() => {
                 setShowCount(false);
@@ -153,13 +152,13 @@ const Header = () => {
             {user ? (
               <>
                 {/* Notifications - Circular */}
-                <Link 
-                  to={isAdmin && isAdmin() ? "/admin/messages" : "/notifications"} 
+                <Link
+                  to={isAdmin && isAdmin() ? "/admin/messages" : "/notifications"}
                   className="inline-flex items-center relative"
                 >
                   <button className="p-2.5 rounded-full hover:bg-pink-100 inline-flex items-center justify-center transition-all duration-300 hover:scale-110">
-                    <Icon 
-                      name={isAdmin && isAdmin() ? "Mail" : "Bell"} 
+                    <Icon
+                      name={isAdmin && isAdmin() ? "Mail" : "Bell"}
                       size={20}
                       className="text-gray-700"
                     />
@@ -213,27 +212,24 @@ const Header = () => {
                         {/* Language Options */}
                         <button
                           onClick={() => setLang('en')}
-                          className={`w-full flex items-center space-x-3 px-4 py-2.5 text-sm transition-colors ${
-                            lang === 'en' ? 'bg-pink-100 text-pink-600 font-semibold' : 'text-gray-700 hover:text-pink-600 hover:bg-pink-50'
-                          }`}
+                          className={`w-full flex items-center space-x-3 px-4 py-2.5 text-sm transition-colors ${lang === 'en' ? 'bg-pink-100 text-pink-600 font-semibold' : 'text-gray-700 hover:text-pink-600 hover:bg-pink-50'
+                            }`}
                         >
                           <span>🇺🇸</span>
                           <span>English</span>
                         </button>
                         <button
                           onClick={() => setLang('fr')}
-                          className={`w-full flex items-center space-x-3 px-4 py-2.5 text-sm transition-colors ${
-                            lang === 'fr' ? 'bg-pink-100 text-pink-600 font-semibold' : 'text-gray-700 hover:text-pink-600 hover:bg-pink-50'
-                          }`}
+                          className={`w-full flex items-center space-x-3 px-4 py-2.5 text-sm transition-colors ${lang === 'fr' ? 'bg-pink-100 text-pink-600 font-semibold' : 'text-gray-700 hover:text-pink-600 hover:bg-pink-50'
+                            }`}
                         >
                           <span>🇫🇷</span>
                           <span>Français</span>
                         </button>
                         <button
                           onClick={() => setLang('ar')}
-                          className={`w-full flex items-center space-x-3 px-4 py-2.5 text-sm transition-colors ${
-                            lang === 'ar' ? 'bg-pink-100 text-pink-600 font-semibold' : 'text-gray-700 hover:text-pink-600 hover:bg-pink-50'
-                          }`}
+                          className={`w-full flex items-center space-x-3 px-4 py-2.5 text-sm transition-colors ${lang === 'ar' ? 'bg-pink-100 text-pink-600 font-semibold' : 'text-gray-700 hover:text-pink-600 hover:bg-pink-50'
+                            }`}
                         >
                           <span>🇸🇦</span>
                           <span>العربية</span>

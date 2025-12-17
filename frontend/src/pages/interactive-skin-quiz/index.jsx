@@ -16,14 +16,14 @@ import Icon from '../../components/AppIcon';
 
 const InteractiveSkinQuiz = () => {
   const navigate = useNavigate();
-  const { 
-    user, 
-    canTakeQuiz, 
-    getRemainingAttempts, 
+  const {
+    user,
+    canTakeQuiz,
+    getRemainingAttempts,
     recordQuizAttempt,
     refreshProfile,
     getNextResetDate,
-    purchaseQuizAttempts 
+    purchaseQuizAttempts
   } = useAuth();
   const [referralLink, setReferralLink] = useState(null);
   const [fetchingReferral, setFetchingReferral] = useState(false);
@@ -37,249 +37,249 @@ const InteractiveSkinQuiz = () => {
   const [lastSaveError, setLastSaveError] = useState(null);
 
   const questions = [
-  {
-    id: 1,
-    title: "What\'s your primary skin type?",
-    subtitle: "Choose the option that best describes your skin most of the time",
-    type: "multiple-choice",
-    options: [
     {
-      id: "oily",
-      label: "Oily",
-      description: "Shiny, greasy appearance with enlarged pores"
-    },
-    {
-      id: "dry",
-      label: "Dry",
-      description: "Tight, flaky, or rough texture with fine lines"
-    },
-    {
-      id: "combination",
-      label: "Combination",
-      description: "Oily T-zone with dry or normal cheeks"
-    },
-    {
-      id: "sensitive",
-      label: "Sensitive",
-      description: "Easily irritated, red, or reactive to products"
-    },
-    {
-      id: "normal",
-      label: "Normal",
-      description: "Balanced, neither too oily nor too dry"
-    }]
+      id: 1,
+      title: "What\'s your primary skin type?",
+      subtitle: "Choose the option that best describes your skin most of the time",
+      type: "multiple-choice",
+      options: [
+        {
+          id: "oily",
+          label: "Oily",
+          description: "Shiny, greasy appearance with enlarged pores"
+        },
+        {
+          id: "dry",
+          label: "Dry",
+          description: "Tight, flaky, or rough texture with fine lines"
+        },
+        {
+          id: "combination",
+          label: "Combination",
+          description: "Oily T-zone with dry or normal cheeks"
+        },
+        {
+          id: "sensitive",
+          label: "Sensitive",
+          description: "Easily irritated, red, or reactive to products"
+        },
+        {
+          id: "normal",
+          label: "Normal",
+          description: "Balanced, neither too oily nor too dry"
+        }]
 
-  },
-  {
-    id: 2,
-    title: "How often do you experience breakouts?",
-    subtitle: "Think about your skin over the past 3 months",
-    type: "multiple-choice",
-    options: [
-    {
-      id: "never",
-      label: "Never",
-      description: "I rarely get pimples or blemishes"
     },
     {
-      id: "rarely",
-      label: "Rarely",
-      description: "Occasional breakout, maybe once a month"
-    },
-    {
-      id: "sometimes",
-      label: "Sometimes",
-      description: "A few breakouts per month"
-    },
-    {
-      id: "often",
-      label: "Often",
-      description: "Weekly breakouts or persistent acne"
-    },
-    {
-      id: "constantly",
-      label: "Constantly",
-      description: "Daily breakouts or severe acne"
-    }]
+      id: 2,
+      title: "How often do you experience breakouts?",
+      subtitle: "Think about your skin over the past 3 months",
+      type: "multiple-choice",
+      options: [
+        {
+          id: "never",
+          label: "Never",
+          description: "I rarely get pimples or blemishes"
+        },
+        {
+          id: "rarely",
+          label: "Rarely",
+          description: "Occasional breakout, maybe once a month"
+        },
+        {
+          id: "sometimes",
+          label: "Sometimes",
+          description: "A few breakouts per month"
+        },
+        {
+          id: "often",
+          label: "Often",
+          description: "Weekly breakouts or persistent acne"
+        },
+        {
+          id: "constantly",
+          label: "Constantly",
+          description: "Daily breakouts or severe acne"
+        }]
 
-  },
-  {
-    id: 3,
-    title: "How does your skin feel by midday?",
-    subtitle: "After your morning skincare routine",
-    type: "multiple-choice",
-    options: [
-    {
-      id: "tight-dry",
-      label: "Tight & Dry",
-      description: "Feels stretched and needs moisturizer"
     },
     {
-      id: "comfortable",
-      label: "Comfortable",
-      description: "Feels balanced and normal"
-    },
-    {
-      id: "slightly-oily",
-      label: "Slightly Oily",
-      description: "Some shine in T-zone area"
-    },
-    {
-      id: "very-oily",
-      label: "Very Oily",
-      description: "Noticeable shine and greasiness"
-    },
-    {
-      id: "irritated",
-      label: "Irritated",
-      description: "Red, itchy, or uncomfortable"
-    }]
+      id: 3,
+      title: "How does your skin feel by midday?",
+      subtitle: "After your morning skincare routine",
+      type: "multiple-choice",
+      options: [
+        {
+          id: "tight-dry",
+          label: "Tight & Dry",
+          description: "Feels stretched and needs moisturizer"
+        },
+        {
+          id: "comfortable",
+          label: "Comfortable",
+          description: "Feels balanced and normal"
+        },
+        {
+          id: "slightly-oily",
+          label: "Slightly Oily",
+          description: "Some shine in T-zone area"
+        },
+        {
+          id: "very-oily",
+          label: "Very Oily",
+          description: "Noticeable shine and greasiness"
+        },
+        {
+          id: "irritated",
+          label: "Irritated",
+          description: "Red, itchy, or uncomfortable"
+        }]
 
-  },
-  {
-    id: 4,
-    title: "What\'s your biggest skin concern?",
-    subtitle: "Select your primary concern",
-    type: "image-selection",
-    options: [
-    {
-      id: "acne",
-      label: "Acne & Breakouts",
-      image: "https://images.unsplash.com/photo-1452223355713-db7fc5eed0b9",
-      imageAlt: "Close-up of skin with acne breakouts and blemishes"
     },
     {
-      id: "aging",
-      label: "Fine Lines & Aging",
-      image: "https://images.unsplash.com/photo-1531067332586-ffe9e4d49477",
-      imageAlt: "Mature skin showing fine lines and wrinkles around eyes"
-    },
-    {
-      id: "dryness",
-      label: "Dryness & Flaking",
-      image: "https://images.unsplash.com/photo-1729617086451-70a40832030b",
-      imageAlt: "Dry flaky skin texture with visible peeling"
-    },
-    {
-      id: "pigmentation",
-      label: "Dark Spots & Pigmentation",
-      image: "https://images.unsplash.com/photo-1702354408183-1d7a58afaf5f",
-      imageAlt: "Skin with dark spots and uneven pigmentation"
-    },
-    {
-      id: "sensitivity",
-      label: "Redness & Sensitivity",
-      image: "https://images.unsplash.com/photo-1694226016585-d4a261afee7c",
-      imageAlt: "Sensitive red irritated skin with inflammation"
-    },
-    {
-      id: "pores",
-      label: "Large Pores",
-      image: "https://images.unsplash.com/photo-1567854143419-b38292f838c5",
-      imageAlt: "Close-up of skin showing enlarged visible pores"
-    }]
+      id: 4,
+      title: "What\'s your biggest skin concern?",
+      subtitle: "Select your primary concern",
+      type: "image-selection",
+      options: [
+        {
+          id: "acne",
+          label: "Acne & Breakouts",
+          image: "https://images.unsplash.com/photo-1452223355713-db7fc5eed0b9",
+          imageAlt: "Close-up of skin with acne breakouts and blemishes"
+        },
+        {
+          id: "aging",
+          label: "Fine Lines & Aging",
+          image: "https://images.unsplash.com/photo-1531067332586-ffe9e4d49477",
+          imageAlt: "Mature skin showing fine lines and wrinkles around eyes"
+        },
+        {
+          id: "dryness",
+          label: "Dryness & Flaking",
+          image: "https://images.unsplash.com/photo-1729617086451-70a40832030b",
+          imageAlt: "Dry flaky skin texture with visible peeling"
+        },
+        {
+          id: "pigmentation",
+          label: "Dark Spots & Pigmentation",
+          image: "https://images.unsplash.com/photo-1702354408183-1d7a58afaf5f",
+          imageAlt: "Skin with dark spots and uneven pigmentation"
+        },
+        {
+          id: "sensitivity",
+          label: "Redness & Sensitivity",
+          image: "https://images.unsplash.com/photo-1694226016585-d4a261afee7c",
+          imageAlt: "Sensitive red irritated skin with inflammation"
+        },
+        {
+          id: "pores",
+          label: "Large Pores",
+          image: "https://images.unsplash.com/photo-1567854143419-b38292f838c5",
+          imageAlt: "Close-up of skin showing enlarged visible pores"
+        }]
 
-  },
-  {
-    id: 5,
-    title: "How sensitive is your skin to new products?",
-    subtitle: "Rate your skin\'s reaction to new skincare products",
-    type: "slider",
-    min: 1,
-    max: 5,
-    step: 1,
-    labels: {
-      1: "Not Sensitive",
-      2: "Slightly Sensitive",
-      3: "Moderately Sensitive",
-      4: "Very Sensitive",
-      5: "Extremely Sensitive"
-    }
-  },
-  {
-    id: 6,
-    title: "What\'s your current skincare routine?",
-    subtitle: "How many steps do you typically follow?",
-    type: "multiple-choice",
-    options: [
-    {
-      id: "minimal",
-      label: "Minimal (1-3 steps)",
-      description: "Cleanser and moisturizer, maybe sunscreen"
     },
     {
-      id: "basic",
-      label: "Basic (4-6 steps)",
-      description: "Cleanser, toner, moisturizer, sunscreen, occasional mask"
+      id: 5,
+      title: "How sensitive is your skin to new products?",
+      subtitle: "Rate your skin\'s reaction to new skincare products",
+      type: "slider",
+      min: 1,
+      max: 5,
+      step: 1,
+      labels: {
+        1: "Not Sensitive",
+        2: "Slightly Sensitive",
+        3: "Moderately Sensitive",
+        4: "Very Sensitive",
+        5: "Extremely Sensitive"
+      }
     },
     {
-      id: "comprehensive",
-      label: "Comprehensive (7-10 steps)",
-      description: "Full routine with serums, treatments, and targeted products"
-    },
-    {
-      id: "extensive",
-      label: "Extensive (10+ steps)",
-      description: "Multi-step routine with multiple serums and treatments"
-    }]
+      id: 6,
+      title: "What\'s your current skincare routine?",
+      subtitle: "How many steps do you typically follow?",
+      type: "multiple-choice",
+      options: [
+        {
+          id: "minimal",
+          label: "Minimal (1-3 steps)",
+          description: "Cleanser and moisturizer, maybe sunscreen"
+        },
+        {
+          id: "basic",
+          label: "Basic (4-6 steps)",
+          description: "Cleanser, toner, moisturizer, sunscreen, occasional mask"
+        },
+        {
+          id: "comprehensive",
+          label: "Comprehensive (7-10 steps)",
+          description: "Full routine with serums, treatments, and targeted products"
+        },
+        {
+          id: "extensive",
+          label: "Extensive (10+ steps)",
+          description: "Multi-step routine with multiple serums and treatments"
+        }]
 
-  },
-  {
-    id: 7,
-    title: "How much time do you spend on skincare daily?",
-    subtitle: "Include both morning and evening routines",
-    type: "multiple-choice",
-    options: [
-    {
-      id: "under-5",
-      label: "Under 5 minutes",
-      description: "Quick and simple routine"
     },
     {
-      id: "5-10",
-      label: "5-10 minutes",
-      description: "Basic but thorough routine"
-    },
-    {
-      id: "10-20",
-      label: "10-20 minutes",
-      description: "Detailed routine with multiple products"
-    },
-    {
-      id: "over-20",
-      label: "Over 20 minutes",
-      description: "Extensive routine with treatments and massage"
-    }]
+      id: 7,
+      title: "How much time do you spend on skincare daily?",
+      subtitle: "Include both morning and evening routines",
+      type: "multiple-choice",
+      options: [
+        {
+          id: "under-5",
+          label: "Under 5 minutes",
+          description: "Quick and simple routine"
+        },
+        {
+          id: "5-10",
+          label: "5-10 minutes",
+          description: "Basic but thorough routine"
+        },
+        {
+          id: "10-20",
+          label: "10-20 minutes",
+          description: "Detailed routine with multiple products"
+        },
+        {
+          id: "over-20",
+          label: "Over 20 minutes",
+          description: "Extensive routine with treatments and massage"
+        }]
 
-  },
-  {
-    id: 8,
-    title: "What\'s your budget for skincare products?",
-    subtitle: "Monthly spending on skincare products",
-    type: "multiple-choice",
-    options: [
-    {
-      id: "budget",
-      label: "Budget-Friendly ($0-$50)",
-      description: "Drugstore and affordable options"
     },
     {
-      id: "moderate",
-      label: "Moderate ($50-$150)",
-      description: "Mix of drugstore and mid-range products"
-    },
-    {
-      id: "premium",
-      label: "Premium ($150-$300)",
-      description: "High-end and professional products"
-    },
-    {
-      id: "luxury",
-      label: "Luxury ($300+)",
-      description: "Top-tier and luxury skincare brands"
-    }]
+      id: 8,
+      title: "What\'s your budget for skincare products?",
+      subtitle: "Monthly spending on skincare products",
+      type: "multiple-choice",
+      options: [
+        {
+          id: "budget",
+          label: "Budget-Friendly ($0-$50)",
+          description: "Drugstore and affordable options"
+        },
+        {
+          id: "moderate",
+          label: "Moderate ($50-$150)",
+          description: "Mix of drugstore and mid-range products"
+        },
+        {
+          id: "premium",
+          label: "Premium ($150-$300)",
+          description: "High-end and professional products"
+        },
+        {
+          id: "luxury",
+          label: "Luxury ($300+)",
+          description: "Top-tier and luxury skincare brands"
+        }]
 
-  }];
+    }];
 
   // compute values inline to avoid initialization order issues
 
@@ -307,7 +307,7 @@ const InteractiveSkinQuiz = () => {
         timestamp: new Date().toISOString()
       };
       localStorage.setItem('glowmatch-quiz-progress', JSON.stringify(progress));
-      
+
       // تأكد من أن الإجابة الحالية محفوظة
       const question = questions?.[currentQuestionIndex];
       if (question && currentAnswer) {
@@ -361,7 +361,7 @@ const InteractiveSkinQuiz = () => {
           return;
         }
         // refresh profile/subscription in context
-        try { await refreshProfile(); } catch(e) { console.debug('profile reload failed', e); }
+        try { await refreshProfile(); } catch (e) { console.debug('profile reload failed', e); }
       } catch (e) {
         console.error('startQuiz request failed', e);
         setLastSaveError({ code: e?.status || 'NETWORK_ERROR', message: e?.message || 'Unable to start quiz at this time', details: e?.raw || null });
@@ -398,7 +398,7 @@ const InteractiveSkinQuiz = () => {
 
     setFetchingReferral(true);
     try {
-      const API_BASE = import.meta.env?.VITE_BACKEND_URL || 'https://backend-three-sigma-81.vercel.app/api';
+      const API_BASE = import.meta.env?.VITE_BACKEND_URL || 'http://localhost:4000/api';
       const resp = await fetch(`${API_BASE}/referrals/me`, {
         headers: { 'Content-Type': 'application/json', ...getAuthHeader() }
       });
@@ -451,13 +451,13 @@ const InteractiveSkinQuiz = () => {
 
     const updatedResponses = [...responses];
     const existingIndex = updatedResponses.findIndex(r => r.questionId === newResponse.questionId);
-    
+
     if (existingIndex >= 0) {
       updatedResponses[existingIndex] = newResponse;
     } else {
       updatedResponses.push(newResponse);
     }
-    
+
     setResponses(updatedResponses);
   };
 
@@ -486,34 +486,34 @@ const InteractiveSkinQuiz = () => {
         setCurrentAnswer(null);
       } else {
         try {
-      // Quiz completed - prepare results
-      const quizData = {
-        responses: updatedResponses.map(r => ({
-          questionId: r.questionId,
-          question: r.question,
-          answer: {
-            id: r.answer?.id,
-            label: r.answer?.label,
-            value: r.answer?.value || r.answer?.id || r.answer?.label
-          }
-        })),
-        metadata: {
-          completedAt: new Date().toISOString(),
-          totalQuestions: questions?.length,
-          version: '1.0'
-        }
-      };
+          // Quiz completed - prepare results
+          const quizData = {
+            responses: updatedResponses.map(r => ({
+              questionId: r.questionId,
+              question: r.question,
+              answer: {
+                id: r.answer?.id,
+                label: r.answer?.label,
+                value: r.answer?.value || r.answer?.id || r.answer?.label
+              }
+            })),
+            metadata: {
+              completedAt: new Date().toISOString(),
+              totalQuestions: questions?.length,
+              version: '1.0'
+            }
+          };
 
-      const results = {
-        skin_type: updatedResponses.find(r => r.questionId === 1)?.answer?.label || 'unknown',
-        concerns: updatedResponses
-          .filter(r => r.questionId === 4)
-          .map(r => r.answer?.label)
-          .filter(Boolean),
-        sensitivity_level: updatedResponses.find(r => r.questionId === 5)?.answer?.value || 3,
-        routine_complexity: updatedResponses.find(r => r.questionId === 6)?.answer?.id || 'basic',
-        completed_at: new Date().toISOString()
-      };          // Save directly using the quiz service
+          const results = {
+            skin_type: updatedResponses.find(r => r.questionId === 1)?.answer?.label || 'unknown',
+            concerns: updatedResponses
+              .filter(r => r.questionId === 4)
+              .map(r => r.answer?.label)
+              .filter(Boolean),
+            sensitivity_level: updatedResponses.find(r => r.questionId === 5)?.answer?.value || 3,
+            routine_complexity: updatedResponses.find(r => r.questionId === 6)?.answer?.id || 'basic',
+            completed_at: new Date().toISOString()
+          };          // Save directly using the quiz service
           const { data: attemptData, error: saveError } = await quizService.saveQuizAttempt(
             user.id,
             quizData,
@@ -535,9 +535,9 @@ const InteractiveSkinQuiz = () => {
             ...quizData,
             attemptId: attemptData.id
           }));
-          
+
           setQuizComplete(true);
-          
+
         } catch (error) {
           console.error('Error completing quiz:', error);
           const errorMessage = error?.message || 'Failed to save quiz data';
@@ -562,7 +562,7 @@ const InteractiveSkinQuiz = () => {
 
   const handleContinueToAnalysis = async (model = 'fallback') => {
     console.log('Starting analysis transition...');
-    
+
     try {
       // Check user authentication
       if (!user?.id) {
@@ -630,7 +630,7 @@ const InteractiveSkinQuiz = () => {
       }
 
       // Try to run AI analysis (best-effort). This analyzes quiz answers (images will be uploaded on next page).
-      const API_BASE = import.meta.env?.VITE_BACKEND_URL || 'https://backend-three-sigma-81.vercel.app/api';
+      const API_BASE = import.meta.env?.VITE_BACKEND_URL || 'http://localhost:4000/api';
       const getAuthHeader = () => {
         try {
           const raw = localStorage.getItem('gm_auth');
@@ -671,7 +671,7 @@ const InteractiveSkinQuiz = () => {
       // Clean up temporary data
       localStorage.removeItem('glowmatch-quiz-progress');
       localStorage.removeItem('glowmatch-quiz-autosave');
-      
+
       // Reset component state
       setQuizStarted(false);
       setCurrentQuestionIndex(0);
@@ -680,7 +680,7 @@ const InteractiveSkinQuiz = () => {
       setQuizComplete(false);
 
       console.log('Navigating to image analysis...');
-      
+
       // Generate PDF report and attach (best-effort). If report generation/upload fails, we still navigate.
       try {
         const reportResult = await generateAndUploadReportAndAttach(attemptData);
@@ -698,7 +698,7 @@ const InteractiveSkinQuiz = () => {
       }
 
       // Navigate to image analysis and pass chosen model so the next page can run image+quiz analysis
-      navigate('/image-upload-analysis', { 
+      navigate('/image-upload-analysis', {
         replace: true,
         state: { quizAttemptId: attemptData.id, model }
       });
@@ -721,7 +721,7 @@ const InteractiveSkinQuiz = () => {
     }
   };
 
-  
+
 
   // الحفظ التلقائي كل 30 ثانية
   useEffect(() => {
@@ -867,8 +867,8 @@ const InteractiveSkinQuiz = () => {
                     <span className="font-mono bg-red-100 px-2 py-0.5 rounded">
                       Error code: {lastSaveError.code}
                     </span>
-                    <Button 
-                      variant="ghost" 
+                    <Button
+                      variant="ghost"
                       size="xs"
                       onClick={() => setLastSaveError(null)}
                       className="text-red-600 hover:text-red-700"
@@ -885,7 +885,7 @@ const InteractiveSkinQuiz = () => {
               </div>
             </div>
           )}
-          
+
           {/* Attempts / Referral Card */}
           {!quizStarted && (
             <div className="mb-6 bg-gradient-to-br from-accent/5 to-secondary/5 border border-accent/20 rounded-lg p-6 shadow-sm">
@@ -899,7 +899,7 @@ const InteractiveSkinQuiz = () => {
                     <p className="text-2xl font-bold text-foreground">{remainingAttempts === Infinity ? '∞' : remainingAttempts}</p>
                   </div>
                 </div>
-                
+
                 <div className="md:col-span-2">
                   {typeof remainingAttempts === 'number' && remainingAttempts <= 0 ? (
                     <div className="bg-destructive/10 border border-destructive/30 rounded-lg p-4">
@@ -930,13 +930,13 @@ const InteractiveSkinQuiz = () => {
                 <div className="mt-4 pt-4 border-t border-accent/10">
                   <p className="text-sm font-medium text-foreground mb-3">Share this link to earn bonus attempts:</p>
                   <div className="flex flex-col sm:flex-row items-center gap-2">
-                    <input 
-                      readOnly 
-                      value={referralLink} 
-                      className="flex-1 px-3 py-2 border border-border rounded-lg bg-background text-sm font-mono text-center sm:text-left" 
+                    <input
+                      readOnly
+                      value={referralLink}
+                      className="flex-1 px-3 py-2 border border-border rounded-lg bg-background text-sm font-mono text-center sm:text-left"
                     />
-                    <Button 
-                      size="sm" 
+                    <Button
+                      size="sm"
                       variant="outline"
                       onClick={() => navigator.clipboard?.writeText(referralLink)}
                       iconName="Copy"
@@ -945,7 +945,7 @@ const InteractiveSkinQuiz = () => {
                       Copy Link
                     </Button>
                     {navigator.share && (
-                      <Button 
+                      <Button
                         size="sm"
                         onClick={() => navigator.share({ title: 'Free Quiz Attempts', text: 'Get free skin quiz attempts using my referral link!', url: referralLink })}
                         iconName="Share2"
@@ -981,30 +981,30 @@ const InteractiveSkinQuiz = () => {
               </div>
             </div>
           )}
-          
+
           {!quizStarted ?
-          <QuizIntro onStart={handleStartQuiz} /> :
-          quizComplete ?
-          <QuizComplete
-            responses={responses}
-            onContinue={handleContinueToAnalysis} /> :
+            <QuizIntro onStart={handleStartQuiz} /> :
+            quizComplete ?
+              <QuizComplete
+                responses={responses}
+                onContinue={handleContinueToAnalysis} /> :
 
-          <div className="space-y-6">
-              <QuizProgress
-              currentQuestion={currentQuestionIndex + 1}
-              totalQuestions={questions?.length}
-              completedQuestions={responses?.length} />
+              <div className="space-y-6">
+                <QuizProgress
+                  currentQuestion={currentQuestionIndex + 1}
+                  totalQuestions={questions?.length}
+                  completedQuestions={responses?.length} />
 
-              <QuestionCard
-              question={questions?.[currentQuestionIndex]}
-              onAnswer={handleAnswer}
-              selectedAnswer={currentAnswer}
-              onNext={handleNext}
-              onPrevious={handlePrevious}
-              isFirstQuestion={currentQuestionIndex === 0}
-              isLastQuestion={currentQuestionIndex === questions?.length - 1} />
+                <QuestionCard
+                  question={questions?.[currentQuestionIndex]}
+                  onAnswer={handleAnswer}
+                  selectedAnswer={currentAnswer}
+                  onNext={handleNext}
+                  onPrevious={handlePrevious}
+                  isFirstQuestion={currentQuestionIndex === 0}
+                  isLastQuestion={currentQuestionIndex === questions?.length - 1} />
 
-            </div>
+              </div>
           }
         </div>
       </main>

@@ -3,7 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import Header from '../../components/ui/Header';
 import Icon from '../../components/AppIcon';
 
-const API_BASE = import.meta.env?.VITE_BACKEND_URL || 'https://backend-three-sigma-81.vercel.app/api';
+const API_BASE = import.meta.env?.VITE_BACKEND_URL || 'http://localhost:4000/api';
 
 const BlogPost = () => {
   const { slug } = useParams();
@@ -15,7 +15,7 @@ const BlogPost = () => {
       try {
         const response = await fetch(`${API_BASE}/blogs`);
         const data = await response.json();
-        
+
         if (data.data && Array.isArray(data.data)) {
           const blog = data.data.find(b => b.slug === slug);
           setPost(blog);
@@ -74,9 +74,9 @@ const BlogPost = () => {
 
         {/* Featured Image */}
         {post.image_url && (
-          <img 
-            src={post.image_url} 
-            alt={post.title} 
+          <img
+            src={post.image_url}
+            alt={post.title}
             className="w-full h-96 object-cover rounded-xl mb-8"
           />
         )}

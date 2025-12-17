@@ -22,14 +22,37 @@ const LoginPage = () => {
     setLoading(true);
     setError('');
 
-    const { error } = await signIn(formData?.email, formData?.password);
-    
+    const { data, error } = await signIn(formData?.email, formData?.password);
+
     if (error) {
       setError(error?.message);
     } else {
+      // Check user role from gm_auth token and redirect accordingly
+      try {
+        const authData = JSON.parse(localStorage.getItem('gm_auth') || '{}');
+        const token = authData?.token;
+        if (token) {
+          const parts = token.split('.');
+          if (parts.length === 3) {
+            const payload = JSON.parse(atob(parts[1]));
+            if (payload.role === 'seller') {
+              navigate('/seller');
+              setLoading(false);
+              return;
+            } else if (payload.role === 'admin') {
+              navigate('/admin');
+              setLoading(false);
+              return;
+            }
+          }
+        }
+      } catch (e) {
+        console.warn('Error parsing token for role:', e);
+      }
+      // Default: redirect to home
       navigate('/');
     }
-    
+
     setLoading(false);
   };
 
@@ -39,11 +62,6 @@ const LoginPage = () => {
       [e?.target?.name]: e?.target?.value
     });
   };
-
-  const demoCredentials = [
-    { email: 'admin@glowmatch.com', password: 'admin123', role: 'Admin' },
-    { email: 'user@glowmatch.com', password: 'user123', role: 'User' }
-  ];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-accent/5 flex items-center justify-center p-4">
@@ -63,7 +81,7 @@ const LoginPage = () => {
         <div className="bg-card border border-border/50 rounded-2xl shadow-lg overflow-hidden">
           {/* Header gradient */}
           <div className="h-1 bg-gradient-to-r from-pink-500 via-rose-500 to-pink-600" />
-          
+
           <div className="p-8 space-y-6">
             <div className="text-center">
               <h2 className="text-2xl font-bold text-foreground mb-1">
@@ -141,32 +159,6 @@ const LoginPage = () => {
                 </Link>
               </p>
             </div>
-          </div>
-        </div>
-
-        {/* Demo Credentials */}
-        <div className="mt-6 p-4 bg-gradient-to-br from-accent/5 to-pink-500/5 rounded-xl border border-accent/10">
-          <h3 className="text-xs font-semibold text-foreground mb-3 flex items-center gap-2">
-            <Icon name="Code2" size={14} />
-            {t('demo_credentials')}
-          </h3>
-          <div className="space-y-3">
-            {demoCredentials?.map((cred, index) => (
-              <div key={index} className="flex items-center justify-between text-xs p-3 bg-background/50 rounded-lg hover:bg-background/80 transition-colors">
-                <div className="flex items-center gap-2 flex-1">
-                  <span className="font-medium text-foreground">{cred?.role}:</span>
-                  <code className="text-muted-foreground">{cred?.email}</code>
-                </div>
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  onClick={() => setFormData({ email: cred?.email, password: cred?.password })}
-                  className="h-7 text-xs"
-                >
-                  Use
-                </Button>
-              </div>
-            ))}
           </div>
         </div>
       </div>

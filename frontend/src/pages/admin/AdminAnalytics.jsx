@@ -12,7 +12,7 @@ import {
 } from 'recharts';
 import Icon from '../../components/AppIcon';
 
-const API_BASE = import.meta.env?.VITE_BACKEND_URL || 'https://backend-three-sigma-81.vercel.app/api';
+const API_BASE = import.meta.env?.VITE_BACKEND_URL || 'http://localhost:4000/api';
 
 function getAuthHeaders() {
   const raw = localStorage.getItem('gm_auth');
@@ -146,10 +146,10 @@ export default function AdminAnalytics() {
               </div>
             </div>
             <div className="hidden sm:flex items-center gap-2">
-              <button className={`px-3 py-1 rounded text-sm ${range===7 ? 'bg-accent text-white' : 'bg-muted/10'}`} onClick={() => setRange(7)}>7d</button>
-              <button className={`px-3 py-1 rounded text-sm ${range===15 ? 'bg-accent text-white' : 'bg-muted/10'}`} onClick={() => setRange(15)}>15d</button>
-              <button className={`px-3 py-1 rounded text-sm ${range===30 ? 'bg-accent text-white' : 'bg-muted/10'}`} onClick={() => setRange(30)}>30d</button>
-              <button className={`px-3 py-1 rounded text-sm ${range===90 ? 'bg-accent text-white' : 'bg-muted/10'}`} onClick={() => setRange(90)}>90d</button>
+              <button className={`px-3 py-1 rounded text-sm ${range === 7 ? 'bg-accent text-white' : 'bg-muted/10'}`} onClick={() => setRange(7)}>7d</button>
+              <button className={`px-3 py-1 rounded text-sm ${range === 15 ? 'bg-accent text-white' : 'bg-muted/10'}`} onClick={() => setRange(15)}>15d</button>
+              <button className={`px-3 py-1 rounded text-sm ${range === 30 ? 'bg-accent text-white' : 'bg-muted/10'}`} onClick={() => setRange(30)}>30d</button>
+              <button className={`px-3 py-1 rounded text-sm ${range === 90 ? 'bg-accent text-white' : 'bg-muted/10'}`} onClick={() => setRange(90)}>90d</button>
             </div>
           </div>
 
@@ -179,69 +179,69 @@ export default function AdminAnalytics() {
 
       {error && <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded">{error}</div>}
 
-        {showDebug && debugSessions && (
-          <div className="mb-4 p-3 rounded bg-card border border-border">
-            <h4 className="font-semibold mb-2">Recent Sessions (debug)</h4>
-            {debugSessions.error && <div className="text-sm text-red-600">{debugSessions.error}</div>}
-            {debugSessions.sessions && debugSessions.sessions.length === 0 && <div className="text-sm text-muted-foreground">No sessions recorded yet.</div>}
-            {debugSessions.sessions && debugSessions.sessions.length > 0 && (
-              <div className="overflow-auto max-h-60">
+      {showDebug && debugSessions && (
+        <div className="mb-4 p-3 rounded bg-card border border-border">
+          <h4 className="font-semibold mb-2">Recent Sessions (debug)</h4>
+          {debugSessions.error && <div className="text-sm text-red-600">{debugSessions.error}</div>}
+          {debugSessions.sessions && debugSessions.sessions.length === 0 && <div className="text-sm text-muted-foreground">No sessions recorded yet.</div>}
+          {debugSessions.sessions && debugSessions.sessions.length > 0 && (
+            <div className="overflow-auto max-h-60">
+              <table className="w-full text-sm table-auto">
+                <thead>
+                  <tr>
+                    <th className="text-left px-2">session_id</th>
+                    <th className="px-2">user_id</th>
+                    <th className="px-2">path</th>
+                    <th className="px-2">last_ping_at</th>
+                    <th className="px-2">started_at</th>
+                    <th className="px-2">duration_s</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {debugSessions.sessions.map(s => (
+                    <tr key={s.session_id} className="border-t">
+                      <td className="px-2 truncate max-w-xs">{s.session_id}</td>
+                      <td className="px-2">{s.user_id || '—'}</td>
+                      <td className="px-2">{s.path || '—'}</td>
+                      <td className="px-2">{s.last_ping_at || '—'}</td>
+                      <td className="px-2">{s.started_at || '—'}</td>
+                      <td className="px-2">{s.duration_seconds ?? '—'}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+
+          {debugSessions.views && debugSessions.views.length > 0 && (
+            <div className="mt-3">
+              <div className="text-sm font-medium mb-1">Recent Page Views</div>
+              <div className="overflow-auto max-h-40">
                 <table className="w-full text-sm table-auto">
                   <thead>
                     <tr>
-                      <th className="text-left px-2">session_id</th>
-                      <th className="px-2">user_id</th>
+                      <th className="text-left px-2">id</th>
+                      <th className="px-2">session_id</th>
                       <th className="px-2">path</th>
-                      <th className="px-2">last_ping_at</th>
-                      <th className="px-2">started_at</th>
-                      <th className="px-2">duration_s</th>
+                      <th className="px-2">created_at</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {debugSessions.sessions.map(s => (
-                      <tr key={s.session_id} className="border-t">
-                        <td className="px-2 truncate max-w-xs">{s.session_id}</td>
-                        <td className="px-2">{s.user_id || '—'}</td>
-                        <td className="px-2">{s.path || '—'}</td>
-                        <td className="px-2">{s.last_ping_at || '—'}</td>
-                        <td className="px-2">{s.started_at || '—'}</td>
-                        <td className="px-2">{s.duration_seconds ?? '—'}</td>
+                    {debugSessions.views.map(v => (
+                      <tr key={v.id} className="border-t">
+                        <td className="px-2 truncate max-w-xs">{v.id}</td>
+                        <td className="px-2 truncate max-w-xs">{v.session_id || '—'}</td>
+                        <td className="px-2">{v.path || '—'}</td>
+                        <td className="px-2">{v.created_at}</td>
                       </tr>
                     ))}
                   </tbody>
                 </table>
               </div>
-            )}
-
-            {debugSessions.views && debugSessions.views.length > 0 && (
-              <div className="mt-3">
-                <div className="text-sm font-medium mb-1">Recent Page Views</div>
-                <div className="overflow-auto max-h-40">
-                  <table className="w-full text-sm table-auto">
-                    <thead>
-                      <tr>
-                        <th className="text-left px-2">id</th>
-                        <th className="px-2">session_id</th>
-                        <th className="px-2">path</th>
-                        <th className="px-2">created_at</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {debugSessions.views.map(v => (
-                        <tr key={v.id} className="border-t">
-                          <td className="px-2 truncate max-w-xs">{v.id}</td>
-                          <td className="px-2 truncate max-w-xs">{v.session_id || '—'}</td>
-                          <td className="px-2">{v.path || '—'}</td>
-                          <td className="px-2">{v.created_at}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            )}
-          </div>
-        )}
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Top summary cards */}
       <div className="mt-4">
@@ -259,21 +259,21 @@ export default function AdminAnalytics() {
           <div className="lg:col-span-2" style={{ width: '100%', height: 380 }}>
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={data} margin={{ top: 10, right: 20, left: 0, bottom: 20 }}>
-              <defs>
-                <linearGradient id="gradAttempts" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#7c3aed" stopOpacity={0.4} />
-                  <stop offset="95%" stopColor="#7c3aed" stopOpacity={0.05} />
-                </linearGradient>
-              </defs>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="label" angle={-45} textAnchor="end" interval={Math.max(0, Math.floor(data.length / 10))} height={60} />
-              <YAxis />
-              <Tooltip formatter={(value, name) => [value, name]} />
-              <Legend verticalAlign="top" />
-              {/* interactive series toggles */}
-              {seriesVisible.active && <Line type="monotone" dataKey="active" name="Active Users" stroke="#06b6d4" strokeWidth={2} dot={false} />}
-              {seriesVisible.attempts && <Line type="monotone" dataKey="attempts" name="Attempts" stroke="#7c3aed" strokeWidth={2} dot={false} fillOpacity={1} />}
-              {seriesVisible.conv && <Line type="monotone" dataKey="conv" name="Conversions" stroke="#10b981" strokeWidth={2} dot={false} />}
+                <defs>
+                  <linearGradient id="gradAttempts" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#7c3aed" stopOpacity={0.4} />
+                    <stop offset="95%" stopColor="#7c3aed" stopOpacity={0.05} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="label" angle={-45} textAnchor="end" interval={Math.max(0, Math.floor(data.length / 10))} height={60} />
+                <YAxis />
+                <Tooltip formatter={(value, name) => [value, name]} />
+                <Legend verticalAlign="top" />
+                {/* interactive series toggles */}
+                {seriesVisible.active && <Line type="monotone" dataKey="active" name="Active Users" stroke="#06b6d4" strokeWidth={2} dot={false} />}
+                {seriesVisible.attempts && <Line type="monotone" dataKey="attempts" name="Attempts" stroke="#7c3aed" strokeWidth={2} dot={false} fillOpacity={1} />}
+                {seriesVisible.conv && <Line type="monotone" dataKey="conv" name="Conversions" stroke="#10b981" strokeWidth={2} dot={false} />}
               </LineChart>
             </ResponsiveContainer>
           </div>
@@ -318,7 +318,7 @@ export default function AdminAnalytics() {
         </div>
       </div>
 
-      
+
     </div>
   );
 }

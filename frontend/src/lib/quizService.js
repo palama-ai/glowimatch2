@@ -1,4 +1,4 @@
-const API_BASE = import.meta.env?.VITE_BACKEND_URL || 'https://backend-three-sigma-81.vercel.app/api';
+const API_BASE = import.meta.env?.VITE_BACKEND_URL || 'http://localhost:4000/api';
 
 /**
  * Helper to build auth header from localStorage (used by the frontend wrapper)
@@ -75,7 +75,7 @@ class QuizService {
     try {
       if (!userId) throw new Error('User ID is required');
       if (!quizData) throw new Error('Quiz data is required');
-      
+
       // Ensure proper JSON structure
       const formattedQuizData = {
         ...quizData,
@@ -114,8 +114,8 @@ class QuizService {
         code: error?.code,
         details: error?.details
       });
-      return { 
-        success: false, 
+      return {
+        success: false,
         error: {
           message: error.message,
           code: error?.code

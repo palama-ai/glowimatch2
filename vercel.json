@@ -2,6 +2,6 @@
   "buildCommand": "npm run build",
   "outputDirectory": "frontend/build",
   "env": {
-    "VITE_BACKEND_URL": "https://backend-three-sigma-81.vercel.app/api"
+    "VITE_BACKEND_URL": "http://localhost:4000/api"
   }
 }

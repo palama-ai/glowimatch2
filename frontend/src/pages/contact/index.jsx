@@ -4,7 +4,7 @@ import { useI18n } from '../../contexts/I18nContext';
 import Icon from '../../components/AppIcon';
 import { GRADIENTS } from '../../utils/imageConstants';
 
-const API_BASE = import.meta.env?.VITE_BACKEND_URL || 'https://backend-three-sigma-81.vercel.app/api';
+const API_BASE = import.meta.env?.VITE_BACKEND_URL || 'http://localhost:4000/api';
 
 const Contact = () => {
   const [status, setStatus] = useState(null);
@@ -80,35 +80,35 @@ const Contact = () => {
               <form className="space-y-6" onSubmit={handleSubmit}>
                 <div>
                   <label className="block text-sm font-semibold text-foreground mb-2">{t('name')}</label>
-                  <input 
-                    name="name" 
-                    type="text" 
-                    required 
+                  <input
+                    name="name"
+                    type="text"
+                    required
                     placeholder="Your full name"
                     className="w-full px-4 py-3 bg-background border border-border rounded-lg focus:border-accent focus:ring-2 focus:ring-accent/20 transition-all"
                   />
                 </div>
                 <div>
                   <label className="block text-sm font-semibold text-foreground mb-2">{t('email')}</label>
-                  <input 
-                    name="email" 
-                    type="email" 
-                    required 
+                  <input
+                    name="email"
+                    type="email"
+                    required
                     placeholder="your@email.com"
                     className="w-full px-4 py-3 bg-background border border-border rounded-lg focus:border-accent focus:ring-2 focus:ring-accent/20 transition-all"
                   />
                 </div>
                 <div>
                   <label className="block text-sm font-semibold text-foreground mb-2">{t('message')}</label>
-                  <textarea 
-                    name="message" 
-                    required 
+                  <textarea
+                    name="message"
+                    required
                     placeholder="Tell us how we can help..."
                     className="w-full px-4 py-3 bg-background border border-border rounded-lg focus:border-accent focus:ring-2 focus:ring-accent/20 transition-all resize-none h-40"
                   />
                 </div>
-                <button 
-                  type="submit" 
+                <button
+                  type="submit"
                   disabled={status === 'sending'}
                   className="w-full px-6 py-3 bg-gradient-to-r from-pink-500 to-rose-500 text-white font-semibold rounded-lg hover:shadow-lg hover:shadow-pink-500/40 transition-all transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
