@@ -232,7 +232,7 @@ const ProductsPage = () => {
     const [showModal, setShowModal] = useState(false);
     const [editingProduct, setEditingProduct] = useState(null);
 
-    const API_BASE = import.meta.env?.VITE_BACKEND_URL || 'http://localhost:4000/api';
+    const API_BASE = import.meta.env?.VITE_BACKEND_URL || 'https://backend-three-sigma-81.vercel.app/api';
     const getHeaders = () => {
         const token = JSON.parse(localStorage.getItem('gm_auth') || '{}')?.token;
         return { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' };

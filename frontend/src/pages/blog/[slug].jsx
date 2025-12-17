@@ -3,7 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import Header from '../../components/ui/Header';
 import Icon from '../../components/AppIcon';
 
-const API_BASE = import.meta.env?.VITE_BACKEND_URL || 'http://localhost:4000/api';
+const API_BASE = import.meta.env?.VITE_BACKEND_URL || 'https://backend-three-sigma-81.vercel.app/api';
 
 const BlogPost = () => {
   const { slug } = useParams();

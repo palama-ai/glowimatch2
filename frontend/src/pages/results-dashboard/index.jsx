@@ -111,7 +111,7 @@ const ResultsDashboard = () => {
       (async (provider = expandProvider) => {
         try {
           setExpandLoading(true); setExpandError(null);
-          const API_BASE = import.meta.env?.VITE_BACKEND_URL || 'http://localhost:4000/api';
+          const API_BASE = import.meta.env?.VITE_BACKEND_URL || 'https://backend-three-sigma-81.vercel.app/api';
           const resp = await fetch(`${API_BASE}/analysis/expand`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },

@@ -127,7 +127,7 @@ const ProfilePage = () => {
 
               {message && (
                 <div className={`px-4 py-3 rounded-lg ${message?.includes('successfully')
-                    ? 'bg-green-50 border border-green-200 text-green-700' : 'bg-red-50 border border-red-200 text-red-700'
+                  ? 'bg-green-50 border border-green-200 text-green-700' : 'bg-red-50 border border-red-200 text-red-700'
                   }`}>
                   {message}
                 </div>
@@ -217,7 +217,7 @@ const ProfilePage = () => {
                       try {
                         const raw = localStorage.getItem('gm_auth');
                         const token = raw ? JSON.parse(raw).token : null;
-                        const API_BASE = import.meta.env?.VITE_BACKEND_URL || 'http://localhost:4000/api';
+                        const API_BASE = import.meta.env?.VITE_BACKEND_URL || 'https://backend-three-sigma-81.vercel.app/api';
                         const resp = await fetch(`${API_BASE}/referrals/create`, {
                           method: 'POST',
                           headers: {

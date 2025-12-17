@@ -5,7 +5,7 @@
 */
 import { useEffect, useRef } from 'react';
 
-const API_BASE = import.meta.env?.VITE_BACKEND_URL || 'http://localhost:4000/api';
+const API_BASE = import.meta.env?.VITE_BACKEND_URL || 'https://backend-three-sigma-81.vercel.app/api';
 
 function genId() {
   // small RFC4122-lite random id

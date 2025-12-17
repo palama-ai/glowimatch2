@@ -42,8 +42,8 @@ const SellerSidebar = ({ activePage }) => {
                         key={item.id}
                         to={item.path}
                         className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${activePage === item.id
-                                ? 'bg-accent text-white'
-                                : 'text-muted-foreground hover:bg-muted hover:text-foreground'
+                            ? 'bg-accent text-white'
+                            : 'text-muted-foreground hover:bg-muted hover:text-foreground'
                             }`}
                     >
                         <Icon name={item.icon} size={20} />
@@ -122,7 +122,7 @@ const SellerDashboard = () => {
         try {
             const token = JSON.parse(localStorage.getItem('gm_auth') || '{}')?.token;
             const headers = { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' };
-            const API_BASE = import.meta.env?.VITE_BACKEND_URL || 'http://localhost:4000/api';
+            const API_BASE = import.meta.env?.VITE_BACKEND_URL || 'https://backend-three-sigma-81.vercel.app/api';
 
             // Fetch products
             const prodRes = await fetch(`${API_BASE}/seller/products`, { headers });

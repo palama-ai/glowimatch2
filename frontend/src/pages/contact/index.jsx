@@ -4,7 +4,7 @@ import { useI18n } from '../../contexts/I18nContext';
 import Icon from '../../components/AppIcon';
 import { GRADIENTS } from '../../utils/imageConstants';
 
-const API_BASE = import.meta.env?.VITE_BACKEND_URL || 'http://localhost:4000/api';
+const API_BASE = import.meta.env?.VITE_BACKEND_URL || 'https://backend-three-sigma-81.vercel.app/api';
 
 const Contact = () => {
   const [status, setStatus] = useState(null);

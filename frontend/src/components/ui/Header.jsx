@@ -7,7 +7,7 @@ import { useModal } from '../../contexts/ModalContext';
 import Button from './Button';
 import Icon from '../AppIcon';
 
-const API_BASE = import.meta.env?.VITE_BACKEND_URL || 'http://localhost:4000/api';
+const API_BASE = import.meta.env?.VITE_BACKEND_URL || 'https://backend-three-sigma-81.vercel.app/api';
 
 // Navigation Link Component with Animation
 const NavLink = ({ to, label }) => {
@@ -19,8 +19,8 @@ const NavLink = ({ to, label }) => {
       onMouseEnter={() => setIsActive(true)}
       onMouseLeave={() => setIsActive(false)}
       className={`relative px-3 py-1 font-medium transition-all duration-300 rounded-lg ${isActive
-          ? 'text-pink-600 bg-white/60'
-          : 'text-gray-700 hover:text-pink-600'
+        ? 'text-pink-600 bg-white/60'
+        : 'text-gray-700 hover:text-pink-600'
         }`}
     >
       <span className="relative z-10">{label}</span>
