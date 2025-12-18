@@ -73,15 +73,7 @@ const ResultsDashboard = () => {
     ]
   };
 
-  // Fallback mock products (used when API returns empty or fails)
-  const mockProducts = [
-    { id: 1, name: "Gentle Foaming Cleanser", brand: "CeraVe", price: 12.99, originalPrice: 15.99, rating: 4.5, reviewCount: 2847, image: "https://images.unsplash.com/photo-1556228720-195a672e8a03", badge: "Best Seller", purchaseUrl: "#", type: "cleanser", concerns: ["sensitivity"] },
-    { id: 2, name: "Niacinamide 10% + Zinc", brand: "The Ordinary", price: 7.20, rating: 4.3, reviewCount: 5632, image: "https://images.unsplash.com/photo-1620916566398-39f1143ab7be", purchaseUrl: "#", type: "serum", concerns: ["pores", "acne"] },
-    { id: 3, name: "Hyaluronic Acid Serum", brand: "Neutrogena", price: 18.99, originalPrice: 22.99, rating: 4.4, reviewCount: 1923, image: "https://images.unsplash.com/photo-1570194065650-d99fb4b38b15", badge: "Editor Pick", purchaseUrl: "#", type: "serum", concerns: ["dryness"] },
-    { id: 4, name: "Daily Moisturizer SPF 30", brand: "Olay", price: 24.99, rating: 4.2, reviewCount: 3456, image: "https://images.unsplash.com/photo-1611930022073-b7a4ba5fcccd", purchaseUrl: "#", type: "moisturizer", concerns: ["dryness"] },
-    { id: 5, name: "BHA Liquid Exfoliant", brand: "Paula's Choice", price: 32.00, rating: 4.6, reviewCount: 8934, image: "https://images.unsplash.com/photo-1608248597279-f99d160bfcbc", badge: "Top Rated", purchaseUrl: "#", type: "serum", concerns: ["acne", "pores"] },
-    { id: 6, name: "Mineral Sunscreen SPF 50", brand: "EltaMD", price: 37.00, rating: 4.7, reviewCount: 2156, image: "https://images.unsplash.com/photo-1556227834-09f1de7a7d14", purchaseUrl: "#", type: "sunscreen", concerns: ["sensitivity"] }
-  ];
+  // No fallback mock products - show empty state when no products available
 
   // Fetch recommended products from API
   const fetchRecommendedProducts = async (skinType, concerns) => {
@@ -100,21 +92,15 @@ const ResultsDashboard = () => {
       const json = await resp.json();
       const products = json?.data || [];
 
-      if (products.length > 0) {
-        setAllProducts(products);
-        setFilteredProducts(products);
-      } else {
-        // Fallback to mock products if no seller products available
-        console.log('No seller products found, using fallback products');
-        setAllProducts(mockProducts);
-        setFilteredProducts(mockProducts);
-      }
+      // Set products from API (may be empty if no seller products exist)
+      setAllProducts(products);
+      setFilteredProducts(products);
     } catch (error) {
       console.error('Error fetching products:', error);
       setProductsError('Unable to load product recommendations');
-      // Fallback to mock products
-      setAllProducts(mockProducts);
-      setFilteredProducts(mockProducts);
+      // Keep empty state on error
+      setAllProducts([]);
+      setFilteredProducts([]);
     } finally {
       setProductsLoading(false);
     }
@@ -325,7 +311,13 @@ const ResultsDashboard = () => {
                     <ProductCard key={product?.id} product={product} />
                   ))}
                 </div>
-              ) : (
+              ) : !productsLoading && allProducts?.length === 0 ? (
+                <div className="text-center py-12 bg-muted/30 rounded-2xl">
+                  <Icon name="Package" size={40} className="text-muted-foreground mx-auto mb-3" />
+                  <p className="text-foreground font-medium mb-2">No products available yet</p>
+                  <p className="text-sm text-muted-foreground">Products will appear here once they are added by sellers</p>
+                </div>
+              ) : !productsLoading ? (
                 <div className="text-center py-12 bg-muted/30 rounded-2xl">
                   <Icon name="Search" size={40} className="text-muted-foreground mx-auto mb-3" />
                   <p className="text-muted-foreground mb-4">No products match your filters</p>
@@ -336,7 +328,7 @@ const ResultsDashboard = () => {
                     Clear filters
                   </button>
                 </div>
-              )}
+              ) : null}
             </div>
           )}
 
