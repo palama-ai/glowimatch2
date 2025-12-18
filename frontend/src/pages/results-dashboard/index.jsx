@@ -75,29 +75,37 @@ const ResultsDashboard = () => {
 
   // No fallback mock products - show empty state when no products available
 
-  // Fetch recommended products from API
-  const fetchRecommendedProducts = async (skinType, concerns) => {
+  // Fetch AI-recommended products using voting system
+  const fetchRecommendedProducts = async (analysis) => {
     setProductsLoading(true);
     setProductsError(null);
     try {
       const API_BASE = import.meta.env?.VITE_BACKEND_URL || 'https://backend-three-sigma-81.vercel.app/api';
-      const concernsParam = Array.isArray(concerns) ? concerns.join(',') : concerns;
-      const url = `${API_BASE}/products/recommended?skinType=${encodeURIComponent(skinType || '')}&concerns=${encodeURIComponent(concernsParam || '')}`;
 
-      const resp = await fetch(url);
+      const resp = await fetch(`${API_BASE}/products/ai-recommend`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ analysis })
+      });
+
       if (!resp.ok) {
-        throw new Error('Failed to fetch products');
+        throw new Error('Failed to fetch AI recommendations');
       }
 
       const json = await resp.json();
       const products = json?.data || [];
 
+      // Store voting info for display
+      if (json?.votingInfo) {
+        console.log('[AI Voting]', json.votingInfo);
+      }
+
       // Set products from API (may be empty if no seller products exist)
       setAllProducts(products);
       setFilteredProducts(products);
     } catch (error) {
-      console.error('Error fetching products:', error);
-      setProductsError('Unable to load product recommendations');
+      console.error('Error fetching AI recommendations:', error);
+      setProductsError('Unable to load AI product recommendations');
       // Keep empty state on error
       setAllProducts([]);
       setFilteredProducts([]);
@@ -125,10 +133,8 @@ const ResultsDashboard = () => {
         setDetailedState(detailed);
       }
 
-      // Fetch recommended products from API based on analysis results
-      const skinType = parsed?.skinType || '';
-      const concerns = parsed?.concerns || [];
-      fetchRecommendedProducts(skinType, concerns);
+      // Fetch AI-recommended products using voting system
+      fetchRecommendedProducts(parsed);
 
       // Request server-side generation (best-effort, don't overwrite existing data on failure)
       (async (provider = expandProvider) => {
@@ -291,9 +297,12 @@ const ResultsDashboard = () => {
               </div>
 
               {productsLoading && (
-                <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground py-12">
+                <div className="flex flex-col items-center justify-center gap-3 text-sm text-muted-foreground py-12">
                   <Icon name="Loader2" size={24} className="animate-spin text-accent" />
-                  Loading product recommendations...
+                  <div className="text-center">
+                    <p className="font-medium text-foreground">AI is analyzing products for you...</p>
+                    <p className="text-xs mt-1">Multiple AI models are voting on the best matches</p>
+                  </div>
                 </div>
               )}
 
