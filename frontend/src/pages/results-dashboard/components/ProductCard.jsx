@@ -10,21 +10,29 @@ const ProductCard = ({ product }) => {
   };
 
   const formatPrice = (price) => {
+    if (!price) return null;
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: 'USD'
     })?.format(price);
   };
 
-  const discount = product?.originalPrice
-    ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
+  // Normalize field names (handle both API normalized and DB raw field names)
+  const productImage = product?.image || product?.image_url;
+  const productPurchaseUrl = product?.purchaseUrl || product?.purchase_url || '#';
+  const productOriginalPrice = product?.originalPrice || product?.original_price;
+  const productRating = product?.rating || 4.5;
+  const productReviewCount = product?.reviewCount || 0;
+
+  const discount = productOriginalPrice && product?.price
+    ? Math.round(((productOriginalPrice - product.price) / productOriginalPrice) * 100)
     : null;
 
   return (
     <div
       className={`group relative bg-background rounded-2xl overflow-hidden border transition-all duration-300 ${isHovered
-          ? 'border-accent/40 shadow-xl shadow-accent/10'
-          : 'border-border/50 hover:border-border'
+        ? 'border-accent/40 shadow-xl shadow-accent/10'
+        : 'border-border/50 hover:border-border'
         }`}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
@@ -32,8 +40,8 @@ const ProductCard = ({ product }) => {
       {/* Image Section */}
       <div className="relative aspect-square overflow-hidden bg-muted/30">
         <Image
-          src={product?.image}
-          alt={product?.imageAlt}
+          src={productImage}
+          alt={product?.imageAlt || product?.name}
           className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
         />
 
@@ -59,7 +67,7 @@ const ProductCard = ({ product }) => {
         {/* Quick Action Overlay */}
         <div className="absolute inset-x-0 bottom-0 p-3 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
           <button
-            onClick={() => handlePurchaseClick(product?.purchaseUrl)}
+            onClick={() => handlePurchaseClick(productPurchaseUrl)}
             className="w-full py-2.5 bg-white text-foreground text-sm font-medium rounded-xl hover:bg-accent hover:text-white transition-colors flex items-center justify-center gap-2"
           >
             <Icon name="ShoppingBag" size={16} />
@@ -85,18 +93,22 @@ const ProductCard = ({ product }) => {
           <div className="flex items-center">
             <Icon name="Star" size={14} className="text-amber-400 fill-amber-400" />
           </div>
-          <span className="text-sm font-medium text-foreground">{product?.rating}</span>
-          <span className="text-xs text-muted-foreground">({product?.reviewCount?.toLocaleString()})</span>
+          <span className="text-sm font-medium text-foreground">{productRating}</span>
+          {productReviewCount > 0 && (
+            <span className="text-xs text-muted-foreground">({productReviewCount?.toLocaleString()})</span>
+          )}
         </div>
 
         {/* Price */}
         <div className="flex items-center gap-2">
-          <span className="text-lg font-bold text-foreground">
-            {formatPrice(product?.price)}
-          </span>
-          {product?.originalPrice && (
+          {formatPrice(product?.price) && (
+            <span className="text-lg font-bold text-foreground">
+              {formatPrice(product?.price)}
+            </span>
+          )}
+          {productOriginalPrice && (
             <span className="text-sm text-muted-foreground line-through">
-              {formatPrice(product.originalPrice)}
+              {formatPrice(productOriginalPrice)}
             </span>
           )}
         </div>
