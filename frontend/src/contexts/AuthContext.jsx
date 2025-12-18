@@ -271,6 +271,45 @@ export const AuthProvider = ({ children }) => {
   // Keep backward compatibility with isAdminRobust
   const isAdminRobust = isAdmin;
 
+  const isSeller = () => {
+    try {
+      // Check profile role
+      const profileRole = userProfile?.role;
+      if (profileRole === 'seller') return true;
+
+      // Check JWT token payload (stored in gm_auth)
+      const raw = localStorage.getItem('gm_auth');
+      if (raw) {
+        try {
+          const parsed = JSON.parse(raw);
+          const token = parsed.token;
+          if (token) {
+            const parts = token.split('.');
+            if (parts.length === 3) {
+              const payload = JSON.parse(atob(parts[1]));
+              if (payload.role === 'seller') return true;
+            }
+          }
+        } catch (e) {
+          console.warn('Failed to decode JWT for seller check:', e);
+        }
+      }
+
+      // Check auth user metadata
+      const authRole = user?.user_metadata?.role;
+      if (authRole === 'seller') return true;
+
+      // Check account_type in user metadata
+      const accountType = user?.user_metadata?.account_type;
+      if (accountType === 'seller') return true;
+
+      return false;
+    } catch (e) {
+      console.error('Error checking seller role:', e);
+      return false;
+    }
+  };
+
   const value = {
     user,
     userProfile,
@@ -288,6 +327,7 @@ export const AuthProvider = ({ children }) => {
     purchaseQuizAttempts,
     isAdmin,
     isAdminRobust, // Keep for backward compatibility
+    isSeller,
     // allow consumers to refresh profile/subscription data after changes
     refreshProfile: async () => { if (user?.id) await profileOperations.load(user.id); }
   };
