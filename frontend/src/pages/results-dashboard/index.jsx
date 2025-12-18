@@ -6,6 +6,7 @@ import ProductCard from './components/ProductCard';
 import ProductFilters from './components/ProductFilters';
 import SkinAnalysisBreakdown from './components/SkinAnalysisBreakdown';
 import SkincareRoutine from './components/SkincareRoutine';
+import ProductModal from './components/ProductModal';
 import Icon from '../../components/AppIcon';
 
 const ResultsDashboard = () => {
@@ -26,6 +27,7 @@ const ResultsDashboard = () => {
   const [productsLoading, setProductsLoading] = useState(false);
   const [productsError, setProductsError] = useState(null);
   const [allProducts, setAllProducts] = useState([]); // Store all fetched products for filtering
+  const [selectedProduct, setSelectedProduct] = useState(null); // { product, index }
 
   // Mock analysis results data
   const analysisResults = {
@@ -316,8 +318,10 @@ const ResultsDashboard = () => {
 
               {!productsLoading && filteredProducts?.length > 0 ? (
                 <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
-                  {filteredProducts?.map((product) => (
-                    <ProductCard key={product?.id} product={product} />
+                  {filteredProducts?.map((product, index) => (
+                    <div key={product?.id} onClick={() => setSelectedProduct({ product, index })} className="cursor-pointer">
+                      <ProductCard product={product} />
+                    </div>
                   ))}
                 </div>
               ) : !productsLoading && allProducts?.length === 0 ? (
@@ -358,6 +362,20 @@ const ResultsDashboard = () => {
           </div>
         </main>
       </div>
+
+      {/* Product Modal */}
+      {selectedProduct && (
+        <ProductModal
+          product={selectedProduct.product}
+          products={filteredProducts}
+          currentIndex={selectedProduct.index}
+          onClose={() => setSelectedProduct(null)}
+          onNavigate={(newIndex) => setSelectedProduct({
+            product: filteredProducts[newIndex],
+            index: newIndex
+          })}
+        />
+      )}
     </div>
   );
 };
