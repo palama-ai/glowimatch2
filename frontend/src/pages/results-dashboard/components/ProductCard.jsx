@@ -47,6 +47,13 @@ const ProductCard = ({ product }) => {
 
         {/* Badges */}
         <div className="absolute top-3 left-3 flex flex-col gap-2">
+          {/* AI Match Score Badge */}
+          {product?.aiVoting?.voteCount > 0 && (
+            <span className="px-2.5 py-1 bg-gradient-to-r from-purple-500 to-pink-500 text-white text-xs font-medium rounded-full flex items-center gap-1">
+              <Icon name="Sparkles" size={12} />
+              {Math.round(product.aiVoting.avgScore * 10)}% Match
+            </span>
+          )}
           {product?.badge && (
             <span className="px-2.5 py-1 bg-foreground text-background text-xs font-medium rounded-full">
               {product.badge}
@@ -87,6 +94,13 @@ const ProductCard = ({ product }) => {
         <h3 className="font-medium text-foreground mb-2 line-clamp-2 leading-snug">
           {product?.name}
         </h3>
+
+        {/* AI Recommendation Reason */}
+        {product?.aiVoting?.reasons?.length > 0 && (
+          <p className="text-xs text-purple-600 mb-2 line-clamp-1 italic">
+            ✨ {product.aiVoting.reasons[0]}
+          </p>
+        )}
 
         {/* Rating */}
         <div className="flex items-center gap-1.5 mb-3">
