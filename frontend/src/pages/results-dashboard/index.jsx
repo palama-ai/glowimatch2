@@ -23,6 +23,9 @@ const ResultsDashboard = () => {
   const [expandError, setExpandError] = useState(null);
   const [expandProvider, setExpandProvider] = useState('gemini');
   const [expandProviderUsed, setExpandProviderUsed] = useState(null);
+  const [productsLoading, setProductsLoading] = useState(false);
+  const [productsError, setProductsError] = useState(null);
+  const [allProducts, setAllProducts] = useState([]); // Store all fetched products for filtering
 
   // Mock analysis results data
   const analysisResults = {
@@ -70,7 +73,7 @@ const ResultsDashboard = () => {
     ]
   };
 
-  // Mock products
+  // Fallback mock products (used when API returns empty or fails)
   const mockProducts = [
     { id: 1, name: "Gentle Foaming Cleanser", brand: "CeraVe", price: 12.99, originalPrice: 15.99, rating: 4.5, reviewCount: 2847, image: "https://images.unsplash.com/photo-1556228720-195a672e8a03", badge: "Best Seller", purchaseUrl: "#", type: "cleanser", concerns: ["sensitivity"] },
     { id: 2, name: "Niacinamide 10% + Zinc", brand: "The Ordinary", price: 7.20, rating: 4.3, reviewCount: 5632, image: "https://images.unsplash.com/photo-1620916566398-39f1143ab7be", purchaseUrl: "#", type: "serum", concerns: ["pores", "acne"] },
@@ -79,6 +82,43 @@ const ResultsDashboard = () => {
     { id: 5, name: "BHA Liquid Exfoliant", brand: "Paula's Choice", price: 32.00, rating: 4.6, reviewCount: 8934, image: "https://images.unsplash.com/photo-1608248597279-f99d160bfcbc", badge: "Top Rated", purchaseUrl: "#", type: "serum", concerns: ["acne", "pores"] },
     { id: 6, name: "Mineral Sunscreen SPF 50", brand: "EltaMD", price: 37.00, rating: 4.7, reviewCount: 2156, image: "https://images.unsplash.com/photo-1556227834-09f1de7a7d14", purchaseUrl: "#", type: "sunscreen", concerns: ["sensitivity"] }
   ];
+
+  // Fetch recommended products from API
+  const fetchRecommendedProducts = async (skinType, concerns) => {
+    setProductsLoading(true);
+    setProductsError(null);
+    try {
+      const API_BASE = import.meta.env?.VITE_BACKEND_URL || 'https://backend-three-sigma-81.vercel.app/api';
+      const concernsParam = Array.isArray(concerns) ? concerns.join(',') : concerns;
+      const url = `${API_BASE}/products/recommended?skinType=${encodeURIComponent(skinType || '')}&concerns=${encodeURIComponent(concernsParam || '')}`;
+
+      const resp = await fetch(url);
+      if (!resp.ok) {
+        throw new Error('Failed to fetch products');
+      }
+
+      const json = await resp.json();
+      const products = json?.data || [];
+
+      if (products.length > 0) {
+        setAllProducts(products);
+        setFilteredProducts(products);
+      } else {
+        // Fallback to mock products if no seller products available
+        console.log('No seller products found, using fallback products');
+        setAllProducts(mockProducts);
+        setFilteredProducts(mockProducts);
+      }
+    } catch (error) {
+      console.error('Error fetching products:', error);
+      setProductsError('Unable to load product recommendations');
+      // Fallback to mock products
+      setAllProducts(mockProducts);
+      setFilteredProducts(mockProducts);
+    } finally {
+      setProductsLoading(false);
+    }
+  };
 
   // Initial data loading - runs once on mount
   useEffect(() => {
@@ -99,13 +139,10 @@ const ResultsDashboard = () => {
         setDetailedState(detailed);
       }
 
-      // Set initial products based on concerns
+      // Fetch recommended products from API based on analysis results
+      const skinType = parsed?.skinType || '';
       const concerns = parsed?.concerns || [];
-      if (concerns.length > 0) {
-        setFilteredProducts(mockProducts?.filter(product => product?.concerns?.some(concern => concerns?.includes(concern))));
-      } else {
-        setFilteredProducts(mockProducts);
-      }
+      fetchRecommendedProducts(skinType, concerns);
 
       // Request server-side generation (best-effort, don't overwrite existing data on failure)
       (async (provider = expandProvider) => {
@@ -145,19 +182,24 @@ const ResultsDashboard = () => {
 
   // Product filtering - runs when filters change
   useEffect(() => {
-    let filtered = mockProducts;
+    if (allProducts.length === 0) return;
+
+    let filtered = [...allProducts];
     Object.entries(activeFilters)?.forEach(([category, values]) => {
       if (values?.length > 0) {
         filtered = filtered?.filter((product) => {
-          if (category === 'type') return values?.includes(product?.type);
+          if (category === 'type') return values?.includes(product?.type) || values?.includes(product?.category);
           if (category === 'priceRange') return values?.includes(product?.priceRange);
-          if (category === 'concerns') return values?.some((concern) => product?.concerns?.includes(concern));
+          if (category === 'concerns') {
+            const productConcerns = Array.isArray(product?.concerns) ? product.concerns : [];
+            return values?.some((concern) => productConcerns?.includes(concern));
+          }
           return true;
         });
       }
     });
     setFilteredProducts(filtered);
-  }, [activeFilters]);
+  }, [activeFilters, allProducts]);
 
   const handleFilterChange = (category, values) => {
     setActiveFilters((prev) => ({ ...prev, [category]: values }));
@@ -258,11 +300,26 @@ const ResultsDashboard = () => {
                   Recommended for You
                 </h2>
                 <span className="text-sm text-muted-foreground">
-                  {filteredProducts?.length} products
+                  {productsLoading ? 'Loading...' : `${filteredProducts?.length} products`}
                 </span>
               </div>
 
-              {filteredProducts?.length > 0 ? (
+              {productsLoading && (
+                <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground py-12">
+                  <Icon name="Loader2" size={24} className="animate-spin text-accent" />
+                  Loading product recommendations...
+                </div>
+              )}
+
+              {productsError && !productsLoading && (
+                <div className="text-center py-8 px-4 bg-yellow-50 border border-yellow-200 rounded-2xl mb-4">
+                  <Icon name="AlertCircle" size={24} className="text-yellow-600 mx-auto mb-2" />
+                  <p className="text-sm text-yellow-700">{productsError}</p>
+                  <p className="text-xs text-yellow-600 mt-1">Showing fallback recommendations</p>
+                </div>
+              )}
+
+              {!productsLoading && filteredProducts?.length > 0 ? (
                 <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
                   {filteredProducts?.map((product) => (
                     <ProductCard key={product?.id} product={product} />
