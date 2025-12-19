@@ -101,9 +101,14 @@ export async function uploadReportPdf(userId, attemptId, pdfBlob) {
   const timestamp = Date.now();
   const filename = `${attemptId}-${timestamp}.pdf`;
 
-  // convert blob to base64
+  // convert blob to base64 (browser-compatible)
   const arrayBuffer = await pdfBlob.arrayBuffer();
-  const base64 = Buffer.from(arrayBuffer).toString('base64');
+  const uint8Array = new Uint8Array(arrayBuffer);
+  let binary = '';
+  for (let i = 0; i < uint8Array.length; i++) {
+    binary += String.fromCharCode(uint8Array[i]);
+  }
+  const base64 = btoa(binary);
 
   const r = await fetch(`${API_BASE}/report/upload`, {
     method: 'POST',
