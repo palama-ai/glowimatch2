@@ -48,9 +48,23 @@ export async function generateQuizReportPdf(attempt) {
 
   // Table of responses
   const tableY = summaryY + 16 + Math.max(1, (summaryLines.length)) * 14 + 16;
-  const responses = (attempt.quiz_data && (attempt.quiz_data.responses || attempt.quiz_data)) || attempt.responses || [];
 
-  const tableBody = (responses || []).map((r) => [
+  // Safely extract responses array from various possible data structures
+  let responses = [];
+  if (attempt.quiz_data) {
+    if (Array.isArray(attempt.quiz_data.responses)) {
+      responses = attempt.quiz_data.responses;
+    } else if (Array.isArray(attempt.quiz_data)) {
+      responses = attempt.quiz_data;
+    } else if (typeof attempt.quiz_data === 'object' && attempt.quiz_data !== null) {
+      // If quiz_data is an object but not an array, try to extract values
+      responses = Object.values(attempt.quiz_data).filter(v => v && typeof v === 'object');
+    }
+  } else if (Array.isArray(attempt.responses)) {
+    responses = attempt.responses;
+  }
+
+  const tableBody = responses.map((r) => [
     r.questionId || r.question || '',
     (r.question && r.question.length > 80) ? (r.question.substring(0, 77) + '...') : (r.question || ''),
     (r.answer && (r.answer.label || r.answer.value || r.answer.id)) || JSON.stringify(r.answer) || ''
