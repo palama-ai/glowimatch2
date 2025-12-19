@@ -3,16 +3,16 @@ import { Link, useNavigate } from 'react-router-dom';
 import Icon from '../../components/AppIcon';
 import { useAuth } from '../../contexts/AuthContext';
 
-// Sidebar Component (shared)
+// Modern Sidebar (shared)
 const SellerSidebar = ({ activePage }) => {
     const navigate = useNavigate();
     const { signOut, userProfile } = useAuth();
 
     const menuItems = [
-        { id: 'dashboard', label: 'Home', icon: 'Home', path: '/seller' },
+        { id: 'dashboard', label: 'Overview', icon: 'LayoutDashboard', path: '/seller' },
         { id: 'products', label: 'Products', icon: 'Package', path: '/seller/products' },
-        { id: 'news', label: 'News', icon: 'Newspaper', path: '/seller/news' },
-        { id: 'profile', label: 'Profile', icon: 'User', path: '/seller/profile' },
+        { id: 'news', label: 'News', icon: 'Bell', path: '/seller/news' },
+        { id: 'profile', label: 'Settings', icon: 'Settings', path: '/seller/profile' },
     ];
 
     const handleLogout = async () => {
@@ -21,80 +21,101 @@ const SellerSidebar = ({ activePage }) => {
     };
 
     return (
-        <div className="w-64 min-h-screen bg-card border-r border-border flex flex-col">
-            <div className="p-6 border-b border-border">
-                <Link to="/seller" className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-pink-500 to-rose-500 flex items-center justify-center">
-                        <Icon name="Sparkles" size={20} className="text-white" />
+        <aside className="w-72 min-h-screen bg-gradient-to-b from-slate-900 to-slate-950 flex flex-col">
+            <div className="p-8">
+                <Link to="/seller" className="flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-rose-500 via-pink-500 to-fuchsia-500 flex items-center justify-center shadow-lg shadow-pink-500/25">
+                        <Icon name="Sparkles" size={24} className="text-white" />
                     </div>
                     <div>
-                        <h1 className="font-bold text-foreground">GlowMatch</h1>
-                        <p className="text-xs text-muted-foreground">Seller Portal</p>
+                        <h1 className="font-bold text-xl text-white tracking-tight">GlowMatch</h1>
+                        <p className="text-xs text-slate-400 font-medium">Seller Dashboard</p>
                     </div>
                 </Link>
             </div>
 
-            <nav className="flex-1 p-4 space-y-2">
-                {menuItems.map((item) => (
-                    <Link
-                        key={item.id}
-                        to={item.path}
-                        className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${activePage === item.id
-                            ? 'bg-accent text-white'
-                            : 'text-muted-foreground hover:bg-muted hover:text-foreground'
-                            }`}
-                    >
-                        <Icon name={item.icon} size={20} />
-                        <span className="font-medium">{item.label}</span>
-                    </Link>
-                ))}
+            <nav className="flex-1 px-4 py-6">
+                <p className="px-4 text-xs font-semibold text-slate-500 uppercase tracking-wider mb-4">Menu</p>
+                <div className="space-y-1">
+                    {menuItems.map((item) => (
+                        <Link
+                            key={item.id}
+                            to={item.path}
+                            className={`group flex items-center gap-4 px-4 py-3.5 rounded-xl transition-all duration-200 ${activePage === item.id
+                                    ? 'bg-gradient-to-r from-pink-500/20 to-fuchsia-500/10 text-white border-l-2 border-pink-500'
+                                    : 'text-slate-400 hover:text-white hover:bg-white/5'
+                                }`}
+                        >
+                            <Icon
+                                name={item.icon}
+                                size={20}
+                                className={activePage === item.id ? 'text-pink-400' : 'text-slate-500 group-hover:text-pink-400 transition-colors'}
+                            />
+                            <span className="font-medium">{item.label}</span>
+                            {activePage === item.id && (
+                                <div className="ml-auto w-1.5 h-1.5 rounded-full bg-pink-500" />
+                            )}
+                        </Link>
+                    ))}
+                </div>
             </nav>
 
-            <div className="p-4 border-t border-border">
-                <div className="flex items-center gap-3 px-4 py-3 mb-2">
-                    <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
-                        <Icon name="User" size={20} className="text-muted-foreground" />
+            <div className="p-4 border-t border-slate-800">
+                <div className="flex items-center gap-3 p-4 rounded-xl bg-slate-800/50 mb-3">
+                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-pink-500 to-fuchsia-500 flex items-center justify-center text-white font-bold text-sm">
+                        {(userProfile?.full_name?.[0] || 'S').toUpperCase()}
                     </div>
                     <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-foreground truncate">
+                        <p className="text-sm font-semibold text-white truncate">
                             {userProfile?.full_name || 'Seller'}
                         </p>
-                        <p className="text-xs text-muted-foreground">Seller Account</p>
+                        <p className="text-xs text-slate-500">Seller Account</p>
                     </div>
                 </div>
                 <button
                     onClick={handleLogout}
-                    className="flex items-center gap-3 px-4 py-3 w-full rounded-xl text-destructive hover:bg-destructive/10 transition-all"
+                    className="flex items-center gap-3 px-4 py-3 w-full rounded-xl text-slate-400 hover:text-red-400 hover:bg-red-500/10 transition-all"
                 >
-                    <Icon name="LogOut" size={20} />
-                    <span className="font-medium">Logout</span>
+                    <Icon name="LogOut" size={18} />
+                    <span className="font-medium text-sm">Sign Out</span>
                 </button>
             </div>
-        </div>
+        </aside>
     );
 };
 
+// Tip Card Component
+const TipCard = ({ icon, color, title, description }) => (
+    <div className="group bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-2xl p-6 hover:shadow-lg hover:shadow-pink-500/5 transition-all duration-300">
+        <div className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${color} flex items-center justify-center mb-4 group-hover:scale-110 transition-transform`}>
+            <Icon name={icon} size={22} className="text-white" />
+        </div>
+        <h3 className="font-bold text-slate-900 dark:text-white mb-2">{title}</h3>
+        <p className="text-sm text-slate-500">{description}</p>
+    </div>
+);
+
 // News Item Component
 const NewsItem = ({ item }) => (
-    <div className="bg-card border border-border rounded-2xl overflow-hidden card-hover">
+    <div className="group bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-2xl overflow-hidden hover:shadow-xl hover:shadow-pink-500/10 transition-all duration-300">
         {item.image_url && (
-            <div className="h-40 bg-muted">
-                <img src={item.image_url} alt={item.title} className="w-full h-full object-cover" />
+            <div className="h-44 bg-slate-100 dark:bg-slate-800 overflow-hidden">
+                <img src={item.image_url} alt={item.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
             </div>
         )}
         <div className="p-5">
-            <div className="flex items-center gap-2 mb-2">
-                <span className="text-xs text-muted-foreground">
+            <div className="flex items-center gap-2 mb-3">
+                <span className="text-xs text-slate-400">
                     {new Date(item.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                 </span>
                 {item.published ? (
-                    <span className="px-2 py-0.5 bg-success/10 text-success text-xs rounded-full">Published</span>
+                    <span className="px-2 py-0.5 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-xs font-semibold rounded-full">Published</span>
                 ) : (
-                    <span className="px-2 py-0.5 bg-muted text-muted-foreground text-xs rounded-full">Draft</span>
+                    <span className="px-2 py-0.5 bg-slate-100 dark:bg-slate-800 text-slate-500 text-xs font-semibold rounded-full">Draft</span>
                 )}
             </div>
-            <h3 className="font-semibold text-foreground mb-2 line-clamp-2">{item.title}</h3>
-            <p className="text-sm text-muted-foreground line-clamp-3">{item.excerpt}</p>
+            <h3 className="font-bold text-slate-900 dark:text-white mb-2 line-clamp-2">{item.title}</h3>
+            <p className="text-sm text-slate-500 line-clamp-3">{item.excerpt}</p>
         </div>
     </div>
 );
@@ -112,7 +133,6 @@ const NewsPage = () => {
 
     const fetchNews = async () => {
         try {
-            // Fetch published blogs/news from the API
             const res = await fetch(`${API_BASE}/blogs`);
             if (res.ok) {
                 const data = await res.json();
@@ -126,75 +146,76 @@ const NewsPage = () => {
     };
 
     return (
-        <div className="flex min-h-screen bg-background">
+        <div className="flex min-h-screen bg-slate-50 dark:bg-slate-950">
             <SellerSidebar activePage="news" />
 
-            <main className="flex-1 p-8">
-                <div className="mb-8">
-                    <h1 className="text-2xl font-bold text-foreground">News & Updates</h1>
-                    <p className="text-muted-foreground">Stay updated with GlowMatch announcements and tips</p>
-                </div>
+            <main className="flex-1 p-8 lg:p-10">
+                {/* Header */}
+                <header className="mb-8">
+                    <h1 className="text-3xl font-bold text-slate-900 dark:text-white tracking-tight">News & Updates</h1>
+                    <p className="text-slate-500 mt-1">Stay updated with GlowMatch announcements and tips</p>
+                </header>
 
-                {/* Featured Section */}
-                <div className="bg-gradient-to-r from-accent/10 to-pink-500/10 rounded-2xl p-6 mb-8 border border-accent/20">
-                    <div className="flex items-start gap-4">
-                        <div className="w-12 h-12 rounded-xl bg-accent/20 flex items-center justify-center flex-shrink-0">
-                            <Icon name="Megaphone" size={24} className="text-accent" />
+                {/* Welcome Banner */}
+                <div className="relative overflow-hidden bg-gradient-to-r from-pink-500 via-rose-500 to-fuchsia-500 rounded-3xl p-8 mb-8 text-white">
+                    <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
+                    <div className="relative flex items-start gap-5">
+                        <div className="w-14 h-14 rounded-2xl bg-white/20 backdrop-blur flex items-center justify-center flex-shrink-0">
+                            <Icon name="Megaphone" size={28} />
                         </div>
                         <div>
-                            <h2 className="font-semibold text-foreground mb-1">Welcome to GlowMatch Seller Portal!</h2>
-                            <p className="text-sm text-muted-foreground">
+                            <h2 className="text-xl font-bold mb-2">Welcome to GlowMatch Seller Portal! 🎉</h2>
+                            <p className="text-white/80 max-w-xl">
                                 Start adding your products to reach thousands of skincare enthusiasts.
-                                Check out our tips below to maximize your visibility.
+                                Check out our tips below to maximize your visibility and sales.
                             </p>
                         </div>
                     </div>
                 </div>
 
                 {/* Tips Cards */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-                    <div className="bg-card border border-border rounded-xl p-5 card-hover">
-                        <div className="w-10 h-10 rounded-lg bg-blue-500/10 flex items-center justify-center mb-3">
-                            <Icon name="Camera" size={20} className="text-blue-500" />
-                        </div>
-                        <h3 className="font-medium text-foreground mb-1">Quality Photos</h3>
-                        <p className="text-sm text-muted-foreground">Use high-quality product images to attract buyers</p>
-                    </div>
-                    <div className="bg-card border border-border rounded-xl p-5 card-hover">
-                        <div className="w-10 h-10 rounded-lg bg-purple-500/10 flex items-center justify-center mb-3">
-                            <Icon name="FileText" size={20} className="text-purple-500" />
-                        </div>
-                        <h3 className="font-medium text-foreground mb-1">Detailed Descriptions</h3>
-                        <p className="text-sm text-muted-foreground">Include ingredients and usage instructions</p>
-                    </div>
-                    <div className="bg-card border border-border rounded-xl p-5 card-hover">
-                        <div className="w-10 h-10 rounded-lg bg-green-500/10 flex items-center justify-center mb-3">
-                            <Icon name="Tag" size={20} className="text-green-500" />
-                        </div>
-                        <h3 className="font-medium text-foreground mb-1">Competitive Pricing</h3>
-                        <p className="text-sm text-muted-foreground">Offer fair prices to increase conversions</p>
-                    </div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-10">
+                    <TipCard
+                        icon="Camera"
+                        color="from-blue-500 to-cyan-500"
+                        title="Quality Photos"
+                        description="Use high-quality product images to attract more buyers"
+                    />
+                    <TipCard
+                        icon="FileText"
+                        color="from-violet-500 to-purple-500"
+                        title="Detailed Descriptions"
+                        description="Include ingredients, benefits, and usage instructions"
+                    />
+                    <TipCard
+                        icon="Tag"
+                        color="from-emerald-500 to-teal-500"
+                        title="Competitive Pricing"
+                        description="Offer fair prices to increase your conversion rate"
+                    />
                 </div>
 
-                {/* Blog Posts */}
+                {/* Latest Articles */}
                 <div>
-                    <h2 className="text-lg font-semibold text-foreground mb-4">Latest Articles</h2>
+                    <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-5">Latest Articles</h2>
                     {loading ? (
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
                             {[1, 2, 3].map((i) => (
-                                <div key={i} className="h-64 bg-muted rounded-xl animate-pulse" />
+                                <div key={i} className="h-72 bg-slate-200 dark:bg-slate-800 rounded-2xl animate-pulse" />
                             ))}
                         </div>
                     ) : news.length > 0 ? (
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
                             {news.map((item) => (
                                 <NewsItem key={item.id} item={item} />
                             ))}
                         </div>
                     ) : (
-                        <div className="text-center py-12 bg-card border border-border rounded-2xl">
-                            <Icon name="Newspaper" size={48} className="mx-auto text-muted-foreground mb-4" />
-                            <p className="text-muted-foreground">No news articles yet. Check back later!</p>
+                        <div className="text-center py-16 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-3xl">
+                            <div className="w-16 h-16 rounded-2xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center mx-auto mb-4">
+                                <Icon name="Newspaper" size={32} className="text-slate-400" />
+                            </div>
+                            <p className="text-slate-500">No news articles yet. Check back later!</p>
                         </div>
                     )}
                 </div>
