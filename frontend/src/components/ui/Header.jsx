@@ -33,7 +33,7 @@ const NavLink = ({ to, label }) => {
 
 const Header = () => {
   const navigate = useNavigate();
-  const { user, userProfile, signOut, isAdmin } = useAuth();
+  const { user, userProfile, signOut, isAdmin, isSeller } = useAuth();
   const [unreadCount, setUnreadCount] = useState(0);
   const [showCount, setShowCount] = useState(true);
   const { lang, setLang, t } = useI18n();
@@ -132,7 +132,7 @@ const Header = () => {
         <div className="flex items-center justify-between h-16 gap-4">
           {/* Logo - Left */}
           <Link to="/" className="flex items-center space-x-2 group flex-shrink-0">
-            <span className="text-2xl font-bold bg-gradient-to-r from-pink-500 to-rose-500 bg-clip-text text-transparent hidden sm:inline">GlowMatch</span>
+            <span className="text-2xl font-bold bg-gradient-to-r from-pink-500 to-rose-500 bg-clip-text text-transparent hidden sm:inline">Glowimatch</span>
           </Link>
 
           {/* Navigation - Center */}
@@ -142,7 +142,8 @@ const Header = () => {
               <NavLink to="/about" label={t('about')} />
               <NavLink to="/contact" label={t('contact')} />
               <NavLink to="/blog" label={t('blog')} />
-              {user && <NavLink to="/interactive-skin-quiz" label={t('skin_quiz')} />}
+              {user && isSeller && isSeller() && <NavLink to="/seller" label={t('dashboard') || 'Dashboard'} />}
+              {user && (!isSeller || !isSeller()) && <NavLink to="/interactive-skin-quiz" label={t('skin_quiz')} />}
               {user && isAdmin && isAdmin() && <NavLink to="/admin" label={t('admin')} />}
             </div>
           </nav>
@@ -264,10 +265,18 @@ const Header = () => {
                           <Icon name="Zap" size={16} className="text-pink-500" />
                           <span>{t('plans')}</span>
                         </Link>
-                        <Link to="/quiz-history" className="flex items-center space-x-3 px-4 py-2.5 text-sm text-gray-700 hover:text-pink-600 hover:bg-pink-50 transition-colors" onClick={() => setShowUserMenu(false)}>
-                          <Icon name="History" size={16} className="text-pink-500" />
-                          <span>{t('quiz_history')}</span>
-                        </Link>
+                        {(!isSeller || !isSeller()) && (
+                          <Link to="/quiz-history" className="flex items-center space-x-3 px-4 py-2.5 text-sm text-gray-700 hover:text-pink-600 hover:bg-pink-50 transition-colors" onClick={() => setShowUserMenu(false)}>
+                            <Icon name="History" size={16} className="text-pink-500" />
+                            <span>{t('quiz_history')}</span>
+                          </Link>
+                        )}
+                        {isSeller && isSeller() && (
+                          <Link to="/seller" className="flex items-center space-x-3 px-4 py-2.5 text-sm text-gray-700 hover:text-pink-600 hover:bg-pink-50 transition-colors" onClick={() => setShowUserMenu(false)}>
+                            <Icon name="LayoutDashboard" size={16} className="text-pink-500" />
+                            <span>{t('dashboard') || 'Dashboard'}</span>
+                          </Link>
+                        )}
                         {isAdmin && isAdmin() && (
                           <Link to="/admin" className="flex items-center space-x-3 px-4 py-2.5 text-sm text-gray-700 hover:text-pink-600 hover:bg-pink-50 transition-colors" onClick={() => setShowUserMenu(false)}>
                             <Icon name="ShieldCheck" size={16} className="text-pink-500" />

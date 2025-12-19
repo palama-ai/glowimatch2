@@ -89,7 +89,7 @@ const SignupPage = () => {
             <Icon name="Sparkles" size={40} className="text-accent" />
           </div>
           <h1 className="text-4xl font-black bg-gradient-to-r from-pink-500 to-rose-500 bg-clip-text text-transparent mb-2">
-            GlowMatch
+            Glowimatch
           </h1>
           <p className="text-muted-foreground text-sm">Discover Your Perfect Skincare</p>
         </div>
@@ -118,8 +118,8 @@ const SignupPage = () => {
                     type="button"
                     onClick={() => setFormData({ ...formData, accountType: 'user' })}
                     className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg text-sm font-medium transition-all ${formData?.accountType === 'user'
-                        ? 'bg-background shadow-sm text-foreground'
-                        : 'text-muted-foreground hover:text-foreground'
+                      ? 'bg-background shadow-sm text-foreground'
+                      : 'text-muted-foreground hover:text-foreground'
                       }`}
                   >
                     <Icon name="User" size={16} />
@@ -129,8 +129,8 @@ const SignupPage = () => {
                     type="button"
                     onClick={() => setFormData({ ...formData, accountType: 'seller' })}
                     className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg text-sm font-medium transition-all ${formData?.accountType === 'seller'
-                        ? 'bg-accent text-white shadow-sm'
-                        : 'text-muted-foreground hover:text-foreground'
+                      ? 'bg-accent text-white shadow-sm'
+                      : 'text-muted-foreground hover:text-foreground'
                       }`}
                   >
                     <Icon name="Store" size={16} />
@@ -139,7 +139,7 @@ const SignupPage = () => {
                 </div>
                 <p className="text-xs text-muted-foreground mt-2">
                   {formData?.accountType === 'seller'
-                    ? 'Sell your skincare products on GlowMatch'
+                    ? 'Sell your skincare products on Glowimatch'
                     : 'Find the perfect skincare routine for you'
                   }
                 </p>

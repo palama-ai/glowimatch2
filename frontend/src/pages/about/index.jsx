@@ -16,11 +16,11 @@ const About = () => {
           <div className="relative max-w-6xl mx-auto px-5 lg:px-8 w-full">
             <div className="max-w-3xl">
               <div className="inline-block px-4 py-2 bg-accent/20 border border-accent/40 rounded-full mb-4">
-                <span className="text-accent text-sm font-semibold">About GlowMatch</span>
+                <span className="text-accent text-sm font-semibold">About Glowimatch</span>
               </div>
               <h1 className="text-5xl md:text-6xl font-bold text-foreground mb-4">Skincare, Personalized</h1>
               <p className="text-xl text-muted-foreground leading-relaxed">
-                GlowMatch combines a quick, friendly skin quiz with optional AI-powered image analysis to give clear, actionable skincare advice tailored to you.
+                Glowimatch combines a quick, friendly skin quiz with optional AI-powered image analysis to give clear, actionable skincare advice tailored to you.
               </p>
             </div>
           </div>
@@ -32,7 +32,7 @@ const About = () => {
             <div className="grid lg:grid-cols-2 gap-12 items-center mb-20">
               <div className="relative">
                 <div className={`absolute -inset-4 bg-gradient-to-r ${GRADIENTS.warm_gradient} rounded-2xl blur-xl opacity-30`}></div>
-                <img 
+                <img
                   src={IMAGES.about_mission}
                   alt="mission"
                   className="relative w-full rounded-2xl shadow-2xl"
@@ -83,7 +83,7 @@ const About = () => {
               </div>
               <div className="relative">
                 <div className={`absolute -inset-4 bg-gradient-to-r ${GRADIENTS.cool_gradient} rounded-2xl blur-xl opacity-30`}></div>
-                <img 
+                <img
                   src={IMAGES.feature_analysis}
                   alt="analysis"
                   className="relative w-full rounded-2xl shadow-2xl"
@@ -143,7 +143,7 @@ const About = () => {
           <div className="max-w-6xl mx-auto">
             <div className="text-center mb-16">
               <h2 className="text-4xl font-bold text-foreground mb-4">{t('team')}</h2>
-              <p className="text-lg text-muted-foreground">Meet the team behind GlowMatch</p>
+              <p className="text-lg text-muted-foreground">Meet the team behind Glowimatch</p>
             </div>
             <div className="grid md:grid-cols-3 gap-8">
               <div className="group bg-card border border-border rounded-xl overflow-hidden hover:border-accent hover:shadow-lg transition-all">

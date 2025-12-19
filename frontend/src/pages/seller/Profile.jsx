@@ -5,16 +5,16 @@ import { useAuth } from '../../contexts/AuthContext';
 import Button from '../../components/ui/Button';
 import Input from '../../components/ui/Input';
 
-// Sidebar Component (shared)
+// Modern Sidebar (shared)
 const SellerSidebar = ({ activePage }) => {
     const navigate = useNavigate();
     const { signOut, userProfile } = useAuth();
 
     const menuItems = [
-        { id: 'dashboard', label: 'Home', icon: 'Home', path: '/seller' },
+        { id: 'dashboard', label: 'Overview', icon: 'LayoutDashboard', path: '/seller' },
         { id: 'products', label: 'Products', icon: 'Package', path: '/seller/products' },
-        { id: 'news', label: 'News', icon: 'Newspaper', path: '/seller/news' },
-        { id: 'profile', label: 'Profile', icon: 'User', path: '/seller/profile' },
+        { id: 'news', label: 'News', icon: 'Bell', path: '/seller/news' },
+        { id: 'profile', label: 'Settings', icon: 'Settings', path: '/seller/profile' },
     ];
 
     const handleLogout = async () => {
@@ -23,62 +23,72 @@ const SellerSidebar = ({ activePage }) => {
     };
 
     return (
-        <div className="w-64 min-h-screen bg-card border-r border-border flex flex-col">
-            <div className="p-6 border-b border-border">
-                <Link to="/seller" className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-pink-500 to-rose-500 flex items-center justify-center">
-                        <Icon name="Sparkles" size={20} className="text-white" />
+        <aside className="w-72 min-h-screen bg-gradient-to-b from-slate-900 to-slate-950 flex flex-col">
+            <div className="p-8">
+                <Link to="/seller" className="flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-rose-500 via-pink-500 to-fuchsia-500 flex items-center justify-center shadow-lg shadow-pink-500/25">
+                        <Icon name="Sparkles" size={24} className="text-white" />
                     </div>
                     <div>
-                        <h1 className="font-bold text-foreground">GlowMatch</h1>
-                        <p className="text-xs text-muted-foreground">Seller Portal</p>
+                        <h1 className="font-bold text-xl text-white tracking-tight">Glowimatch</h1>
+                        <p className="text-xs text-slate-400 font-medium">Seller Dashboard</p>
                     </div>
                 </Link>
             </div>
 
-            <nav className="flex-1 p-4 space-y-2">
-                {menuItems.map((item) => (
-                    <Link
-                        key={item.id}
-                        to={item.path}
-                        className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${activePage === item.id
-                            ? 'bg-accent text-white'
-                            : 'text-muted-foreground hover:bg-muted hover:text-foreground'
-                            }`}
-                    >
-                        <Icon name={item.icon} size={20} />
-                        <span className="font-medium">{item.label}</span>
-                    </Link>
-                ))}
+            <nav className="flex-1 px-4 py-6">
+                <p className="px-4 text-xs font-semibold text-slate-500 uppercase tracking-wider mb-4">Menu</p>
+                <div className="space-y-1">
+                    {menuItems.map((item) => (
+                        <Link
+                            key={item.id}
+                            to={item.path}
+                            className={`group flex items-center gap-4 px-4 py-3.5 rounded-xl transition-all duration-200 ${activePage === item.id
+                                ? 'bg-gradient-to-r from-pink-500/20 to-fuchsia-500/10 text-white border-l-2 border-pink-500'
+                                : 'text-slate-400 hover:text-white hover:bg-white/5'
+                                }`}
+                        >
+                            <Icon
+                                name={item.icon}
+                                size={20}
+                                className={activePage === item.id ? 'text-pink-400' : 'text-slate-500 group-hover:text-pink-400 transition-colors'}
+                            />
+                            <span className="font-medium">{item.label}</span>
+                            {activePage === item.id && (
+                                <div className="ml-auto w-1.5 h-1.5 rounded-full bg-pink-500" />
+                            )}
+                        </Link>
+                    ))}
+                </div>
             </nav>
 
-            <div className="p-4 border-t border-border">
-                <div className="flex items-center gap-3 px-4 py-3 mb-2">
-                    <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
-                        <Icon name="User" size={20} className="text-muted-foreground" />
+            <div className="p-4 border-t border-slate-800">
+                <div className="flex items-center gap-3 p-4 rounded-xl bg-slate-800/50 mb-3">
+                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-pink-500 to-fuchsia-500 flex items-center justify-center text-white font-bold text-sm">
+                        {(userProfile?.full_name?.[0] || 'S').toUpperCase()}
                     </div>
                     <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-foreground truncate">
+                        <p className="text-sm font-semibold text-white truncate">
                             {userProfile?.full_name || 'Seller'}
                         </p>
-                        <p className="text-xs text-muted-foreground">Seller Account</p>
+                        <p className="text-xs text-slate-500">Seller Account</p>
                     </div>
                 </div>
                 <button
                     onClick={handleLogout}
-                    className="flex items-center gap-3 px-4 py-3 w-full rounded-xl text-destructive hover:bg-destructive/10 transition-all"
+                    className="flex items-center gap-3 px-4 py-3 w-full rounded-xl text-slate-400 hover:text-red-400 hover:bg-red-500/10 transition-all"
                 >
-                    <Icon name="LogOut" size={20} />
-                    <span className="font-medium">Logout</span>
+                    <Icon name="LogOut" size={18} />
+                    <span className="font-medium text-sm">Sign Out</span>
                 </button>
             </div>
-        </div>
+        </aside>
     );
 };
 
 // Profile Page
 const ProfilePage = () => {
-    const { userProfile, user, updateProfile, refreshProfile } = useAuth();
+    const { userProfile, user, refreshProfile } = useAuth();
     const [formData, setFormData] = useState({
         full_name: '',
         email: '',
@@ -143,127 +153,138 @@ const ProfilePage = () => {
     };
 
     return (
-        <div className="flex min-h-screen bg-background">
+        <div className="flex min-h-screen bg-slate-50 dark:bg-slate-950">
             <SellerSidebar activePage="profile" />
 
-            <main className="flex-1 p-8">
+            <main className="flex-1 p-8 lg:p-10">
                 <div className="max-w-2xl">
-                    <div className="mb-8">
-                        <h1 className="text-2xl font-bold text-foreground">Profile Settings</h1>
-                        <p className="text-muted-foreground">Manage your seller account information</p>
-                    </div>
+                    {/* Header */}
+                    <header className="mb-8">
+                        <h1 className="text-3xl font-bold text-slate-900 dark:text-white tracking-tight">Settings</h1>
+                        <p className="text-slate-500 mt-1">Manage your seller account information</p>
+                    </header>
 
                     {/* Profile Card */}
-                    <div className="bg-card border border-border rounded-2xl overflow-hidden">
-                        {/* Header */}
-                        <div className="bg-gradient-to-r from-accent/10 to-pink-500/10 p-6 border-b border-border">
-                            <div className="flex items-center gap-4">
-                                <div className="w-20 h-20 rounded-2xl bg-accent/20 flex items-center justify-center">
-                                    <Icon name="User" size={40} className="text-accent" />
-                                </div>
-                                <div>
-                                    <h2 className="text-xl font-bold text-foreground">{formData.full_name || 'Seller'}</h2>
-                                    <p className="text-muted-foreground">{formData.email}</p>
-                                    <span className="inline-flex items-center gap-1 mt-1 px-2 py-0.5 bg-accent/20 text-accent text-xs rounded-full">
-                                        <Icon name="Store" size={12} />
-                                        Seller Account
+                    <div className="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-3xl overflow-hidden shadow-sm">
+                        {/* Profile Header */}
+                        <div className="relative h-32 bg-gradient-to-r from-pink-500 via-rose-500 to-fuchsia-500">
+                            <div className="absolute -bottom-12 left-8">
+                                <div className="w-24 h-24 rounded-2xl bg-white dark:bg-slate-900 shadow-xl flex items-center justify-center border-4 border-white dark:border-slate-900">
+                                    <span className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-br from-pink-500 to-fuchsia-500">
+                                        {(formData.full_name?.[0] || 'S').toUpperCase()}
                                     </span>
                                 </div>
                             </div>
                         </div>
 
+                        <div className="pt-16 px-8 pb-2">
+                            <h2 className="text-xl font-bold text-slate-900 dark:text-white">{formData.full_name || 'Seller'}</h2>
+                            <p className="text-slate-500">{formData.email}</p>
+                            <span className="inline-flex items-center gap-1.5 mt-2 px-3 py-1 bg-pink-50 dark:bg-pink-500/10 text-pink-600 dark:text-pink-400 text-xs font-semibold rounded-full">
+                                <Icon name="Store" size={12} />
+                                Seller Account
+                            </span>
+                        </div>
+
                         {/* Form */}
-                        <form onSubmit={handleSubmit} className="p-6 space-y-5">
+                        <form onSubmit={handleSubmit} className="p-8 pt-6 space-y-6">
                             {success && (
-                                <div className="bg-success/10 border border-success/30 text-success px-4 py-3 rounded-lg flex items-center gap-2">
-                                    <Icon name="CheckCircle" size={18} />
-                                    <span className="text-sm">Profile updated successfully!</span>
+                                <div className="flex items-center gap-3 px-4 py-3 bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-100 dark:border-emerald-500/20 text-emerald-600 dark:text-emerald-400 rounded-xl">
+                                    <Icon name="CheckCircle" size={20} />
+                                    <span className="text-sm font-medium">Profile updated successfully!</span>
                                 </div>
                             )}
 
                             {error && (
-                                <div className="bg-destructive/10 border border-destructive/30 text-destructive px-4 py-3 rounded-lg flex items-center gap-2">
-                                    <Icon name="AlertTriangle" size={18} />
-                                    <span className="text-sm">{error}</span>
+                                <div className="flex items-center gap-3 px-4 py-3 bg-red-50 dark:bg-red-500/10 border border-red-100 dark:border-red-500/20 text-red-600 dark:text-red-400 rounded-xl">
+                                    <Icon name="AlertTriangle" size={20} />
+                                    <span className="text-sm font-medium">{error}</span>
                                 </div>
                             )}
 
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                                 <div>
-                                    <label className="block text-sm font-medium text-foreground mb-2">Full Name</label>
+                                    <label className="block text-sm font-semibold text-slate-900 dark:text-white mb-2">Full Name</label>
                                     <Input
                                         value={formData.full_name}
                                         onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
                                         placeholder="Your full name"
+                                        className="rounded-xl"
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium text-foreground mb-2">Email</label>
+                                    <label className="block text-sm font-semibold text-slate-900 dark:text-white mb-2">Email</label>
                                     <Input
                                         value={formData.email}
                                         disabled
-                                        className="bg-muted cursor-not-allowed"
+                                        className="rounded-xl bg-slate-50 dark:bg-slate-800 cursor-not-allowed"
                                     />
-                                    <p className="text-xs text-muted-foreground mt-1">Email cannot be changed</p>
+                                    <p className="text-xs text-slate-400 mt-1">Email cannot be changed</p>
                                 </div>
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium text-foreground mb-2">Brand Name</label>
+                                <label className="block text-sm font-semibold text-slate-900 dark:text-white mb-2">Brand Name</label>
                                 <Input
                                     value={formData.brand_name}
                                     onChange={(e) => setFormData({ ...formData, brand_name: e.target.value })}
                                     placeholder="Your brand or company name"
+                                    className="rounded-xl"
                                 />
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium text-foreground mb-2">Website</label>
+                                <label className="block text-sm font-semibold text-slate-900 dark:text-white mb-2">Website</label>
                                 <Input
                                     value={formData.website}
                                     onChange={(e) => setFormData({ ...formData, website: e.target.value })}
                                     placeholder="https://yourwebsite.com"
+                                    className="rounded-xl"
                                 />
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium text-foreground mb-2">Bio</label>
+                                <label className="block text-sm font-semibold text-slate-900 dark:text-white mb-2">Bio</label>
                                 <textarea
                                     value={formData.bio}
                                     onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
                                     placeholder="Tell customers about yourself and your products..."
-                                    className="w-full px-3 py-2 border border-border rounded-lg bg-background min-h-[100px] focus:outline-none focus:ring-2 focus:ring-accent/50"
+                                    className="w-full px-4 py-3 border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 text-slate-900 dark:text-white min-h-[120px] focus:outline-none focus:ring-2 focus:ring-pink-500/50 transition-shadow"
                                 />
                             </div>
 
                             <div className="pt-4">
-                                <Button type="submit" disabled={saving} className="w-full md:w-auto">
+                                <button
+                                    type="submit"
+                                    disabled={saving}
+                                    className="flex items-center justify-center gap-2 w-full md:w-auto px-8 py-3 bg-gradient-to-r from-pink-500 to-rose-500 text-white rounded-xl font-semibold shadow-lg shadow-pink-500/25 hover:shadow-xl hover:shadow-pink-500/30 disabled:opacity-50 transition-all"
+                                >
                                     {saving ? (
                                         <>
-                                            <Icon name="Loader2" size={16} className="animate-spin mr-2" />
+                                            <Icon name="Loader2" size={18} className="animate-spin" />
                                             Saving...
                                         </>
                                     ) : (
                                         <>
-                                            <Icon name="Save" size={16} className="mr-2" />
+                                            <Icon name="Save" size={18} />
                                             Save Changes
                                         </>
                                     )}
-                                </Button>
+                                </button>
                             </div>
                         </form>
                     </div>
 
                     {/* Account Stats */}
                     <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div className="bg-card border border-border rounded-xl p-4">
-                            <div className="flex items-center gap-3">
-                                <div className="w-10 h-10 rounded-lg bg-accent/10 flex items-center justify-center">
-                                    <Icon name="Calendar" size={20} className="text-accent" />
+                        <div className="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-2xl p-5">
+                            <div className="flex items-center gap-4">
+                                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-pink-500 to-rose-500 flex items-center justify-center">
+                                    <Icon name="Calendar" size={22} className="text-white" />
                                 </div>
                                 <div>
-                                    <p className="text-sm text-muted-foreground">Member since</p>
-                                    <p className="font-medium text-foreground">
+                                    <p className="text-sm text-slate-500">Member since</p>
+                                    <p className="font-bold text-slate-900 dark:text-white">
                                         {userProfile?.created_at
                                             ? new Date(userProfile.created_at).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
                                             : 'N/A'
@@ -272,25 +293,25 @@ const ProfilePage = () => {
                                 </div>
                             </div>
                         </div>
-                        <div className="bg-card border border-border rounded-xl p-4">
-                            <div className="flex items-center gap-3">
-                                <div className="w-10 h-10 rounded-lg bg-blue-500/10 flex items-center justify-center">
-                                    <Icon name="Shield" size={20} className="text-blue-500" />
+                        <div className="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-2xl p-5">
+                            <div className="flex items-center gap-4">
+                                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center">
+                                    <Icon name="Shield" size={22} className="text-white" />
                                 </div>
                                 <div>
-                                    <p className="text-sm text-muted-foreground">Account Type</p>
-                                    <p className="font-medium text-foreground capitalize">{userProfile?.role || 'Seller'}</p>
+                                    <p className="text-sm text-slate-500">Account Type</p>
+                                    <p className="font-bold text-slate-900 dark:text-white capitalize">{userProfile?.role || 'Seller'}</p>
                                 </div>
                             </div>
                         </div>
-                        <div className="bg-card border border-border rounded-xl p-4">
-                            <div className="flex items-center gap-3">
-                                <div className="w-10 h-10 rounded-lg bg-green-500/10 flex items-center justify-center">
-                                    <Icon name="CheckCircle" size={20} className="text-green-500" />
+                        <div className="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-2xl p-5">
+                            <div className="flex items-center gap-4">
+                                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center">
+                                    <Icon name="CheckCircle" size={22} className="text-white" />
                                 </div>
                                 <div>
-                                    <p className="text-sm text-muted-foreground">Status</p>
-                                    <p className="font-medium text-foreground">Active</p>
+                                    <p className="text-sm text-slate-500">Status</p>
+                                    <p className="font-bold text-slate-900 dark:text-white">Active</p>
                                 </div>
                             </div>
                         </div>

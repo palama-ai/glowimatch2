@@ -72,7 +72,7 @@ const LoginPage = () => {
             <Icon name="Sparkles" size={40} className="text-accent" />
           </div>
           <h1 className="text-4xl font-black bg-gradient-to-r from-pink-500 to-rose-500 bg-clip-text text-transparent mb-2">
-            GlowMatch
+            Glowimatch
           </h1>
           <p className="text-muted-foreground text-sm">Discover Your Perfect Skincare</p>
         </div>

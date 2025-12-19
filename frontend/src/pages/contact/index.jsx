@@ -167,7 +167,7 @@ const Contact = () => {
                 <span className="font-semibold text-foreground text-lg">What devices do you support?</span>
                 <Icon name="ChevronDown" size={20} className="text-muted-foreground group-open:rotate-180 transition-transform" />
               </summary>
-              <p className="text-muted-foreground mt-4 leading-relaxed">GlowMatch works on all devices - desktop, tablet, and mobile. Our responsive design ensures a great experience across all screen sizes.</p>
+              <p className="text-muted-foreground mt-4 leading-relaxed">Glowimatch works on all devices - desktop, tablet, and mobile. Our responsive design ensures a great experience across all screen sizes.</p>
             </details>
           </div>
         </section>

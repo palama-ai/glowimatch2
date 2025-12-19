@@ -154,6 +154,34 @@ export const quizService = {
     } catch (error) {
       return { data: null, error };
     }
+  },
+
+  async deleteQuizAttempt(attemptId) {
+    try {
+      const r = await fetch(`${API_BASE}/quiz/attempts/${attemptId}`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json', ...getAuthHeader() }
+      });
+      const json = await r.json();
+      if (!r.ok) throw json.error || new Error('Failed to delete');
+      return { success: true, error: null };
+    } catch (error) {
+      return { success: false, error };
+    }
+  },
+
+  async deleteAllQuizHistory(userId) {
+    try {
+      const r = await fetch(`${API_BASE}/quiz/history/${encodeURIComponent(userId)}`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json', ...getAuthHeader() }
+      });
+      const json = await r.json();
+      if (!r.ok) throw json.error || new Error('Failed to delete all');
+      return { success: true, error: null };
+    } catch (error) {
+      return { success: false, error };
+    }
   }
 };
 

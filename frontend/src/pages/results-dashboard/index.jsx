@@ -6,6 +6,7 @@ import ProductCard from './components/ProductCard';
 import ProductFilters from './components/ProductFilters';
 import SkinAnalysisBreakdown from './components/SkinAnalysisBreakdown';
 import SkincareRoutine from './components/SkincareRoutine';
+import ProductModal from './components/ProductModal';
 import Icon from '../../components/AppIcon';
 
 const ResultsDashboard = () => {
@@ -23,6 +24,10 @@ const ResultsDashboard = () => {
   const [expandError, setExpandError] = useState(null);
   const [expandProvider, setExpandProvider] = useState('gemini');
   const [expandProviderUsed, setExpandProviderUsed] = useState(null);
+  const [productsLoading, setProductsLoading] = useState(false);
+  const [productsError, setProductsError] = useState(null);
+  const [allProducts, setAllProducts] = useState([]); // Store all fetched products for filtering
+  const [selectedProduct, setSelectedProduct] = useState(null); // { product, index }
 
   // Mock analysis results data
   const analysisResults = {
@@ -70,15 +75,46 @@ const ResultsDashboard = () => {
     ]
   };
 
-  // Mock products
-  const mockProducts = [
-    { id: 1, name: "Gentle Foaming Cleanser", brand: "CeraVe", price: 12.99, originalPrice: 15.99, rating: 4.5, reviewCount: 2847, image: "https://images.unsplash.com/photo-1556228720-195a672e8a03", badge: "Best Seller", purchaseUrl: "#", type: "cleanser", concerns: ["sensitivity"] },
-    { id: 2, name: "Niacinamide 10% + Zinc", brand: "The Ordinary", price: 7.20, rating: 4.3, reviewCount: 5632, image: "https://images.unsplash.com/photo-1620916566398-39f1143ab7be", purchaseUrl: "#", type: "serum", concerns: ["pores", "acne"] },
-    { id: 3, name: "Hyaluronic Acid Serum", brand: "Neutrogena", price: 18.99, originalPrice: 22.99, rating: 4.4, reviewCount: 1923, image: "https://images.unsplash.com/photo-1570194065650-d99fb4b38b15", badge: "Editor Pick", purchaseUrl: "#", type: "serum", concerns: ["dryness"] },
-    { id: 4, name: "Daily Moisturizer SPF 30", brand: "Olay", price: 24.99, rating: 4.2, reviewCount: 3456, image: "https://images.unsplash.com/photo-1611930022073-b7a4ba5fcccd", purchaseUrl: "#", type: "moisturizer", concerns: ["dryness"] },
-    { id: 5, name: "BHA Liquid Exfoliant", brand: "Paula's Choice", price: 32.00, rating: 4.6, reviewCount: 8934, image: "https://images.unsplash.com/photo-1608248597279-f99d160bfcbc", badge: "Top Rated", purchaseUrl: "#", type: "serum", concerns: ["acne", "pores"] },
-    { id: 6, name: "Mineral Sunscreen SPF 50", brand: "EltaMD", price: 37.00, rating: 4.7, reviewCount: 2156, image: "https://images.unsplash.com/photo-1556227834-09f1de7a7d14", purchaseUrl: "#", type: "sunscreen", concerns: ["sensitivity"] }
-  ];
+  // No fallback mock products - show empty state when no products available
+
+  // Fetch AI-recommended products using voting system
+  const fetchRecommendedProducts = async (analysis) => {
+    setProductsLoading(true);
+    setProductsError(null);
+    try {
+      const API_BASE = import.meta.env?.VITE_BACKEND_URL || 'https://backend-three-sigma-81.vercel.app/api';
+
+      const resp = await fetch(`${API_BASE}/products/ai-recommend`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ analysis })
+      });
+
+      if (!resp.ok) {
+        throw new Error('Failed to fetch AI recommendations');
+      }
+
+      const json = await resp.json();
+      const products = json?.data || [];
+
+      // Store voting info for display
+      if (json?.votingInfo) {
+        console.log('[AI Voting]', json.votingInfo);
+      }
+
+      // Set products from API (may be empty if no seller products exist)
+      setAllProducts(products);
+      setFilteredProducts(products);
+    } catch (error) {
+      console.error('Error fetching AI recommendations:', error);
+      setProductsError('Unable to load AI product recommendations');
+      // Keep empty state on error
+      setAllProducts([]);
+      setFilteredProducts([]);
+    } finally {
+      setProductsLoading(false);
+    }
+  };
 
   // Initial data loading - runs once on mount
   useEffect(() => {
@@ -99,13 +135,8 @@ const ResultsDashboard = () => {
         setDetailedState(detailed);
       }
 
-      // Set initial products based on concerns
-      const concerns = parsed?.concerns || [];
-      if (concerns.length > 0) {
-        setFilteredProducts(mockProducts?.filter(product => product?.concerns?.some(concern => concerns?.includes(concern))));
-      } else {
-        setFilteredProducts(mockProducts);
-      }
+      // Fetch AI-recommended products using voting system
+      fetchRecommendedProducts(parsed);
 
       // Request server-side generation (best-effort, don't overwrite existing data on failure)
       (async (provider = expandProvider) => {
@@ -145,19 +176,24 @@ const ResultsDashboard = () => {
 
   // Product filtering - runs when filters change
   useEffect(() => {
-    let filtered = mockProducts;
+    if (allProducts.length === 0) return;
+
+    let filtered = [...allProducts];
     Object.entries(activeFilters)?.forEach(([category, values]) => {
       if (values?.length > 0) {
         filtered = filtered?.filter((product) => {
-          if (category === 'type') return values?.includes(product?.type);
+          if (category === 'type') return values?.includes(product?.type) || values?.includes(product?.category);
           if (category === 'priceRange') return values?.includes(product?.priceRange);
-          if (category === 'concerns') return values?.some((concern) => product?.concerns?.includes(concern));
+          if (category === 'concerns') {
+            const productConcerns = Array.isArray(product?.concerns) ? product.concerns : [];
+            return values?.some((concern) => productConcerns?.includes(concern));
+          }
           return true;
         });
       }
     });
     setFilteredProducts(filtered);
-  }, [activeFilters]);
+  }, [activeFilters, allProducts]);
 
   const handleFilterChange = (category, values) => {
     setActiveFilters((prev) => ({ ...prev, [category]: values }));
@@ -258,17 +294,43 @@ const ResultsDashboard = () => {
                   Recommended for You
                 </h2>
                 <span className="text-sm text-muted-foreground">
-                  {filteredProducts?.length} products
+                  {productsLoading ? 'Loading...' : `${filteredProducts?.length} products`}
                 </span>
               </div>
 
-              {filteredProducts?.length > 0 ? (
+              {productsLoading && (
+                <div className="flex flex-col items-center justify-center gap-3 text-sm text-muted-foreground py-12">
+                  <Icon name="Loader2" size={24} className="animate-spin text-accent" />
+                  <div className="text-center">
+                    <p className="font-medium text-foreground">AI is analyzing products for you...</p>
+                    <p className="text-xs mt-1">Multiple AI models are voting on the best matches</p>
+                  </div>
+                </div>
+              )}
+
+              {productsError && !productsLoading && (
+                <div className="text-center py-8 px-4 bg-yellow-50 border border-yellow-200 rounded-2xl mb-4">
+                  <Icon name="AlertCircle" size={24} className="text-yellow-600 mx-auto mb-2" />
+                  <p className="text-sm text-yellow-700">{productsError}</p>
+                  <p className="text-xs text-yellow-600 mt-1">Showing fallback recommendations</p>
+                </div>
+              )}
+
+              {!productsLoading && filteredProducts?.length > 0 ? (
                 <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
-                  {filteredProducts?.map((product) => (
-                    <ProductCard key={product?.id} product={product} />
+                  {filteredProducts?.map((product, index) => (
+                    <div key={product?.id} onClick={() => setSelectedProduct({ product, index })} className="cursor-pointer">
+                      <ProductCard product={product} />
+                    </div>
                   ))}
                 </div>
-              ) : (
+              ) : !productsLoading && allProducts?.length === 0 ? (
+                <div className="text-center py-12 bg-muted/30 rounded-2xl">
+                  <Icon name="Package" size={40} className="text-muted-foreground mx-auto mb-3" />
+                  <p className="text-foreground font-medium mb-2">No products available yet</p>
+                  <p className="text-sm text-muted-foreground">Products will appear here once they are added by sellers</p>
+                </div>
+              ) : !productsLoading ? (
                 <div className="text-center py-12 bg-muted/30 rounded-2xl">
                   <Icon name="Search" size={40} className="text-muted-foreground mx-auto mb-3" />
                   <p className="text-muted-foreground mb-4">No products match your filters</p>
@@ -279,7 +341,7 @@ const ResultsDashboard = () => {
                     Clear filters
                   </button>
                 </div>
-              )}
+              ) : null}
             </div>
           )}
 
@@ -300,6 +362,20 @@ const ResultsDashboard = () => {
           </div>
         </main>
       </div>
+
+      {/* Product Modal */}
+      {selectedProduct && (
+        <ProductModal
+          product={selectedProduct.product}
+          products={filteredProducts}
+          currentIndex={selectedProduct.index}
+          onClose={() => setSelectedProduct(null)}
+          onNavigate={(newIndex) => setSelectedProduct({
+            product: filteredProducts[newIndex],
+            index: newIndex
+          })}
+        />
+      )}
     </div>
   );
 };

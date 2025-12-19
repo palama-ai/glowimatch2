@@ -53,13 +53,13 @@ const TrustSignals = () => {
               <div className="w-8 h-8 bg-gradient-to-br from-accent to-secondary rounded-lg flex items-center justify-center">
                 <Icon name="Sparkles" size={16} color="white" />
               </div>
-              <span className="text-lg font-semibold text-foreground">GlowMatch</span>
+              <span className="text-lg font-semibold text-foreground">Glowimatch</span>
             </div>
 
             {/* Copyright */}
             <div className="text-center md:text-right">
               <p className="text-sm text-muted-foreground">
-                © {new Date()?.getFullYear()} GlowMatch. All rights reserved.
+                © {new Date()?.getFullYear()} Glowimatch. All rights reserved.
               </p>
               <p className="text-xs text-muted-foreground mt-1">
                 AI-powered beauty recommendations for everyone

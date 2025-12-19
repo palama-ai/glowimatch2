@@ -169,7 +169,7 @@ const SplashLoader = ({ isVisible, onComplete }) => {
         <div className="text-center space-y-4">
           <div className={`transition-all duration-700 ${progress >= 70 ? 'opacity-100 scale-100' : 'opacity-0 scale-90'}`}>
             <h1 className="text-6xl font-black bg-gradient-to-r from-pink-500 via-rose-500 to-pink-600 bg-clip-text text-transparent drop-shadow-lg">
-              GlowMatch
+              Glowimatch
             </h1>
           </div>
 

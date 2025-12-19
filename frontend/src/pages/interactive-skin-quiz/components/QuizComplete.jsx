@@ -3,11 +3,10 @@ import Button from '../../../components/ui/Button';
 import Icon from '../../../components/AppIcon';
 
 const QuizComplete = ({ responses, onContinue }) => {
-  const [model, setModel] = React.useState('fallback');
   const getResponseSummary = () => {
     const skinConcerns = responses?.filter(r => r?.question?.includes('concern'))?.map(r => r?.answer?.label);
     const skinType = responses?.find(r => r?.question?.includes('skin type'))?.answer?.label || 'Mixed';
-    
+
     return {
       skinType,
       concerns: skinConcerns?.slice(0, 3),
@@ -27,7 +26,7 @@ const QuizComplete = ({ responses, onContinue }) => {
         <h1 className="text-2xl md:text-3xl font-bold text-card-foreground mb-4">
           Quiz Complete!
         </h1>
-        
+
         <p className="text-muted-foreground text-lg mb-8">
           Great job! We've gathered all the information we need to analyze your skin and provide personalized recommendations.
         </p>
@@ -57,31 +56,17 @@ const QuizComplete = ({ responses, onContinue }) => {
         </div>
 
         <div className="space-y-4">
-          <div className="text-left">
-            <label className="text-sm text-muted-foreground block mb-2">Select analysis model</label>
-            <select
-              value={model}
-              onChange={(e) => setModel(e.target.value)}
-              className="w-full md:w-72 p-2 bg-background border border-border rounded"
-            >
-              <option value="fallback">Rule-based (local fallback)</option>
-              <option value="openai">OpenAI (GPT)</option>
-              <option value="gemini">Gemini</option>
-              <option value="cloud">Anthropic / Cloud</option>
-            </select>
-          </div>
-
           <Button
             variant="default"
             size="lg"
-            onClick={() => onContinue(model)}
+            onClick={() => onContinue('fallback')}
             iconName="Camera"
             iconPosition="right"
             className="w-full md:w-auto animate-scale-hover"
           >
             Continue to Image Analysis
           </Button>
-          
+
           <p className="text-xs text-muted-foreground">
             Next: Upload a photo for AI-powered skin analysis
           </p>
