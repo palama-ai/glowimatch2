@@ -44,8 +44,8 @@ const SellerSidebar = ({ activePage }) => {
                             key={item.id}
                             to={item.path}
                             className={`group flex items-center gap-4 px-4 py-3.5 rounded-xl transition-all duration-200 ${activePage === item.id
-                                    ? 'bg-gradient-to-r from-pink-500/20 to-fuchsia-500/10 text-white border-l-2 border-pink-500'
-                                    : 'text-slate-400 hover:text-white hover:bg-white/5'
+                                ? 'bg-gradient-to-r from-pink-500/20 to-fuchsia-500/10 text-white border-l-2 border-pink-500'
+                                : 'text-slate-400 hover:text-white hover:bg-white/5'
                                 }`}
                         >
                             <Icon
@@ -100,8 +100,8 @@ const StatsCard = ({ icon, label, value, trend, gradient = 'from-pink-500 to-ros
                 </div>
                 {trend !== undefined && (
                     <div className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold ${trend >= 0
-                            ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400'
-                            : 'bg-red-50 text-red-600 dark:bg-red-500/10 dark:text-red-400'
+                        ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400'
+                        : 'bg-red-50 text-red-600 dark:bg-red-500/10 dark:text-red-400'
                         }`}>
                         <Icon name={trend >= 0 ? 'TrendingUp' : 'TrendingDown'} size={12} />
                         {Math.abs(trend)}%
@@ -189,8 +189,8 @@ const ProductCard = ({ product, onClick }) => (
 
             {/* Status Badge */}
             <div className={`absolute top-3 right-3 px-2.5 py-1 rounded-full text-xs font-semibold backdrop-blur-sm ${product.published
-                    ? 'bg-emerald-500/90 text-white'
-                    : 'bg-amber-500/90 text-white'
+                ? 'bg-emerald-500/90 text-white'
+                : 'bg-amber-500/90 text-white'
                 }`}>
                 {product.published ? 'Live' : 'Draft'}
             </div>
@@ -231,6 +231,20 @@ const SellerDashboard = () => {
     const [products, setProducts] = useState([]);
     const [analytics, setAnalytics] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [showWelcomeModal, setShowWelcomeModal] = useState(false);
+
+    // Check if first time seller on mount
+    useEffect(() => {
+        const hasSeenWelcome = localStorage.getItem('gm_seller_welcome_seen');
+        if (!hasSeenWelcome) {
+            setShowWelcomeModal(true);
+        }
+    }, []);
+
+    const handleCloseWelcome = () => {
+        localStorage.setItem('gm_seller_welcome_seen', 'true');
+        setShowWelcomeModal(false);
+    };
 
     const getActivePage = () => {
         const path = location.pathname;
@@ -394,6 +408,68 @@ const SellerDashboard = () => {
                     )}
                 </div>
             </main>
+
+            {/* Welcome Modal for First-Time Sellers */}
+            {showWelcomeModal && (
+                <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+                    <div className="relative bg-white dark:bg-slate-900 rounded-3xl w-full max-w-md shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-300">
+                        {/* Close Button */}
+                        <button
+                            onClick={handleCloseWelcome}
+                            className="absolute top-4 right-4 p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors z-10"
+                        >
+                            <Icon name="X" size={20} className="text-slate-500" />
+                        </button>
+
+                        {/* Gradient Header */}
+                        <div className="h-32 bg-gradient-to-br from-pink-500 via-rose-500 to-fuchsia-500 relative overflow-hidden">
+                            <div className="absolute inset-0 flex items-center justify-center">
+                                <div className="w-20 h-20 rounded-full bg-white/20 backdrop-blur flex items-center justify-center">
+                                    <Icon name="Gift" size={40} className="text-white" />
+                                </div>
+                            </div>
+                            <div className="absolute -bottom-6 -left-6 w-24 h-24 bg-white/10 rounded-full blur-xl" />
+                            <div className="absolute -top-6 -right-6 w-32 h-32 bg-white/10 rounded-full blur-xl" />
+                        </div>
+
+                        {/* Content */}
+                        <div className="p-8 text-center">
+                            <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-sm font-semibold rounded-full mb-4">
+                                <Icon name="Sparkles" size={16} />
+                                Special Offer
+                            </div>
+
+                            <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-3">
+                                Welcome to GlowMatch! 🎉
+                            </h2>
+
+                            <p className="text-slate-500 mb-6">
+                                As a thank you for joining us, you've received
+                            </p>
+
+                            <div className="bg-gradient-to-r from-pink-50 to-fuchsia-50 dark:from-pink-500/10 dark:to-fuchsia-500/10 rounded-2xl p-6 mb-6">
+                                <p className="text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-fuchsia-500 mb-2">
+                                    3 Months
+                                </p>
+                                <p className="text-lg font-semibold text-slate-700 dark:text-slate-300">
+                                    FREE Premium Access
+                                </p>
+                            </div>
+
+                            <p className="text-sm text-slate-400 mb-6">
+                                Start adding your products today and reach thousands of skincare enthusiasts!
+                            </p>
+
+                            <button
+                                onClick={handleCloseWelcome}
+                                className="w-full px-6 py-4 bg-gradient-to-r from-pink-500 to-rose-500 text-white rounded-xl font-bold text-lg shadow-lg shadow-pink-500/25 hover:shadow-xl hover:shadow-pink-500/30 hover:-translate-y-0.5 transition-all duration-200"
+                            >
+                                Get Started
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
