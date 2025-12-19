@@ -38,8 +38,34 @@ const ProductModal = ({ product, products, currentIndex, onClose, onNavigate }) 
     useEffect(() => {
         if (product?.id) {
             fetchReviews();
+            trackProductView();
         }
     }, [product?.id]);
+
+    // Track product view (per user per quiz attempt)
+    const trackProductView = async () => {
+        try {
+            // Get user ID from auth context or localStorage
+            const userId = user?.id;
+
+            // Get quiz attempt ID from localStorage
+            let quizAttemptId = null;
+            try {
+                const quizData = JSON.parse(localStorage.getItem('glowmatch-quiz-data') || '{}');
+                quizAttemptId = quizData.attemptId;
+            } catch (e) { /* ignore */ }
+
+            // Only track if we have both user and quiz attempt (otherwise it's anonymous)
+            await fetch(`${API_BASE}/products/${product.id}/view`, {
+                method: 'POST',
+                headers: getHeaders(),
+                body: JSON.stringify({ userId, quizAttemptId })
+            });
+        } catch (err) {
+            // Non-blocking - don't show error to user
+            console.debug('View tracking failed:', err);
+        }
+    };
 
     const fetchReviews = async () => {
         setLoading(true);
