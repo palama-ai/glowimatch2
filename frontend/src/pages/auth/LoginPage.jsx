@@ -5,6 +5,7 @@ import { useI18n } from '../../contexts/I18nContext';
 import Button from '../../components/ui/Button';
 import Input from '../../components/ui/Input';
 import Icon from '../../components/AppIcon';
+import GoogleSignInButton from '../../components/GoogleSignInButton';
 
 const LoginPage = () => {
   const navigate = useNavigate();
@@ -16,6 +17,7 @@ const LoginPage = () => {
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [googleError, setGoogleError] = useState('');
 
   const handleSubmit = async (e) => {
     e?.preventDefault();
@@ -150,6 +152,30 @@ const LoginPage = () => {
                 <span className="px-2 bg-card text-muted-foreground">or</span>
               </div>
             </div>
+
+            {/* Google Sign-In Button */}
+            <GoogleSignInButton
+              accountType="user"
+              onSuccess={(data) => {
+                // Redirect based on role
+                if (data?.user?.role === 'seller') {
+                  navigate('/seller');
+                } else if (data?.user?.role === 'admin') {
+                  navigate('/admin');
+                } else {
+                  navigate('/');
+                }
+              }}
+              onError={(err) => {
+                setGoogleError(err?.message || 'فشل تسجيل الدخول بـ Google');
+              }}
+            />
+
+            {googleError && (
+              <div className="bg-destructive/10 border border-destructive/30 text-destructive px-4 py-2 rounded-lg text-sm text-center">
+                {googleError}
+              </div>
+            )}
 
             <div className="text-center">
               <p className="text-sm text-muted-foreground">
