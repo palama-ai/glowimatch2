@@ -32,13 +32,40 @@ const supabase = {
       try {
         const r = await fetch(`${API_BASE}/auth/login`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, password }) });
         const json = await r.json().catch(() => null);
+
+        // Check for remaining attempts warning
+        const attemptsRemaining = r.headers.get('X-Attempts-Remaining');
+
         if (json?.data?.token) {
           localStorage.setItem(authStorageKey, JSON.stringify({ token: json.data.token, user: json.data.user }));
         }
+
         let err = null;
         if (!r.ok) {
-          const msg = (json && (json.message || json.error)) || 'Login failed';
-          err = { message: msg, raw: json };
+          // 🛡️ SECURITY: Handle different error types
+          if (r.status === 423) {
+            // Account locked - brute force protection
+            err = {
+              message: json?.message || 'الحساب مقفل مؤقتاً. حاول لاحقاً',
+              type: 'locked',
+              raw: json
+            };
+          } else if (r.status === 429) {
+            // Too many requests
+            err = {
+              message: json?.message || 'طلبات كثيرة جداً. حاول لاحقاً',
+              type: 'rate_limited',
+              raw: json
+            };
+          } else {
+            const msg = (json && (json.message || json.error)) || 'فشل تسجيل الدخول';
+            err = { message: msg, raw: json };
+          }
+
+          // Add warning about remaining attempts
+          if (attemptsRemaining && parseInt(attemptsRemaining) <= 2) {
+            err.message += ` (${attemptsRemaining} محاولات متبقية)`;
+          }
         }
         return makeResp(r.ok, json?.data ?? null, err);
       } catch (err) {
