@@ -6,6 +6,7 @@ import { useI18n } from '../../contexts/I18nContext';
 import Button from '../../components/ui/Button';
 import Input from '../../components/ui/Input';
 import Icon from '../../components/AppIcon';
+import GoogleSignInButton from '../../components/GoogleSignInButton';
 
 const API_BASE = import.meta.env?.VITE_BACKEND_URL || 'https://backend-three-sigma-81.vercel.app/api';
 
@@ -289,6 +290,24 @@ const SignupPage = () => {
                 <span className="px-2 bg-card text-muted-foreground">or</span>
               </div>
             </div>
+
+            {/* Google Sign-In Button */}
+            <GoogleSignInButton
+              accountType={formData?.accountType || 'user'}
+              onSuccess={(data) => {
+                // Redirect based on role
+                if (data?.user?.role === 'seller') {
+                  navigate('/seller');
+                } else if (data?.user?.role === 'admin') {
+                  navigate('/admin');
+                } else {
+                  navigate('/');
+                }
+              }}
+              onError={(err) => {
+                setError(err?.message || 'فشل التسجيل بـ Google');
+              }}
+            />
 
             <div className="text-center">
               <p className="text-sm text-muted-foreground">
