@@ -215,7 +215,9 @@ export const quizService = {
 export const subscriptionService = {
   async getCurrentSubscription(userId) {
     try {
-      const r = await fetch(`${API_BASE}/subscription/${encodeURIComponent(userId)}`);
+      const r = await fetch(`${API_BASE}/subscription/${encodeURIComponent(userId)}`, {
+        headers: { ...getAuthHeader() }
+      });
       const json = await r.json();
       if (!r.ok) throw json.error || new Error('Failed to load subscription');
       return { data: json.data, error: null };
