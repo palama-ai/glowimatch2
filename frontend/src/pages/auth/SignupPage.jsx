@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
@@ -6,6 +6,8 @@ import { useI18n } from '../../contexts/I18nContext';
 import Button from '../../components/ui/Button';
 import Input from '../../components/ui/Input';
 import Icon from '../../components/AppIcon';
+
+const API_BASE = import.meta.env?.VITE_BACKEND_URL || 'https://backend-three-sigma-81.vercel.app/api';
 
 const SignupPage = () => {
   const navigate = useNavigate();
@@ -21,8 +23,27 @@ const SignupPage = () => {
   const [referralCode, setReferralCode] = useState(() => localStorage.getItem('referral_code') || '');
   const location = useLocation();
 
+  // Signup block status
+  const [signupBlock, setSignupBlock] = useState({ blockUserSignup: false, blockSellerSignup: false });
+
+  // Fetch signup block status on mount
+  useEffect(() => {
+    const fetchSignupStatus = async () => {
+      try {
+        const r = await fetch(`${API_BASE}/admin/signup-status`);
+        if (r.ok) {
+          const j = await r.json();
+          setSignupBlock(j.data || { blockUserSignup: false, blockSellerSignup: false });
+        }
+      } catch (e) {
+        console.warn('[signup] Could not fetch signup status:', e);
+      }
+    };
+    fetchSignupStatus();
+  }, []);
+
   // read ?ref=... from URL and prefill referral code
-  React.useEffect(() => {
+  useEffect(() => {
     try {
       const params = new URLSearchParams(location.search);
       const r = params.get('ref');
@@ -117,24 +138,28 @@ const SignupPage = () => {
                   <button
                     type="button"
                     onClick={() => setFormData({ ...formData, accountType: 'user' })}
+                    disabled={signupBlock.blockUserSignup}
                     className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg text-sm font-medium transition-all ${formData?.accountType === 'user'
                       ? 'bg-background shadow-sm text-foreground'
                       : 'text-muted-foreground hover:text-foreground'
-                      }`}
+                      } ${signupBlock.blockUserSignup ? 'opacity-50 cursor-not-allowed' : ''}`}
                   >
-                    <Icon name="User" size={16} />
+                    <Icon name={signupBlock.blockUserSignup ? "UserX" : "User"} size={16} />
                     User
+                    {signupBlock.blockUserSignup && <Icon name="Lock" size={12} className="ml-1 text-red-500" />}
                   </button>
                   <button
                     type="button"
                     onClick={() => setFormData({ ...formData, accountType: 'seller' })}
+                    disabled={signupBlock.blockSellerSignup}
                     className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg text-sm font-medium transition-all ${formData?.accountType === 'seller'
                       ? 'bg-accent text-white shadow-sm'
                       : 'text-muted-foreground hover:text-foreground'
-                      }`}
+                      } ${signupBlock.blockSellerSignup ? 'opacity-50 cursor-not-allowed' : ''}`}
                   >
-                    <Icon name="Store" size={16} />
+                    <Icon name={signupBlock.blockSellerSignup ? "StoreOff" : "Store"} size={16} />
                     Seller
+                    {signupBlock.blockSellerSignup && <Icon name="Lock" size={12} className="ml-1 text-red-500" />}
                   </button>
                 </div>
                 <p className="text-xs text-muted-foreground mt-2">
@@ -143,6 +168,21 @@ const SignupPage = () => {
                     : 'Find the perfect skincare routine for you'
                   }
                 </p>
+
+                {/* Blocked Signup Warning */}
+                {((formData?.accountType === 'user' && signupBlock.blockUserSignup) ||
+                  (formData?.accountType === 'seller' && signupBlock.blockSellerSignup)) && (
+                    <div className="mt-3 p-3 bg-amber-50 border border-amber-300 text-amber-800 rounded-lg flex items-start gap-2">
+                      <Icon name="AlertTriangle" size={18} className="flex-shrink-0 mt-0.5" />
+                      <div className="text-sm">
+                        <strong className="block">التسجيل معطل مؤقتاً</strong>
+                        {formData?.accountType === 'seller'
+                          ? 'تسجيل حسابات البائعين معطل حالياً. يرجى المحاولة لاحقاً.'
+                          : 'تسجيل حسابات المستخدمين معطل حالياً. يرجى المحاولة لاحقاً.'
+                        }
+                      </div>
+                    </div>
+                  )}
               </div>
 
               <div className="space-y-4">
@@ -233,7 +273,7 @@ const SignupPage = () => {
               <Button
                 type="submit"
                 className="w-full bg-gradient-to-r from-pink-500 to-rose-500 hover:shadow-lg hover:shadow-pink-500/40 transition-all"
-                disabled={loading}
+                disabled={loading || (formData?.accountType === 'user' && signupBlock.blockUserSignup) || (formData?.accountType === 'seller' && signupBlock.blockSellerSignup)}
                 iconName={loading ? "Loader2" : "UserPlus"}
                 iconClassName={loading ? "animate-spin" : ""}
               >
