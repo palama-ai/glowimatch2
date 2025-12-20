@@ -17,6 +17,7 @@ import BlogPost from './pages/blog/[slug]';
 import Contact from './pages/contact';
 import AdminDashboard from './pages/admin/Dashboard';
 import AdminUsers from './pages/admin/Users';
+import AdminProducts from './pages/admin/Products';
 import AdminBlogs from './pages/admin/Blogs';
 import AdminMessages from './pages/admin/Messages';
 import AdminSessions from './pages/admin/Sessions';
@@ -94,6 +95,7 @@ const Routes = () => {
                   {/* Admin routes (simple client-side access, server enforces admin token) */}
                   <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
                   <Route path="/admin/users" element={<AdminRoute><AdminUsers /></AdminRoute>} />
+                  <Route path="/admin/products" element={<AdminRoute><AdminProducts /></AdminRoute>} />
                   <Route path="/admin/blogs" element={<AdminRoute><AdminBlogs /></AdminRoute>} />
                   <Route path="/admin/messages" element={<AdminRoute><AdminMessages /></AdminRoute>} />
                   <Route path="/admin/notifications" element={<AdminRoute><AdminNotifications /></AdminRoute>} />
