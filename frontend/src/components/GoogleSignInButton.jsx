@@ -42,7 +42,7 @@ const GoogleSignInButton = ({ onSuccess, onError, accountType = 'user' }) => {
         script.onerror = () => {
             console.error('Failed to load Google Sign-In script');
             setRenderError(true);
-            onError?.({ message: 'فشل تحميل Google Sign-In' });
+            onError?.({ message: 'Failed to load Google Sign-In' });
         };
         document.body.appendChild(script);
 
@@ -90,7 +90,7 @@ const GoogleSignInButton = ({ onSuccess, onError, accountType = 'user' }) => {
 
     const handleCredentialResponse = async (response) => {
         if (!response.credential) {
-            onError?.({ message: 'لم يتم استلام بيانات Google' });
+            onError?.({ message: 'No Google data received' });
             return;
         }
 
@@ -110,7 +110,7 @@ const GoogleSignInButton = ({ onSuccess, onError, accountType = 'user' }) => {
             const data = await res.json();
 
             if (!res.ok) {
-                throw new Error(data.message || data.error || 'فشل تسجيل الدخول بـ Google');
+                throw new Error(data.message || data.error || 'Google sign-in failed');
             }
 
             // Store auth data
@@ -124,7 +124,7 @@ const GoogleSignInButton = ({ onSuccess, onError, accountType = 'user' }) => {
             onSuccess?.(data.data);
         } catch (error) {
             console.error('Google auth error:', error);
-            onError?.({ message: error.message || 'فشل تسجيل الدخول بـ Google' });
+            onError?.({ message: error.message || 'Google sign-in failed' });
         } finally {
             setLoading(false);
         }
@@ -145,7 +145,7 @@ const GoogleSignInButton = ({ onSuccess, onError, accountType = 'user' }) => {
                     <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
                 </svg>
                 <span>Continue with Google</span>
-                <span className="text-xs text-red-400">(غير متاح)</span>
+                <span className="text-xs text-red-400">(unavailable)</span>
             </button>
         );
     }
@@ -167,7 +167,7 @@ const GoogleSignInButton = ({ onSuccess, onError, accountType = 'user' }) => {
             {/* Loading overlay */}
             {loading && (
                 <div className="mt-2 text-center text-sm text-muted-foreground">
-                    جاري تسجيل الدخول...
+                    Signing in...
                 </div>
             )}
         </div>
