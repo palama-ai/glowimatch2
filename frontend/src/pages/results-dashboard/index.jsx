@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Header from '../../components/ui/Header';
+import { quizService } from '../../lib/supabase';
 import SkinTypeSummary from './components/SkinTypeSummary';
 import ProductCard from './components/ProductCard';
 import ProductFilters from './components/ProductFilters';
@@ -28,6 +29,8 @@ const ResultsDashboard = () => {
   const [productsError, setProductsError] = useState(null);
   const [allProducts, setAllProducts] = useState([]); // Store all fetched products for filtering
   const [selectedProduct, setSelectedProduct] = useState(null); // { product, index }
+  const [attemptId, setAttemptId] = useState(null); // Track current quiz attempt ID
+  const analysisAlreadySaved = useRef(false); // Track if we've already saved analysis for this session
 
   // Mock analysis results data
   const analysisResults = {
@@ -95,18 +98,35 @@ const ResultsDashboard = () => {
   // Initial data loading - runs once on mount
   useEffect(() => {
     const analysisData = localStorage.getItem('glowmatch-analysis');
-    const quizData = localStorage.getItem('glowmatch-quiz-data');
-    if (!analysisData || !quizData) {
+    const quizDataRaw = localStorage.getItem('glowmatch-quiz-data');
+    if (!analysisData || !quizDataRaw) {
       navigate('/interactive-skin-quiz');
       return;
     }
 
     try {
       const parsed = JSON.parse(analysisData);
-      const detailed = parsed?.detailed || parsed?.raw?.detailed || null;
+      const quizParsed = JSON.parse(quizDataRaw);
+      const currentAttemptId = quizParsed?.attemptId || null;
+      setAttemptId(currentAttemptId);
       setAnalysisState(parsed);
 
+      // Check if we have pre-saved analysis data (from quiz history)
+      const savedAnalysis = parsed?.savedAnalysis || null;
+      if (savedAnalysis && savedAnalysis.metrics) {
+        console.log('[Results] Using saved analysis data');
+        setDetailedState(savedAnalysis);
+        if (savedAnalysis.products?.length > 0) {
+          setAllProducts(savedAnalysis.products);
+          setFilteredProducts(savedAnalysis.products);
+        } else {
+          fetchRecommendedProducts(parsed);
+        }
+        return; // Don't re-fetch AI data
+      }
+
       // Set initial detailed state from local data
+      const detailed = parsed?.detailed || parsed?.raw?.detailed || null;
       if (detailed) {
         setDetailedState(detailed);
       }
@@ -151,12 +171,32 @@ const ResultsDashboard = () => {
 
           if (gen && (gen.metrics?.length > 0 || gen.tips?.length > 0 || gen.routine)) {
             // Update with AI generated data
+            const newDetailedState = {
+              metrics: gen.metrics?.length > 0 ? gen.metrics : [],
+              tips: gen.tips?.length > 0 ? gen.tips : [],
+              routine: gen.routine || null,
+              rationale: gen.rationale || null,
+              generatedAt: new Date().toISOString()
+            };
             setDetailedState(prev => ({
               ...(prev || {}),
-              metrics: gen.metrics?.length > 0 ? gen.metrics : (prev?.metrics || []),
-              tips: gen.tips?.length > 0 ? gen.tips : (prev?.tips || []),
-              routine: gen.routine || prev?.routine || null
+              ...newDetailedState
             }));
+
+            // Save to database if we have an attemptId and haven't already saved
+            if (currentAttemptId && !analysisAlreadySaved.current) {
+              analysisAlreadySaved.current = true;
+              console.log('[Results] Saving AI analysis to database for attempt:', currentAttemptId);
+              quizService.saveQuizAnalysis(currentAttemptId, newDetailedState)
+                .then(result => {
+                  if (result.success) {
+                    console.log('[Results] Analysis saved successfully');
+                  } else {
+                    console.warn('[Results] Failed to save analysis:', result.error);
+                  }
+                })
+                .catch(err => console.warn('[Results] Error saving analysis:', err));
+            }
           } else {
             console.warn('[Expand] No meaningful data in response:', gen);
             setExpandError('AI could not generate detailed analysis');
