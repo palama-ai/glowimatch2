@@ -335,12 +335,8 @@ const InteractiveSkinQuiz = () => {
       // If user has zero remaining attempts, prompt sharing referral
       const remaining = getRemainingAttempts?.();
       if (typeof remaining === 'number' && remaining <= 0) {
-        // Ensure referral link is available for sharing
-        try {
-          await fetchReferralLink();
-        } catch (e) {
-          console.debug('fetchReferralLink failed', e);
-        }
+        // Fetch referral link in background, show message immediately
+        fetchReferralLink().catch(e => console.debug('fetchReferralLink failed', e));
         alert('You have no quiz attempts left. Share your referral link to get more attempts.');
         return;
       }
@@ -355,26 +351,27 @@ const InteractiveSkinQuiz = () => {
         const { data, error } = await quizService.startQuiz();
         if (error || !data) {
           console.error('startQuiz failed', error);
-          // Surface server raw body if available so the developer can inspect HTML/error pages
           const details = error?.raw || error?.details || null;
           setLastSaveError({ code: 'START_ATTEMPT_ERROR', message: error?.message || 'Unable to start quiz', details });
           return;
         }
-        // refresh profile/subscription in context
-        try { await refreshProfile(); } catch (e) { console.debug('profile reload failed', e); }
+
+        // Start quiz IMMEDIATELY - refresh profile in background
+        setQuizStarted(true);
+        setCurrentQuestionIndex(0);
+        setResponses([]);
+        setCurrentAnswer(null);
+
+        // Refresh profile in background (non-blocking)
+        refreshProfile().catch(e => console.debug('profile reload failed', e));
+
       } catch (e) {
         console.error('startQuiz request failed', e);
         setLastSaveError({ code: e?.status || 'NETWORK_ERROR', message: e?.message || 'Unable to start quiz at this time', details: e?.raw || null });
         return;
       }
-
-      setQuizStarted(true);
-      setCurrentQuestionIndex(0);
-      setResponses([]);
-      setCurrentAnswer(null);
     } catch (error) {
       console.error('Error starting quiz:', error);
-      // عرض رسالة خطأ أكثر وضوحاً للمستخدم
       alert('Unable to start the quiz at this moment. Please try again in a few moments.');
     }
   };
@@ -603,10 +600,9 @@ const InteractiveSkinQuiz = () => {
 
       console.log('Saving quiz attempt...', { quizData, results });
 
-      // Try RPC save first (preferred). If it fails (permissions / RPC error), fall back to direct insert.
+      // Save quiz attempt (this is required, must wait)
       let attemptData = null;
       try {
-        // Try saving using quizService (centralized backend call)
         const { data: serviceData, error: serviceError } = await quizService.saveQuizAttempt(
           user.id,
           quizData,
@@ -629,39 +625,6 @@ const InteractiveSkinQuiz = () => {
         throw new Error('No attempt data returned after save');
       }
 
-      // Try to run AI analysis (best-effort). This analyzes quiz answers (images will be uploaded on next page).
-      const API_BASE = import.meta.env?.VITE_BACKEND_URL || 'https://backend-three-sigma-81.vercel.app/api';
-      const getAuthHeader = () => {
-        try {
-          const raw = localStorage.getItem('gm_auth');
-          if (!raw) return {};
-          const parsed = JSON.parse(raw);
-          return { Authorization: `Bearer ${parsed.token}` };
-        } catch {
-          return {};
-        }
-      };
-
-      let analysisText = null;
-      try {
-        const resp = await fetch(`${API_BASE}/analysis`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', ...getAuthHeader() },
-          body: JSON.stringify({ quizData, images: [], model })
-        });
-        const json = await resp.json();
-        if (resp.ok && json?.data) {
-          analysisText = json.data.analysis || json.data.result || json.data;
-        } else {
-          console.warn('Analysis failed or returned no data', json);
-        }
-      } catch (e) {
-        console.warn('Analysis request failed (non-blocking):', e);
-      }
-
-      // Attach analysis to attempt data so report generation can include it
-      if (analysisText) attemptData.analysis = analysisText;
-
       // Save backup to localStorage (include attempt id)
       localStorage.setItem('glowmatch-quiz-data', JSON.stringify({
         ...quizData,
@@ -679,44 +642,62 @@ const InteractiveSkinQuiz = () => {
       setCurrentAnswer(null);
       setQuizComplete(false);
 
+      // Navigate IMMEDIATELY - don't wait for analysis or report
       console.log('Navigating to image analysis...');
-
-      // Generate PDF report and attach (best-effort). If report generation/upload fails, we still navigate.
-      try {
-        const reportResult = await generateAndUploadReportAndAttach(attemptData);
-        if (reportResult?.success) {
-          // update local backup with report url
-          const existing = JSON.parse(localStorage.getItem('glowmatch-quiz-data') || '{}');
-          localStorage.setItem('glowmatch-quiz-data', JSON.stringify({ ...existing, reportUrl: reportResult.publicUrl }));
-        } else {
-          console.warn('Report generation/upload returned failure', reportResult.error);
-        }
-      } catch (reportError) {
-        console.error('Report generation/upload failed:', reportError);
-        // show non-blocking banner
-        setLastSaveError({ code: reportError?.code || 'report_error', message: reportError?.message || String(reportError), details: reportError?.details || null });
-      }
-
-      // Navigate to image analysis and pass chosen model so the next page can run image+quiz analysis
       navigate('/image-upload-analysis', {
         replace: true,
         state: { quizAttemptId: attemptData.id, model }
       });
 
+      // Run AI analysis + report generation in BACKGROUND (non-blocking)
+      const API_BASE = import.meta.env?.VITE_BACKEND_URL || 'https://backend-three-sigma-81.vercel.app/api';
+      const getAuthHeader = () => {
+        try {
+          const raw = localStorage.getItem('gm_auth');
+          if (!raw) return {};
+          const parsed = JSON.parse(raw);
+          return { Authorization: `Bearer ${parsed.token}` };
+        } catch {
+          return {};
+        }
+      };
+
+      // Background: AI analysis (non-blocking)
+      fetch(`${API_BASE}/analysis`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', ...getAuthHeader() },
+        body: JSON.stringify({ quizData, images: [], model })
+      }).then(resp => resp.json()).then(json => {
+        if (json?.data) {
+          console.log('Background AI analysis completed');
+          const existing = JSON.parse(localStorage.getItem('glowmatch-quiz-data') || '{}');
+          localStorage.setItem('glowmatch-quiz-data', JSON.stringify({
+            ...existing,
+            analysis: json.data.analysis || json.data.result || json.data
+          }));
+        }
+      }).catch(e => console.warn('Background analysis failed:', e));
+
+      // Background: Generate PDF report (non-blocking)
+      generateAndUploadReportAndAttach(attemptData).then(reportResult => {
+        if (reportResult?.success) {
+          console.log('Background report generation completed');
+          const existing = JSON.parse(localStorage.getItem('glowmatch-quiz-data') || '{}');
+          localStorage.setItem('glowmatch-quiz-data', JSON.stringify({ ...existing, reportUrl: reportResult.publicUrl }));
+        }
+      }).catch(e => console.warn('Background report failed:', e));
+
     } catch (error) {
-      // More detailed logging for the user and developer
       console.error('Error in handleContinueToAnalysis:', error);
       debugLogger.error('handleContinueToAnalysis', error);
 
-      // Prepare user-friendly error details and persist them to state so user can copy
       const code = error?.code || error?.status || error?.name || 'unknown';
       const message = error?.message || JSON.stringify(error);
       const details = error?.details || error?.fallback || null;
       const errorPayload = { code, message, details };
       setLastSaveError(errorPayload);
 
-      // Show a helpful alert and keep banner visible
-      alert(`Failed to save quiz attempt (code: ${code}). Please try again. More details are shown on the page. If this continues, open the browser console and share the error details.`);
+      alert(`Failed to save quiz attempt (code: ${code}). Please try again.`);
       return;
     }
   };
