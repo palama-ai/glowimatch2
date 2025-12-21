@@ -213,6 +213,37 @@ export const quizService = {
     } catch (error) {
       return { success: false, error };
     }
+  },
+
+  // Save complete analysis data (metrics, routine, tips, products) to existing quiz attempt
+  async saveQuizAnalysis(attemptId, analysisData) {
+    try {
+      const r = await fetch(`${API_BASE}/quiz/attempts/${attemptId}/analysis`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', ...getAuthHeader() },
+        body: JSON.stringify({ analysis: analysisData })
+      });
+      const json = await r.json();
+      if (!r.ok) throw json.error || new Error('Failed to save analysis');
+      return { success: true, data: json.data, error: null };
+    } catch (error) {
+      console.error('saveQuizAnalysis error:', error);
+      return { success: false, data: null, error };
+    }
+  },
+
+  // Get a specific quiz attempt with full analysis data
+  async getQuizAttempt(attemptId) {
+    try {
+      const r = await fetch(`${API_BASE}/quiz/attempts/${attemptId}`, {
+        headers: { ...getAuthHeader() }
+      });
+      const json = await r.json();
+      if (!r.ok) throw json.error || new Error('Failed to load attempt');
+      return { data: json.data, error: null };
+    } catch (error) {
+      return { data: null, error };
+    }
   }
 };
 
