@@ -39,6 +39,17 @@ const ImageUploadAnalysis = () => {
     reader.readAsDataURL(f);
   };
 
+  const getAuthHeader = () => {
+    try {
+      const raw = localStorage.getItem('gm_auth');
+      if (!raw) return {};
+      const parsed = JSON.parse(raw);
+      return { Authorization: `Bearer ${parsed.token}` };
+    } catch {
+      return {};
+    }
+  };
+
   const submitAnalysis = async () => {
     setLoading(true);
     setError(null);
@@ -56,7 +67,7 @@ const ImageUploadAnalysis = () => {
 
       const resp = await fetch(`${API_BASE}/analysis`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...getAuthHeader() },
         body: JSON.stringify(payload)
       });
 
