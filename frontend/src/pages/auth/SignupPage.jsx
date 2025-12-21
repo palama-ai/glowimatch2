@@ -176,10 +176,10 @@ const SignupPage = () => {
                     <div className="mt-3 p-3 bg-amber-50 border border-amber-300 text-amber-800 rounded-lg flex items-start gap-2">
                       <Icon name="AlertTriangle" size={18} className="flex-shrink-0 mt-0.5" />
                       <div className="text-sm">
-                        <strong className="block">التسجيل معطل مؤقتاً</strong>
+                        <strong className="block">Registration temporarily disabled</strong>
                         {formData?.accountType === 'seller'
-                          ? 'تسجيل حسابات البائعين معطل حالياً. يرجى المحاولة لاحقاً.'
-                          : 'تسجيل حسابات المستخدمين معطل حالياً. يرجى المحاولة لاحقاً.'
+                          ? 'Seller registration is currently disabled. Please try again later.'
+                          : 'User registration is currently disabled. Please try again later.'
                         }
                       </div>
                     </div>
@@ -305,7 +305,7 @@ const SignupPage = () => {
                 }
               }}
               onError={(err) => {
-                setError(err?.message || 'فشل التسجيل بـ Google');
+                setError(err?.message || 'Google sign-up failed');
               }}
             />
 
