@@ -55,17 +55,37 @@ const QuizHistory = () => {
     return colors[skinType?.toLowerCase()] || 'text-foreground';
   };
 
-  // Extract metrics from results - handle different data structures
+  // Extract metrics from results - handle quiz-based and AI-based data
   const getMetrics = (results) => {
-    if (!results) return { confidence: null, moisture: null, texture: null, health: null };
+    if (!results) return { sensitivity: null, routine: null, concerns_count: null, analysis: null };
 
-    // Try different possible field names
+    // Quiz-based metrics (always available)
+    const sensitivityMap = { 1: 20, 2: 40, 3: 60, 4: 80, 5: 100 };
+    const sensitivity = results.sensitivity_level
+      ? sensitivityMap[results.sensitivity_level] || (results.sensitivity_level * 20)
+      : null;
+
+    // Map routine complexity to a percentage
+    const routineMap = { 'minimal': 25, 'basic': 50, 'comprehensive': 75, 'extensive': 100 };
+    const routine = results.routine_complexity
+      ? routineMap[results.routine_complexity] || 50
+      : null;
+
+    // Count concerns
+    const concernsArr = results.concerns || results.skinConcerns || [];
+    const concerns_count = Array.isArray(concernsArr) ? concernsArr.length : null;
+
+    // AI-based metrics (only available if AI analysis was done)
     const confidence = results.confidence || results.confidenceScore || results.overall_confidence;
-    const moisture = results.moisture_score || results.moistureScore || results.moisture || results.hydration;
-    const texture = results.texture_score || results.textureScore || results.texture;
-    const health = results.overall_health || results.overallHealth || results.skinHealth || results.health_score;
+    const hasAIMetrics = confidence != null;
 
-    return { confidence, moisture, texture, health };
+    return {
+      sensitivity,
+      routine,
+      concerns_count,
+      // AI metrics if available
+      analysis: hasAIMetrics ? confidence : null
+    };
   };
 
   // Get skin type from results
@@ -256,14 +276,14 @@ const QuizHistory = () => {
                       <div className="flex-shrink-0 md:w-64">
                         <div className="grid grid-cols-2 gap-3 mb-4">
                           {[
-                            { label: 'Confidence', value: metrics.confidence },
-                            { label: 'Moisture', value: metrics.moisture },
-                            { label: 'Texture', value: metrics.texture },
-                            { label: 'Health', value: metrics.health }
+                            { label: 'Sensitivity', value: metrics.sensitivity, suffix: '%' },
+                            { label: 'Routine', value: metrics.routine, suffix: '%' },
+                            { label: 'Concerns', value: metrics.concerns_count, suffix: '' },
+                            { label: 'AI Analysis', value: metrics.analysis, suffix: '%' }
                           ].map((metric, i) => (
                             <div key={i} className="text-center">
                               <div className="text-lg font-bold text-accent">
-                                {metric.value ? `${Math.round(metric.value)}%` : '—'}
+                                {metric.value != null ? `${Math.round(metric.value)}${metric.suffix}` : '—'}
                               </div>
                               <div className="text-xs text-muted-foreground">{metric.label}</div>
                             </div>
