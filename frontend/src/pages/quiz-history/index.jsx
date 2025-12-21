@@ -295,8 +295,19 @@ const QuizHistory = () => {
                             variant="outline"
                             size="sm"
                             onClick={() => {
-                              localStorage.setItem('glowmatch-quiz-data', JSON.stringify(attempt.quiz_data));
-                              localStorage.setItem('glowmatch-analysis', JSON.stringify(attempt.results));
+                              // Include attempt ID in quiz data so results can be saved
+                              const quizDataWithId = {
+                                ...attempt.quiz_data,
+                                attemptId: attempt.id
+                              };
+                              localStorage.setItem('glowmatch-quiz-data', JSON.stringify(quizDataWithId));
+
+                              // Include saved analysis data if available
+                              const analysisWithSaved = {
+                                ...attempt.results,
+                                savedAnalysis: attempt.analysis || null
+                              };
+                              localStorage.setItem('glowmatch-analysis', JSON.stringify(analysisWithSaved));
                               navigate('/results-dashboard');
                             }}
                             iconName="Eye"
