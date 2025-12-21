@@ -41,40 +41,6 @@ const ResultsDashboard = () => {
     ]
   };
 
-  // Mock detailed analysis data
-  const detailedAnalysis = {
-    metrics: [
-      { name: "Moisture", score: 65, icon: "Droplets" },
-      { name: "Oil Level", score: 78, icon: "Zap" },
-      { name: "Pore Size", score: 45, icon: "Circle" },
-      { name: "Texture", score: 82, icon: "Layers" },
-      { name: "Sensitivity", score: 70, icon: "Shield" }
-    ],
-    tips: [
-      "Use a gentle cleanser twice daily to maintain balance",
-      "Apply different moisturizers to T-zone and cheeks",
-      "Incorporate a BHA exfoliant 2-3 times per week",
-      "Always use SPF 30+ sunscreen during the day"
-    ]
-  };
-
-  // Mock skincare routine data
-  const skincareRoutine = {
-    morning: [
-      { type: "cleanser", name: "Gentle Foaming Cleanser", description: "Start with a mild, pH-balanced cleanser.", timing: "2 min", tips: "Use lukewarm water and gentle motions." },
-      { type: "toner", name: "Balancing Toner", description: "Restore pH balance and prep skin.", timing: "30 sec", tips: "Focus on T-zone for oil control." },
-      { type: "serum", name: "Niacinamide Serum", description: "Target pores and oil production.", timing: "1 min", tips: "Apply to T-zone primarily." },
-      { type: "moisturizer", name: "Lightweight Moisturizer", description: "Gel-based for T-zone, cream for cheeks.", timing: "1 min" },
-      { type: "sunscreen", name: "SPF 30+ Sunscreen", description: "Broad-spectrum protection.", timing: "1 min", tips: "Reapply every 2 hours outdoors." }
-    ],
-    evening: [
-      { type: "cleanser", name: "Double Cleanse", description: "Oil cleanser then foaming cleanser.", timing: "3 min" },
-      { type: "treatment", name: "BHA Exfoliant", description: "Salicylic acid 2-3x per week.", timing: "Leave on", tips: "Apply to problem areas." },
-      { type: "serum", name: "Hydrating Serum", description: "Hyaluronic acid for moisture.", timing: "1 min", tips: "Apply to damp skin." },
-      { type: "moisturizer", name: "Night Moisturizer", description: "Richer formula for overnight repair.", timing: "2 min" }
-    ]
-  };
-
   // No fallback mock products - show empty state when no products available
 
   // Fetch AI-recommended products using voting system
@@ -224,7 +190,7 @@ const ResultsDashboard = () => {
   ];
 
   const currentAnalysis = analysisState || analysisResults;
-  const currentDetailed = detailedState || detailedAnalysis;
+  const currentDetailed = detailedState || null;
 
   return (
     <div className="min-h-screen bg-background">
@@ -291,7 +257,7 @@ const ResultsDashboard = () => {
             <div className="animate-fade-in">
               <SkincareRoutine
                 skinType={currentAnalysis?.skinType}
-                routineSteps={(currentDetailed?.routine) || skincareRoutine}
+                routineSteps={currentDetailed?.routine || null}
               />
             </div>
           )}
