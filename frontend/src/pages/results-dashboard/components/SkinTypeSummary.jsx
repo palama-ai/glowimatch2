@@ -1,156 +1,152 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Icon from '../../../components/AppIcon';
 
-// Circular Progress Component
-const CircularProgress = ({ value, size = 80, strokeWidth = 6, color = 'var(--color-accent)' }) => {
-  const radius = (size - strokeWidth) / 2;
-  const circumference = radius * 2 * Math.PI;
-  const offset = circumference - (value / 100) * circumference;
+const SkincareRoutine = ({ skinType, routineSteps }) => {
+  const [activeRoutine, setActiveRoutine] = useState('morning');
+  const [expandedStep, setExpandedStep] = useState(null);
+
+  const getStepIcon = (stepType) => {
+    switch (stepType) {
+      case 'cleanser': return 'Droplets';
+      case 'toner': return 'Spray';
+      case 'serum': return 'FlaskConical';
+      case 'moisturizer': return 'Heart';
+      case 'sunscreen': return 'Shield';
+      case 'treatment': return 'Zap';
+      default: return 'Circle';
+    }
+  };
+
+  const getStepColor = (stepType) => {
+    switch (stepType) {
+      case 'cleanser': return 'bg-blue-500';
+      case 'toner': return 'bg-purple-500';
+      case 'serum': return 'bg-amber-500';
+      case 'moisturizer': return 'bg-rose-500';
+      case 'sunscreen': return 'bg-orange-500';
+      case 'treatment': return 'bg-emerald-500';
+      default: return 'bg-accent';
+    }
+  };
+
+  const currentRoutine = routineSteps?.[activeRoutine] || [];
+
+  const toggleStep = (index) => {
+    setExpandedStep(expandedStep === index ? null : index);
+  };
 
   return (
-    <div className="circular-progress" style={{ width: size, height: size }}>
-      <svg width={size} height={size}>
-        <circle
-          className="circular-progress-track"
-          cx={size / 2}
-          cy={size / 2}
-          r={radius}
-          strokeWidth={strokeWidth}
-        />
-        <circle
-          className="circular-progress-fill"
-          cx={size / 2}
-          cy={size / 2}
-          r={radius}
-          strokeWidth={strokeWidth}
-          stroke={color}
-          strokeDasharray={circumference}
-          strokeDashoffset={offset}
-        />
-      </svg>
-      <div className="absolute inset-0 flex items-center justify-center">
-        <span className="text-xl font-bold text-foreground">{value}%</span>
+    <div className="animate-fade-in">
+      {/* Toggle Button */}
+      <div className="flex p-1 bg-muted/50 rounded-2xl mb-6 max-w-md">
+        <button
+          onClick={() => setActiveRoutine('morning')}
+          className={`flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-sm font-medium transition-all ${activeRoutine === 'morning'
+            ? 'bg-background shadow-sm text-foreground'
+            : 'text-muted-foreground hover:text-foreground'
+            }`}
+        >
+          <Icon name="Sun" size={18} />
+          Morning
+        </button>
+        <button
+          onClick={() => setActiveRoutine('evening')}
+          className={`flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-sm font-medium transition-all ${activeRoutine === 'evening'
+            ? 'bg-background shadow-sm text-foreground'
+            : 'text-muted-foreground hover:text-foreground'
+            }`}
+        >
+          <Icon name="Moon" size={18} />
+          Evening
+        </button>
       </div>
-    </div>
-  );
-};
 
-const SkinTypeSummary = ({ skinType, confidence, characteristics }) => {
-  const getSkinTypeIcon = (type) => {
-    switch (type) {
-      case 'oily': return 'Droplets';
-      case 'dry': return 'Sun';
-      case 'sensitive': return 'Heart';
-      case 'combination': return 'Layers';
-      default: return 'Sparkles';
-    }
-  };
+      {/* Timeline */}
+      <div className="relative">
+        {/* Timeline Line */}
+        <div className="absolute left-6 top-0 bottom-0 w-0.5 bg-gradient-to-b from-accent via-accent/50 to-transparent" />
 
-  const getSkinTypeGradient = (type) => {
-    switch (type) {
-      case 'oily': return 'from-blue-400/20 to-cyan-400/20';
-      case 'dry': return 'from-orange-400/20 to-amber-400/20';
-      case 'sensitive': return 'from-rose-400/20 to-pink-400/20';
-      case 'combination': return 'from-purple-400/20 to-violet-400/20';
-      default: return 'from-accent/20 to-secondary/20';
-    }
-  };
-
-  const getSkinTypeColor = (type) => {
-    switch (type) {
-      case 'oily': return 'text-blue-500';
-      case 'dry': return 'text-orange-500';
-      case 'sensitive': return 'text-rose-500';
-      case 'combination': return 'text-purple-500';
-      default: return 'text-accent';
-    }
-  };
-
-  const getSkinTypeBg = (type) => {
-    switch (type) {
-      case 'oily': return 'bg-blue-500/10';
-      case 'dry': return 'bg-orange-500/10';
-      case 'sensitive': return 'bg-rose-500/10';
-      case 'combination': return 'bg-purple-500/10';
-      default: return 'bg-accent/10';
-    }
-  };
-
-  const getSkinTypeDescription = (type) => {
-    switch (type) {
-      case 'oily':
-        return "Your skin produces excess sebum, particularly in the T-zone. We recommend oil-control products.";
-      case 'dry':
-        return "Your skin needs extra moisture. Focus on hydrating and nourishing products.";
-      case 'sensitive':
-        return "Your skin requires gentle care. Choose fragrance-free, hypoallergenic formulas.";
-      case 'combination':
-        return "Your skin has both oily and dry areas. Use targeted products for each zone.";
-      default:
-        return "Your personalized skincare plan is ready based on your unique skin profile.";
-    }
-  };
-
-  // Limit characteristics to first 4 for cleaner look
-  const displayCharacteristics = characteristics?.slice(0, 4) || [];
-
-  return (
-    <div className="relative overflow-hidden rounded-2xl mb-8 animate-fade-in">
-      {/* Glassmorphism Background */}
-      <div className={`absolute inset-0 bg-gradient-to-br ${getSkinTypeGradient(skinType)} opacity-60`} />
-      <div className="absolute inset-0 glass" />
-
-      {/* Content */}
-      <div className="relative p-6 md:p-8">
-        {/* Header Row */}
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 mb-6">
-          {/* Skin Type Info */}
-          <div className="flex items-center gap-4">
-            <div className={`w-16 h-16 md:w-20 md:h-20 rounded-2xl ${getSkinTypeBg(skinType)} flex items-center justify-center animate-float`}>
-              <Icon name={getSkinTypeIcon(skinType)} size={36} className={getSkinTypeColor(skinType)} />
-            </div>
-            <div>
-              <h2 className="text-2xl md:text-3xl font-bold text-foreground capitalize">
-                {skinType} <span className="text-muted-foreground font-normal">Skin</span>
-              </h2>
-              <p className="text-sm text-muted-foreground mt-1">
-                Analyzed on {new Date()?.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-              </p>
-            </div>
+        {/* Steps */}
+        {currentRoutine.length === 0 ? (
+          <div className="text-center py-12 ml-14">
+            <Icon name="Loader2" size={32} className="mx-auto text-muted-foreground/50 mb-3 animate-spin" />
+            <p className="text-sm text-muted-foreground">
+              Generating your personalized {activeRoutine} routine...
+            </p>
           </div>
+        ) : (
+          <div className="space-y-4 stagger-children">
+            {currentRoutine?.map((step, index) => (
+              <div key={index} className="relative pl-14">
+                {/* Step Number Circle */}
+                <div className={`absolute left-0 w-12 h-12 rounded-full ${getStepColor(step?.type)} flex items-center justify-center shadow-lg`}>
+                  <Icon name={getStepIcon(step?.type)} size={20} className="text-white" />
+                </div>
 
-          {/* Confidence Score */}
-          <div className="flex items-center gap-4">
-            <CircularProgress value={confidence || 87} />
-            <div className="hidden sm:block">
-              <p className="text-xs text-muted-foreground uppercase tracking-wide">Confidence</p>
-              <p className="text-sm font-medium text-foreground">Match Score</p>
-            </div>
-          </div>
-        </div>
+                {/* Step Card */}
+                <div
+                  className="glass rounded-2xl overflow-hidden cursor-pointer card-hover"
+                  onClick={() => toggleStep(index)}
+                >
+                  <div className="p-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <span className="text-xs font-medium text-accent bg-accent/10 px-2 py-1 rounded-full">
+                          Step {index + 1}
+                        </span>
+                        <span className="text-xs text-muted-foreground">
+                          {step?.timing}
+                        </span>
+                      </div>
+                      <Icon
+                        name={expandedStep === index ? 'ChevronUp' : 'ChevronDown'}
+                        size={18}
+                        className="text-muted-foreground"
+                      />
+                    </div>
 
-        {/* Description */}
-        <p className="text-foreground/80 mb-6 max-w-2xl">
-          {getSkinTypeDescription(skinType)}
-        </p>
+                    <h4 className="font-semibold text-foreground mt-2">{step?.name}</h4>
+                    <p className="text-sm text-muted-foreground mt-1 line-clamp-2">{step?.description}</p>
+                  </div>
 
-        {/* Characteristics Cards */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 stagger-children">
-          {displayCharacteristics.map((characteristic, index) => (
-            <div
-              key={index}
-              className="bg-background/60 backdrop-blur-sm rounded-xl p-3 border border-border/50 card-hover"
-            >
-              <div className="flex items-start gap-2">
-                <div className={`w-1.5 h-1.5 rounded-full ${getSkinTypeBg(skinType).replace('/10', '')} mt-2 flex-shrink-0`} />
-                <span className="text-sm text-foreground leading-tight">{characteristic}</span>
+                  {/* Expanded Content */}
+                  {expandedStep === index && step?.tips && (
+                    <div className="px-4 pb-4 animate-fade-in">
+                      <div className="p-3 bg-accent/5 rounded-xl border border-accent/10">
+                        <div className="flex items-start gap-2">
+                          <Icon name="Lightbulb" size={14} className="text-accent mt-0.5 flex-shrink-0" />
+                          <p className="text-xs text-foreground leading-relaxed">{step.tips}</p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Pro Tip */}
+      <div className="mt-8 p-5 gradient-soft rounded-2xl border border-accent/10">
+        <div className="flex items-start gap-3">
+          <div className="w-10 h-10 rounded-xl bg-accent/10 flex items-center justify-center flex-shrink-0">
+            <Icon name="Star" size={18} className="text-accent" />
+          </div>
+          <div>
+            <h5 className="font-medium text-foreground mb-1">Pro Tip for {skinType} Skin</h5>
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              {skinType === 'oily' && "Use oil-free products and don't skip moisturizer - hydration helps regulate oil production!"}
+              {skinType === 'dry' && "Layer products from thinnest to thickest and seal with an occlusive moisturizer."}
+              {skinType === 'sensitive' && "Patch test new products and choose fragrance-free, hypoallergenic formulas."}
+              {skinType === 'combination' && "Use different products for different zones - lighter on T-zone, richer on cheeks."}
+              {!['oily', 'dry', 'sensitive', 'combination'].includes(skinType) && "Consistency is key! Stick to your routine for at least 4-6 weeks to see results."}
+            </p>
+          </div>
         </div>
       </div>
     </div>
   );
 };
 
-export default SkinTypeSummary;
+export default SkincareRoutine;
