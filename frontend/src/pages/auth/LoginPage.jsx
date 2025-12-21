@@ -167,7 +167,7 @@ const LoginPage = () => {
                 }
               }}
               onError={(err) => {
-                setGoogleError(err?.message || 'فشل تسجيل الدخول بـ Google');
+                setGoogleError(err?.message || 'Google sign-in failed');
               }}
             />
 
