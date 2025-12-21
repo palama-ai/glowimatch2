@@ -31,6 +31,7 @@ const ResultsDashboard = () => {
   const [selectedProduct, setSelectedProduct] = useState(null); // { product, index }
   const [attemptId, setAttemptId] = useState(null); // Track current quiz attempt ID
   const analysisAlreadySaved = useRef(false); // Track if we've already saved analysis for this session
+  const productsSaved = useRef(false); // Track if we've already saved products for this session
 
   // Mock analysis results data
   const analysisResults = {
@@ -234,6 +235,28 @@ const ResultsDashboard = () => {
     });
     setFilteredProducts(filtered);
   }, [activeFilters, allProducts]);
+
+  // Save products to database when they're loaded
+  useEffect(() => {
+    if (allProducts.length > 0 && attemptId && !productsLoading && !productsSaved.current) {
+      productsSaved.current = true; // Prevent duplicate saves
+      // Update the saved analysis to include products
+      console.log('[Results] Saving products to database for attempt:', attemptId);
+      quizService.saveQuizAnalysis(attemptId, {
+        ...(detailedState || {}),
+        products: allProducts,
+        productsUpdatedAt: new Date().toISOString()
+      })
+        .then(result => {
+          if (result.success) {
+            console.log('[Results] Products saved successfully');
+          } else {
+            console.warn('[Results] Failed to save products:', result.error);
+          }
+        })
+        .catch(err => console.warn('[Results] Error saving products:', err));
+    }
+  }, [allProducts, attemptId, productsLoading]); // Only run when products change
 
   const handleFilterChange = (category, values) => {
     setActiveFilters((prev) => ({ ...prev, [category]: values }));
