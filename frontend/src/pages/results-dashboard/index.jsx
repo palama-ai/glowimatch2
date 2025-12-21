@@ -143,9 +143,20 @@ const ResultsDashboard = () => {
         try {
           setExpandLoading(true); setExpandError(null);
           const API_BASE = import.meta.env?.VITE_BACKEND_URL || 'https://backend-three-sigma-81.vercel.app/api';
+
+          // Get auth header for authenticated requests
+          const getAuthHeader = () => {
+            try {
+              const raw = localStorage.getItem('gm_auth');
+              if (!raw) return {};
+              const p = JSON.parse(raw);
+              return { Authorization: `Bearer ${p.token}` };
+            } catch { return {}; }
+          };
+
           const resp = await fetch(`${API_BASE}/analysis/expand`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 'Content-Type': 'application/json', ...getAuthHeader() },
             body: JSON.stringify({ analysis: parsed, provider })
           });
           if (!resp.ok) {
