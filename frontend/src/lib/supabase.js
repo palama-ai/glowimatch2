@@ -128,7 +128,9 @@ export const quizService = {
 
   async getQuizHistory(userId) {
     try {
-      const r = await fetch(`${API_BASE}/quiz/history/${encodeURIComponent(userId)}`);
+      const r = await fetch(`${API_BASE}/quiz/history/${encodeURIComponent(userId)}`, {
+        headers: { ...getAuthHeader() }
+      });
       const json = await r.json();
       if (!r.ok) throw json.error || new Error('Failed to load');
       return { data: json.data, error: null };
@@ -150,7 +152,9 @@ export const quizService = {
 
   async getQuizAutosave(userId) {
     try {
-      const r = await fetch(`${API_BASE}/quiz/autosave/${encodeURIComponent(userId)}`);
+      const r = await fetch(`${API_BASE}/quiz/autosave/${encodeURIComponent(userId)}`, {
+        headers: { ...getAuthHeader() }
+      });
       const json = await r.json();
       if (!r.ok) throw json.error || new Error('Failed to fetch autosave');
       return { data: json.data, error: null };
