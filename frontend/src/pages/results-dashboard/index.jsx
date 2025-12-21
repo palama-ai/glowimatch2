@@ -29,9 +29,7 @@ const ResultsDashboard = () => {
   const [productsError, setProductsError] = useState(null);
   const [allProducts, setAllProducts] = useState([]); // Store all fetched products for filtering
   const [selectedProduct, setSelectedProduct] = useState(null); // { product, index }
-  const [attemptId, setAttemptId] = useState(null); // Track current quiz attempt ID
-  const analysisAlreadySaved = useRef(false); // Track if we've already saved analysis for this session
-  const productsSaved = useRef(false); // Track if we've already saved products for this session
+  const [attemptId, setAttemptId] = useState(null); // Track current quiz attempt ID\n  const analysisAlreadySaved = useRef(false); // Track if we've already saved for this session
 
   // Mock analysis results data
   const analysisResults = {
@@ -183,21 +181,6 @@ const ResultsDashboard = () => {
               ...(prev || {}),
               ...newDetailedState
             }));
-
-            // Save to database if we have an attemptId and haven't already saved
-            if (currentAttemptId && !analysisAlreadySaved.current) {
-              analysisAlreadySaved.current = true;
-              console.log('[Results] Saving AI analysis to database for attempt:', currentAttemptId);
-              quizService.saveQuizAnalysis(currentAttemptId, newDetailedState)
-                .then(result => {
-                  if (result.success) {
-                    console.log('[Results] Analysis saved successfully');
-                  } else {
-                    console.warn('[Results] Failed to save analysis:', result.error);
-                  }
-                })
-                .catch(err => console.warn('[Results] Error saving analysis:', err));
-            }
           } else {
             console.warn('[Expand] No meaningful data in response:', gen);
             setExpandError('AI could not generate detailed analysis');
@@ -236,27 +219,33 @@ const ResultsDashboard = () => {
     setFilteredProducts(filtered);
   }, [activeFilters, allProducts]);
 
-  // Save products to database when they're loaded
+  // Combined save: Save both analysis AND products together when both are ready
   useEffect(() => {
-    if (allProducts.length > 0 && attemptId && !productsLoading && !productsSaved.current) {
-      productsSaved.current = true; // Prevent duplicate saves
-      // Update the saved analysis to include products
-      console.log('[Results] Saving products to database for attempt:', attemptId);
-      quizService.saveQuizAnalysis(attemptId, {
+    // Wait until we have: attemptId, products loaded, and not already saved
+    const hasProducts = allProducts.length > 0 && !productsLoading;
+    const hasAnalysis = detailedState && (detailedState.metrics?.length > 0 || detailedState.routine);
+
+    if (attemptId && hasProducts && !analysisAlreadySaved.current) {
+      analysisAlreadySaved.current = true;
+
+      const completeAnalysis = {
         ...(detailedState || {}),
         products: allProducts,
-        productsUpdatedAt: new Date().toISOString()
-      })
+        savedAt: new Date().toISOString()
+      };
+
+      console.log('[Results] Saving complete analysis + products to database for attempt:', attemptId);
+      quizService.saveQuizAnalysis(attemptId, completeAnalysis)
         .then(result => {
           if (result.success) {
-            console.log('[Results] Products saved successfully');
+            console.log('[Results] Complete analysis saved successfully');
           } else {
-            console.warn('[Results] Failed to save products:', result.error);
+            console.warn('[Results] Failed to save:', result.error);
           }
         })
-        .catch(err => console.warn('[Results] Error saving products:', err));
+        .catch(err => console.warn('[Results] Error saving:', err));
     }
-  }, [allProducts, attemptId, productsLoading]); // Only run when products change
+  }, [allProducts, attemptId, productsLoading, detailedState]); // Trigger when any of these change
 
   const handleFilterChange = (category, values) => {
     setActiveFilters((prev) => ({ ...prev, [category]: values }));
