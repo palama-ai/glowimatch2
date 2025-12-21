@@ -46,25 +46,25 @@ const supabase = {
           if (r.status === 423) {
             // Account locked - brute force protection
             err = {
-              message: json?.message || 'الحساب مقفل مؤقتاً. حاول لاحقاً',
+              message: json?.message || 'Account temporarily locked. Please try again later.',
               type: 'locked',
               raw: json
             };
           } else if (r.status === 429) {
             // Too many requests
             err = {
-              message: json?.message || 'طلبات كثيرة جداً. حاول لاحقاً',
+              message: json?.message || 'Too many requests. Please try again later.',
               type: 'rate_limited',
               raw: json
             };
           } else {
-            const msg = (json && (json.message || json.error)) || 'فشل تسجيل الدخول';
+            const msg = (json && (json.message || json.error)) || 'Login failed';
             err = { message: msg, raw: json };
           }
 
           // Add warning about remaining attempts
           if (attemptsRemaining && parseInt(attemptsRemaining) <= 2) {
-            err.message += ` (${attemptsRemaining} محاولات متبقية)`;
+            err.message += ` (${attemptsRemaining} attempts remaining)`;
           }
         }
         return makeResp(r.ok, json?.data ?? null, err);
