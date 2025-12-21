@@ -135,25 +135,38 @@ const ResultsDashboard = () => {
             headers: { 'Content-Type': 'application/json', ...getAuthHeader() },
             body: JSON.stringify({ analysis: parsed, provider })
           });
+
           if (!resp.ok) {
-            console.warn('Expand API failed, keeping existing data');
+            const errText = await resp.text().catch(() => 'Unknown error');
+            console.warn('Expand API failed:', resp.status, errText);
+            setExpandError('Unable to generate detailed analysis');
+            setExpandLoading(false);
             return;
           }
+
           const j = await resp.json();
+          console.log('[Expand] Response:', j);
           setExpandProviderUsed(j?.data?.provider || null);
           const gen = j?.data?.generated || null;
+
           if (gen && (gen.metrics?.length > 0 || gen.tips?.length > 0 || gen.routine)) {
-            // Only update if we got meaningful data back
+            // Update with AI generated data
             setDetailedState(prev => ({
               ...(prev || {}),
               metrics: gen.metrics?.length > 0 ? gen.metrics : (prev?.metrics || []),
               tips: gen.tips?.length > 0 ? gen.tips : (prev?.tips || []),
               routine: gen.routine || prev?.routine || null
             }));
+          } else {
+            console.warn('[Expand] No meaningful data in response:', gen);
+            setExpandError('AI could not generate detailed analysis');
           }
         } catch (e) {
-          console.warn('Expand fetch failed, keeping existing data:', e);
-        } finally { setExpandLoading(false); }
+          console.warn('Expand fetch failed:', e);
+          setExpandError('Failed to generate analysis');
+        } finally {
+          setExpandLoading(false);
+        }
       })();
     } catch (error) {
       console.error('Error parsing analysis data:', error);
@@ -268,6 +281,8 @@ const ResultsDashboard = () => {
               <SkincareRoutine
                 skinType={currentAnalysis?.skinType}
                 routineSteps={currentDetailed?.routine || null}
+                isLoading={expandLoading}
+                error={expandError}
               />
             </div>
           )}
