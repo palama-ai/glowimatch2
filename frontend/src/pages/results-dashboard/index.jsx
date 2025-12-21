@@ -29,7 +29,8 @@ const ResultsDashboard = () => {
   const [productsError, setProductsError] = useState(null);
   const [allProducts, setAllProducts] = useState([]); // Store all fetched products for filtering
   const [selectedProduct, setSelectedProduct] = useState(null); // { product, index }
-  const [attemptId, setAttemptId] = useState(null); // Track current quiz attempt ID\n  const analysisAlreadySaved = useRef(false); // Track if we've already saved for this session
+  const [attemptId, setAttemptId] = useState(null); // Track current quiz attempt ID
+  const analysisAlreadySaved = useRef(false); // Track if we've already saved for this session
 
   // Mock analysis results data
   const analysisResults = {
