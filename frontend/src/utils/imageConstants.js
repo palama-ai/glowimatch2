@@ -1,4 +1,4 @@
-// Image URLs - Using high-quality placeholder images from Unsplash
+// Image URLs - Using high-quality skincare-related images from Unsplash
 // All URLs verified and working as of December 2024
 
 export const IMAGES = {
@@ -14,7 +14,7 @@ export const IMAGES = {
   skin_sensitive: 'https://images.unsplash.com/photo-1515377905703-c4788e51af15?w=400&h=400&fit=crop',
 
   // Features
-  feature_analysis: 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=500&h=500&fit=crop',
+  feature_analysis: 'https://images.unsplash.com/photo-1620916566886-1a1c391d84fe?w=500&h=500&fit=crop',
   feature_personalized: 'https://images.unsplash.com/photo-1556228720-195a672e8a03?w=500&h=500&fit=crop',
   feature_reports: 'https://images.unsplash.com/photo-1607779097040-26e80aa78e66?w=500&h=500&fit=crop',
 
@@ -23,9 +23,9 @@ export const IMAGES = {
   blog_skincare_tips: 'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?w=600&h=400&fit=crop',
   blog_ingredients: 'https://images.unsplash.com/photo-1556228841-a3c527ebefe5?w=600&h=400&fit=crop',
 
-  // About
-  about_mission: 'https://images.unsplash.com/photo-1559599101-f09722fb4948?w=800&h=600&fit=crop',
-  about_team: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=800&h=600&fit=crop',
+  // About - Skincare related images
+  about_mission: 'https://images.unsplash.com/photo-1556228720-195a672e8a03?w=800&h=600&fit=crop',
+  about_team: 'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?w=800&h=600&fit=crop',
 
   // CTA & Social
   cta_beauty: 'https://images.unsplash.com/photo-1516975080664-ed2fc6a32937?w=1200&h=400&fit=crop',
