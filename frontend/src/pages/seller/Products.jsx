@@ -100,11 +100,86 @@ const ProductModal = ({ product, onClose, onSave }) => {
         published: 0
     });
     const [saving, setSaving] = useState(false);
+    const [imageMode, setImageMode] = useState('url'); // 'url' or 'upload'
+    const [selectedFile, setSelectedFile] = useState(null);
+    const [filePreview, setFilePreview] = useState(null);
+    const [uploadError, setUploadError] = useState('');
+
+    const API_BASE = import.meta.env?.VITE_BACKEND_URL || 'https://backend-three-sigma-81.vercel.app/api';
+    const getHeaders = () => {
+        const token = JSON.parse(localStorage.getItem('gm_auth') || '{}')?.token;
+        return { 'Authorization': `Bearer ${token}` };
+    };
+
+    const handleFileSelect = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            // Validate file type
+            const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif'];
+            if (!allowedTypes.includes(file.type)) {
+                setUploadError('Invalid file type. Only JPEG, PNG, WebP, and GIF are allowed.');
+                return;
+            }
+            // Validate file size (5MB max)
+            if (file.size > 5 * 1024 * 1024) {
+                setUploadError('File too large. Maximum size is 5MB.');
+                return;
+            }
+            setUploadError('');
+            setSelectedFile(file);
+            // Create preview
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setFilePreview(reader.result);
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
+    const uploadImage = async () => {
+        if (!selectedFile) return null;
+
+        const formDataUpload = new FormData();
+        formDataUpload.append('image', selectedFile);
+
+        try {
+            const res = await fetch(`${API_BASE}/upload/image`, {
+                method: 'POST',
+                headers: getHeaders(),
+                body: formDataUpload
+            });
+
+            const data = await res.json();
+            if (res.ok && data.success) {
+                return data.data.url;
+            } else {
+                throw new Error(data.error || 'Failed to upload image');
+            }
+        } catch (err) {
+            console.error('Image upload error:', err);
+            setUploadError(err.message || 'Failed to upload image');
+            return null;
+        }
+    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         setSaving(true);
-        await onSave(formData);
+        setUploadError('');
+
+        let imageUrl = formData.image_url;
+
+        // If upload mode and file selected, upload first
+        if (imageMode === 'upload' && selectedFile) {
+            const uploadedUrl = await uploadImage();
+            if (!uploadedUrl) {
+                setSaving(false);
+                return; // Upload failed, error already set
+            }
+            imageUrl = uploadedUrl;
+        }
+
+        await onSave({ ...formData, image_url: imageUrl });
         setSaving(false);
     };
 
@@ -202,14 +277,102 @@ const ProductModal = ({ product, onClose, onSave }) => {
                         </div>
                     </div>
 
+                    {/* Image Section with Toggle */}
                     <div>
-                        <label className="block text-sm font-semibold text-slate-900 dark:text-white mb-2">Image URL</label>
-                        <Input
-                            value={formData.image_url}
-                            onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
-                            placeholder="https://example.com/image.jpg"
-                            className="rounded-xl"
-                        />
+                        <label className="block text-sm font-semibold text-slate-900 dark:text-white mb-2">Product Image</label>
+
+                        {/* Toggle Buttons */}
+                        <div className="flex mb-3 p-1 bg-slate-100 dark:bg-slate-800 rounded-xl">
+                            <button
+                                type="button"
+                                onClick={() => setImageMode('url')}
+                                className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-lg text-sm font-medium transition-all ${imageMode === 'url'
+                                        ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm'
+                                        : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
+                                    }`}
+                            >
+                                <Icon name="Link" size={16} />
+                                URL
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => setImageMode('upload')}
+                                className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-lg text-sm font-medium transition-all ${imageMode === 'upload'
+                                        ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm'
+                                        : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
+                                    }`}
+                            >
+                                <Icon name="Upload" size={16} />
+                                Upload
+                            </button>
+                        </div>
+
+                        {/* URL Mode */}
+                        {imageMode === 'url' && (
+                            <Input
+                                value={formData.image_url}
+                                onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
+                                placeholder="https://example.com/image.jpg"
+                                className="rounded-xl"
+                            />
+                        )}
+
+                        {/* Upload Mode */}
+                        {imageMode === 'upload' && (
+                            <div>
+                                <div
+                                    className="relative border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-xl p-6 text-center hover:border-pink-400 transition-colors cursor-pointer"
+                                    onClick={() => document.getElementById('image-upload').click()}
+                                >
+                                    <input
+                                        type="file"
+                                        id="image-upload"
+                                        accept="image/jpeg,image/jpg,image/png,image/webp,image/gif"
+                                        onChange={handleFileSelect}
+                                        className="hidden"
+                                    />
+
+                                    {filePreview ? (
+                                        <div className="relative">
+                                            <img
+                                                src={filePreview}
+                                                alt="Preview"
+                                                className="max-h-40 mx-auto rounded-lg object-cover"
+                                            />
+                                            <button
+                                                type="button"
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    setSelectedFile(null);
+                                                    setFilePreview(null);
+                                                }}
+                                                className="absolute top-2 right-2 p-1 bg-red-500 text-white rounded-full hover:bg-red-600"
+                                            >
+                                                <Icon name="X" size={14} />
+                                            </button>
+                                            <p className="text-xs text-slate-500 mt-2">{selectedFile?.name}</p>
+                                        </div>
+                                    ) : (
+                                        <div>
+                                            <Icon name="ImagePlus" size={40} className="mx-auto text-slate-400 mb-2" />
+                                            <p className="text-sm text-slate-600 dark:text-slate-400">
+                                                Click to select an image
+                                            </p>
+                                            <p className="text-xs text-slate-400 mt-1">
+                                                JPEG, PNG, WebP, GIF (max 5MB)
+                                            </p>
+                                        </div>
+                                    )}
+                                </div>
+
+                                {uploadError && (
+                                    <p className="text-sm text-red-500 mt-2 flex items-center gap-1">
+                                        <Icon name="AlertCircle" size={14} />
+                                        {uploadError}
+                                    </p>
+                                )}
+                            </div>
+                        )}
                     </div>
 
                     <div>
