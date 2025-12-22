@@ -298,7 +298,7 @@ const LoginPage = () => {
               {forgotStep === 1 ? (
                 <div className="space-y-4">
                   <p className="text-sm text-muted-foreground">
-                    Enter your email address and we'll generate a reset code for you.
+                    Enter your email address and we'll send a reset code to your inbox.
                   </p>
                   <div>
                     <label className="block text-sm font-medium text-foreground mb-2">Email Address</label>
@@ -329,14 +329,14 @@ const LoginPage = () => {
                 </div>
               ) : (
                 <div className="space-y-4">
-                  {displayedCode && (
-                    <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg">
-                      <p className="text-sm font-medium">Your reset code:</p>
-                      <p className="text-2xl font-bold tracking-widest text-center my-2">{displayedCode}</p>
-                      <p className="text-xs text-green-600">Valid for 15 minutes</p>
+                  <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg">
+                    <div className="flex items-center gap-2 mb-1">
+                      <Icon name="Mail" size={18} />
+                      <p className="text-sm font-medium">Check your email!</p>
                     </div>
-                  )}
-
+                    <p className="text-xs">We sent a 6-digit code to <strong>{forgotEmail}</strong></p>
+                    <p className="text-xs text-green-600 mt-1">Code expires in 15 minutes</p>
+                  </div>
                   <div>
                     <label className="block text-sm font-medium text-foreground mb-2">Reset Code</label>
                     <Input
