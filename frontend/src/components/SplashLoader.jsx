@@ -14,26 +14,27 @@ const SplashLoader = ({ isVisible, onComplete }) => {
   useEffect(() => {
     if (!isVisible || !shouldRender) return;
 
-    // Animate progress for stroke drawing effect
+    // Slower, smoother animation progress
     const interval = setInterval(() => {
       setAnimationProgress(prev => {
         if (prev >= 100) {
           clearInterval(interval);
           return 100;
         }
-        return prev + 2;
+        // Slower increment for smoother drawing
+        return prev + 0.8;
       });
-    }, 40);
+    }, 50);
 
-    // Fade out after animation completes
+    // Longer fade out for smoother transition
     const fadeTimer = setTimeout(() => {
       setFadeOut(true);
-    }, 2500);
+    }, 4000);
 
     const completeTimer = setTimeout(() => {
       setShouldRender(false);
       onComplete && onComplete();
-    }, 3000);
+    }, 5000);
 
     return () => {
       clearInterval(interval);
@@ -45,7 +46,14 @@ const SplashLoader = ({ isVisible, onComplete }) => {
   if (!shouldRender) return null;
 
   return (
-    <div className={`fixed inset-0 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center z-[9999] transition-all duration-500 ${fadeOut ? 'opacity-0 scale-95' : 'opacity-100 scale-100'}`}>
+    <div
+      className={`fixed inset-0 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center z-[9999]`}
+      style={{
+        opacity: fadeOut ? 0 : 1,
+        transform: fadeOut ? 'scale(1.05)' : 'scale(1)',
+        transition: 'opacity 1s cubic-bezier(0.4, 0, 0.2, 1), transform 1s cubic-bezier(0.4, 0, 0.2, 1)'
+      }}
+    >
       {/* Animated background elements */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute top-20 left-10 w-32 h-32 bg-pink-500/10 rounded-full blur-3xl animate-pulse" />
@@ -55,11 +63,11 @@ const SplashLoader = ({ isVisible, onComplete }) => {
 
       {/* Main content */}
       <div className="relative flex flex-col items-center justify-center gap-8 z-10">
-        {/* SVG Text with drawing effect */}
+        {/* SVG Text with smooth drawing effect */}
         <svg
-          width="400"
-          height="80"
-          viewBox="0 0 400 80"
+          width="420"
+          height="90"
+          viewBox="0 0 420 90"
           className="overflow-visible"
         >
           <defs>
@@ -72,7 +80,7 @@ const SplashLoader = ({ isVisible, onComplete }) => {
 
             {/* Glow filter */}
             <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
-              <feGaussianBlur stdDeviation="3" result="coloredBlur" />
+              <feGaussianBlur stdDeviation="4" result="coloredBlur" />
               <feMerge>
                 <feMergeNode in="coloredBlur" />
                 <feMergeNode in="SourceGraphic" />
@@ -80,70 +88,58 @@ const SplashLoader = ({ isVisible, onComplete }) => {
             </filter>
           </defs>
 
-          {/* Glowimatch text - outlined/hollow style */}
+          {/* Glowimatch text - outlined/hollow style with smooth drawing */}
           <text
-            x="200"
-            y="55"
+            x="210"
+            y="60"
             textAnchor="middle"
-            className="splash-text"
             style={{
-              fontSize: '52px',
+              fontSize: '54px',
               fontWeight: 900,
               fontFamily: 'system-ui, -apple-system, sans-serif',
               fill: 'none',
               stroke: 'url(#textGradient)',
-              strokeWidth: '2',
+              strokeWidth: '1.5',
               strokeLinecap: 'round',
               strokeLinejoin: 'round',
-              strokeDasharray: 600,
-              strokeDashoffset: 600 - (600 * animationProgress / 100),
+              strokeDasharray: 800,
+              strokeDashoffset: 800 - (800 * animationProgress / 100),
               filter: 'url(#glow)',
-              transition: 'stroke-dashoffset 0.04s ease-out'
+              transition: 'stroke-dashoffset 0.1s cubic-bezier(0.4, 0, 0.2, 1)'
             }}
           >
             Glowimatch
           </text>
-
-          {/* Fill effect that appears after drawing completes */}
-          {animationProgress >= 100 && (
-            <text
-              x="200"
-              y="55"
-              textAnchor="middle"
-              style={{
-                fontSize: '52px',
-                fontWeight: 900,
-                fontFamily: 'system-ui, -apple-system, sans-serif',
-                fill: 'none',
-                stroke: 'url(#textGradient)',
-                strokeWidth: '2',
-                opacity: 0,
-                animation: 'fadeIn 0.5s ease-out forwards'
-              }}
-            >
-              Glowimatch
-            </text>
-          )}
         </svg>
 
-        {/* Tagline */}
+        {/* Tagline with smooth fade in */}
         <p
-          className="text-white/60 text-sm font-medium tracking-wide transition-opacity duration-500"
-          style={{ opacity: animationProgress > 50 ? 1 : 0 }}
+          className="text-white/60 text-sm font-medium tracking-wide"
+          style={{
+            opacity: animationProgress > 60 ? 1 : 0,
+            transform: animationProgress > 60 ? 'translateY(0)' : 'translateY(10px)',
+            transition: 'opacity 0.8s ease-out, transform 0.8s ease-out'
+          }}
         >
           Discover Your Perfect Skincare
         </p>
 
-        {/* Progress dots */}
-        <div className="flex gap-2">
+        {/* Progress dots with smooth animation */}
+        <div
+          className="flex gap-3"
+          style={{
+            opacity: animationProgress < 95 ? 1 : 0,
+            transition: 'opacity 0.5s ease-out'
+          }}
+        >
           {[0, 1, 2].map((i) => (
             <div
               key={i}
-              className="w-2 h-2 rounded-full bg-pink-500/30"
+              className="w-2 h-2 rounded-full"
               style={{
-                animation: animationProgress < 100 ? 'pulse 1.5s ease-in-out infinite' : 'none',
-                animationDelay: `${i * 0.2}s`,
-                backgroundColor: animationProgress >= 100 ? '#ec4899' : undefined
+                backgroundColor: '#ec4899',
+                animation: 'dotPulse 1.4s ease-in-out infinite',
+                animationDelay: `${i * 0.2}s`
               }}
             />
           ))}
@@ -151,19 +147,14 @@ const SplashLoader = ({ isVisible, onComplete }) => {
       </div>
 
       <style>{`
-        @keyframes fadeIn {
-          from { opacity: 0; }
-          to { opacity: 1; }
-        }
-        
-        @keyframes pulse {
+        @keyframes dotPulse {
           0%, 100% { 
             opacity: 0.3;
             transform: scale(0.8);
           }
           50% { 
             opacity: 1;
-            transform: scale(1);
+            transform: scale(1.2);
           }
         }
       `}</style>
