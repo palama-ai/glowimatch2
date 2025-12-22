@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import AccountTypeModal from './AccountTypeModal';
 
 const API_BASE = import.meta.env?.VITE_BACKEND_URL || 'https://backend-three-sigma-81.vercel.app/api';
 
@@ -14,6 +15,11 @@ const GoogleSignInButton = ({ onSuccess, onError, accountType = 'user' }) => {
     const [loading, setLoading] = useState(false);
     const [scriptLoaded, setScriptLoaded] = useState(false);
     const [renderError, setRenderError] = useState(false);
+
+    // State for new user flow
+    const [showAccountTypeModal, setShowAccountTypeModal] = useState(false);
+    const [pendingCredential, setPendingCredential] = useState(null);
+    const [pendingUserInfo, setPendingUserInfo] = useState({ email: '', name: '' });
 
     useEffect(() => {
         // If no client ID, show error
@@ -97,13 +103,46 @@ const GoogleSignInButton = ({ onSuccess, onError, accountType = 'user' }) => {
         setLoading(true);
 
         try {
-            // Send credential to our backend
+            // First, check if user exists (without creating account)
+            const checkRes = await fetch(`${API_BASE}/auth/google-check`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ credential: response.credential })
+            });
+
+            const checkData = await checkRes.json();
+
+            if (checkRes.ok && checkData.exists) {
+                // User exists - proceed with login
+                await completeGoogleAuth(response.credential, null);
+            } else if (checkRes.ok && !checkData.exists) {
+                // New user - show account type selection modal
+                setPendingCredential(response.credential);
+                setPendingUserInfo({
+                    email: checkData.email || '',
+                    name: checkData.name || ''
+                });
+                setShowAccountTypeModal(true);
+                setLoading(false);
+            } else {
+                throw new Error(checkData.error || 'Failed to check user');
+            }
+        } catch (error) {
+            console.error('Google auth error:', error);
+            // Fallback: try normal auth flow
+            await completeGoogleAuth(response.credential, accountType);
+        }
+    };
+
+    const completeGoogleAuth = async (credential, selectedAccountType) => {
+        setLoading(true);
+        try {
             const res = await fetch(`${API_BASE}/auth/google`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    credential: response.credential,
-                    accountType: accountType
+                    credential: credential,
+                    accountType: selectedAccountType || accountType
                 })
             });
 
@@ -121,6 +160,7 @@ const GoogleSignInButton = ({ onSuccess, onError, accountType = 'user' }) => {
                 }));
             }
 
+            setShowAccountTypeModal(false);
             onSuccess?.(data.data);
         } catch (error) {
             console.error('Google auth error:', error);
@@ -128,6 +168,11 @@ const GoogleSignInButton = ({ onSuccess, onError, accountType = 'user' }) => {
         } finally {
             setLoading(false);
         }
+    };
+
+    const handleAccountTypeSelect = async (selectedType) => {
+        if (!pendingCredential) return;
+        await completeGoogleAuth(pendingCredential, selectedType);
     };
 
     // Show error if no client ID or script failed
@@ -160,19 +205,28 @@ const GoogleSignInButton = ({ onSuccess, onError, accountType = 'user' }) => {
     }
 
     return (
-        <div className="w-full">
-            {/* Google's rendered button */}
-            <div ref={buttonRef} className="w-full flex justify-center min-h-[44px]" />
+        <>
+            <div className="w-full">
+                {/* Google's rendered button */}
+                <div ref={buttonRef} className="w-full flex justify-center min-h-[44px]" />
 
-            {/* Loading overlay */}
-            {loading && (
-                <div className="mt-2 text-center text-sm text-muted-foreground">
-                    Signing in...
-                </div>
-            )}
-        </div>
+                {/* Loading overlay */}
+                {loading && (
+                    <div className="mt-2 text-center text-sm text-muted-foreground">
+                        Signing in...
+                    </div>
+                )}
+            </div>
+
+            {/* Account Type Selection Modal for new users */}
+            <AccountTypeModal
+                isOpen={showAccountTypeModal}
+                onSelect={handleAccountTypeSelect}
+                userEmail={pendingUserInfo.email}
+                userName={pendingUserInfo.name}
+            />
+        </>
     );
 };
 
 export default GoogleSignInButton;
-
