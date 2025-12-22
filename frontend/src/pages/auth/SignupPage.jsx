@@ -57,6 +57,7 @@ const SignupPage = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [acceptTerms, setAcceptTerms] = useState(false);
 
   // Password validation requirements
   const passwordRequirements = [
@@ -83,6 +84,12 @@ const SignupPage = () => {
 
     if (!allPasswordRequirementsMet) {
       setError('Password must contain an uppercase letter, lowercase letter, number, symbol, and be at least 8 characters');
+      setLoading(false);
+      return;
+    }
+
+    if (!acceptTerms) {
+      setError('You must accept the Terms of Service to create an account');
       setLoading(false);
       return;
     }
@@ -305,10 +312,27 @@ const SignupPage = () => {
                 </div>
               )}
 
+              {/* Terms of Service Checkbox */}
+              <div className="flex items-start gap-3">
+                <input
+                  type="checkbox"
+                  id="acceptTerms"
+                  checked={acceptTerms}
+                  onChange={(e) => setAcceptTerms(e.target.checked)}
+                  className="mt-1 w-4 h-4 rounded border-gray-300 text-pink-500 focus:ring-pink-500 cursor-pointer"
+                />
+                <label htmlFor="acceptTerms" className="text-sm text-muted-foreground cursor-pointer">
+                  I agree to the{' '}
+                  <Link to="/terms" className="text-accent hover:underline font-medium" target="_blank">
+                    Terms of Service
+                  </Link>
+                </label>
+              </div>
+
               <Button
                 type="submit"
                 className="w-full bg-gradient-to-r from-pink-500 to-rose-500 hover:shadow-lg hover:shadow-pink-500/40 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                disabled={loading || !allPasswordRequirementsMet || (formData?.password !== formData?.confirmPassword) || (formData?.accountType === 'user' && signupBlock.blockUserSignup) || (formData?.accountType === 'seller' && signupBlock.blockSellerSignup)}
+                disabled={loading || !allPasswordRequirementsMet || (formData?.password !== formData?.confirmPassword) || !acceptTerms || (formData?.accountType === 'user' && signupBlock.blockUserSignup) || (formData?.accountType === 'seller' && signupBlock.blockSellerSignup)}
                 iconName={loading ? "Loader2" : "UserPlus"}
                 iconClassName={loading ? "animate-spin" : ""}
               >
