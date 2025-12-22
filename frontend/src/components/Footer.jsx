@@ -98,12 +98,6 @@ const Footer = () => {
                                     Terms of Service
                                 </Link>
                             </li>
-                            <li>
-                                <a href="mailto:support@glowimatch.com" className="text-slate-400 hover:text-pink-400 text-sm transition-colors flex items-center gap-1">
-                                    <Icon name="Mail" size={14} />
-                                    support@glowimatch.com
-                                </a>
-                            </li>
                         </ul>
                     </div>
                 </div>
