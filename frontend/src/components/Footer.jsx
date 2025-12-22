@@ -50,11 +50,6 @@ const Footer = () => {
                                 </Link>
                             </li>
                             <li>
-                                <Link to="/interactive-skin-quiz" className="text-slate-400 hover:text-pink-400 text-sm transition-colors">
-                                    Skin Analysis
-                                </Link>
-                            </li>
-                            <li>
                                 <Link to="/blog" className="text-slate-400 hover:text-pink-400 text-sm transition-colors">
                                     Blog
                                 </Link>
@@ -69,11 +64,6 @@ const Footer = () => {
                             <li>
                                 <Link to="/signup" className="text-slate-400 hover:text-pink-400 text-sm transition-colors">
                                     Become a Seller
-                                </Link>
-                            </li>
-                            <li>
-                                <Link to="/seller" className="text-slate-400 hover:text-pink-400 text-sm transition-colors">
-                                    Seller Dashboard
                                 </Link>
                             </li>
                             <li>
