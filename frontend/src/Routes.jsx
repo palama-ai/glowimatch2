@@ -125,6 +125,9 @@ const Routes = () => {
                     <Route path="/seller/news" element={<SellerNews />} />
                     <Route path="/seller/profile" element={<SellerProfile />} />
 
+                    {/* Legal pages */}
+                    <Route path="/terms" element={<TermsOfService />} />
+
                     <Route path="*" element={<NotFound />} />
                   </RouterRoutes>
                 </Suspense>
