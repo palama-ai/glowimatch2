@@ -307,13 +307,29 @@ const SignupPage = () => {
 
               <Button
                 type="submit"
-                className="w-full bg-gradient-to-r from-pink-500 to-rose-500 hover:shadow-lg hover:shadow-pink-500/40 transition-all"
-                disabled={loading || (formData?.accountType === 'user' && signupBlock.blockUserSignup) || (formData?.accountType === 'seller' && signupBlock.blockSellerSignup)}
+                className="w-full bg-gradient-to-r from-pink-500 to-rose-500 hover:shadow-lg hover:shadow-pink-500/40 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled={loading || !allPasswordRequirementsMet || (formData?.password !== formData?.confirmPassword) || (formData?.accountType === 'user' && signupBlock.blockUserSignup) || (formData?.accountType === 'seller' && signupBlock.blockSellerSignup)}
                 iconName={loading ? "Loader2" : "UserPlus"}
                 iconClassName={loading ? "animate-spin" : ""}
               >
                 {loading ? t('creating_account') : t('sign_up')}
               </Button>
+
+              {/* Password warning if requirements not met */}
+              {formData?.password && !allPasswordRequirementsMet && (
+                <div className="bg-amber-50 border border-amber-200 text-amber-700 px-4 py-2 rounded-lg flex items-center gap-2 text-sm">
+                  <Icon name="AlertCircle" size={16} className="flex-shrink-0" />
+                  <span>Please meet all password requirements above</span>
+                </div>
+              )}
+
+              {/* Password mismatch warning */}
+              {formData?.confirmPassword && formData?.password !== formData?.confirmPassword && (
+                <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-2 rounded-lg flex items-center gap-2 text-sm">
+                  <Icon name="XCircle" size={16} className="flex-shrink-0" />
+                  <span>Passwords do not match</span>
+                </div>
+              )}
             </form>
 
             <div className="relative">
