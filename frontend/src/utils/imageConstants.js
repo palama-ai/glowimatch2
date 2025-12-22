@@ -14,7 +14,7 @@ export const IMAGES = {
   skin_sensitive: 'https://images.unsplash.com/photo-1515377905703-c4788e51af15?w=400&h=400&fit=crop',
 
   // Features
-  feature_analysis: 'https://images.unsplash.com/photo-1620916566886-1a1c391d84fe?w=500&h=500&fit=crop',
+  feature_analysis: 'https://images.unsplash.com/photo-1611930022073-84f7e1b63f1d?w=500&h=500&fit=crop',
   feature_personalized: 'https://images.unsplash.com/photo-1556228720-195a672e8a03?w=500&h=500&fit=crop',
   feature_reports: 'https://images.unsplash.com/photo-1607779097040-26e80aa78e66?w=500&h=500&fit=crop',
 
