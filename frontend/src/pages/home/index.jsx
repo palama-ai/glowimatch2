@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Header from '../../components/ui/Header';
+import Footer from '../../components/Footer';
 import SplashLoader from '../../components/SplashLoader';
 import { Link } from 'react-router-dom';
 import { useI18n } from '../../contexts/I18nContext';
@@ -171,6 +172,8 @@ const Home = () => {
               </div>
             </section>
           </main>
+
+          <Footer />
         </>
       )}
     </div>
