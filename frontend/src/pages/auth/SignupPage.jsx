@@ -58,6 +58,17 @@ const SignupPage = () => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
+  // Password validation requirements
+  const passwordRequirements = [
+    { label: 'Uppercase letter (A-Z)', test: (pwd) => /[A-Z]/.test(pwd) },
+    { label: 'Lowercase letter (a-z)', test: (pwd) => /[a-z]/.test(pwd) },
+    { label: 'Number (0-9)', test: (pwd) => /[0-9]/.test(pwd) },
+    { label: 'Symbol (!@#$%...)', test: (pwd) => /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(pwd) },
+    { label: 'At least 8 characters', test: (pwd) => pwd.length >= 8 },
+  ];
+
+  const allPasswordRequirementsMet = passwordRequirements.every((req) => req.test(formData.password || ''));
+
   const handleSubmit = async (e) => {
     e?.preventDefault();
     setLoading(true);
@@ -70,8 +81,8 @@ const SignupPage = () => {
       return;
     }
 
-    if (formData?.password?.length < 6) {
-      setError(t('password_min_length'));
+    if (!allPasswordRequirementsMet) {
+      setError('Password must contain an uppercase letter, lowercase letter, number, symbol, and be at least 8 characters');
       setLoading(false);
       return;
     }
@@ -240,6 +251,29 @@ const SignupPage = () => {
                     onChange={handleInputChange}
                     className="w-full"
                   />
+                  {/* Password Requirements Indicator */}
+                  {formData?.password && (
+                    <div className="mt-3 p-3 bg-muted/30 rounded-lg border border-border/50">
+                      <p className="text-xs font-medium text-muted-foreground mb-2">Password Requirements:</p>
+                      <div className="grid grid-cols-1 gap-1.5">
+                        {passwordRequirements.map((req, index) => {
+                          const isMet = req.test(formData.password || '');
+                          return (
+                            <div key={index} className="flex items-center gap-2">
+                              <Icon
+                                name={isMet ? "CheckCircle2" : "XCircle"}
+                                size={14}
+                                className={isMet ? "text-green-500" : "text-red-400"}
+                              />
+                              <span className={`text-xs ${isMet ? "text-green-600" : "text-muted-foreground"}`}>
+                                {req.label}
+                              </span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-foreground mb-2">{t('confirm_password')}</label>
