@@ -65,9 +65,9 @@ const SplashLoader = ({ isVisible, onComplete }) => {
       <div className="relative flex flex-col items-center justify-center gap-8 z-10">
         {/* SVG Text with smooth drawing effect */}
         <svg
-          width="420"
-          height="90"
-          viewBox="0 0 420 90"
+          width="550"
+          height="120"
+          viewBox="0 0 550 120"
           className="overflow-visible"
         >
           <defs>
@@ -80,7 +80,7 @@ const SplashLoader = ({ isVisible, onComplete }) => {
 
             {/* Glow filter */}
             <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
-              <feGaussianBlur stdDeviation="4" result="coloredBlur" />
+              <feGaussianBlur stdDeviation="5" result="coloredBlur" />
               <feMerge>
                 <feMergeNode in="coloredBlur" />
                 <feMergeNode in="SourceGraphic" />
@@ -90,20 +90,20 @@ const SplashLoader = ({ isVisible, onComplete }) => {
 
           {/* Glowimatch text - outlined/hollow style with smooth drawing */}
           <text
-            x="210"
-            y="60"
+            x="275"
+            y="80"
             textAnchor="middle"
             style={{
-              fontSize: '54px',
+              fontSize: '72px',
               fontWeight: 900,
               fontFamily: 'system-ui, -apple-system, sans-serif',
               fill: 'none',
               stroke: 'url(#textGradient)',
-              strokeWidth: '1.5',
+              strokeWidth: '2',
               strokeLinecap: 'round',
               strokeLinejoin: 'round',
-              strokeDasharray: 800,
-              strokeDashoffset: 800 - (800 * animationProgress / 100),
+              strokeDasharray: 1000,
+              strokeDashoffset: 1000 - (1000 * animationProgress / 100),
               filter: 'url(#glow)',
               transition: 'stroke-dashoffset 0.1s cubic-bezier(0.4, 0, 0.2, 1)'
             }}
