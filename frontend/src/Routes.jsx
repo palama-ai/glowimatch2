@@ -44,6 +44,9 @@ const SellerProducts = lazy(() => import('./pages/seller/Products'));
 const SellerNews = lazy(() => import('./pages/seller/News'));
 const SellerProfile = lazy(() => import('./pages/seller/Profile'));
 
+// Legal pages
+const TermsOfService = lazy(() => import('./pages/legal/TermsOfService'));
+
 // Loading spinner component for Suspense fallback
 const PageLoader = () => (
   <div className="min-h-screen flex items-center justify-center bg-background">
