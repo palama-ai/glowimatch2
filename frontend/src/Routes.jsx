@@ -123,6 +123,7 @@ const Routes = () => {
                     <Route path="/admin/messages" element={<Suspense fallback={<PageLoader />}><AdminRoute><AdminMessages /></AdminRoute></Suspense>} />
                     <Route path="/admin/notifications" element={<Suspense fallback={<PageLoader />}><AdminRoute><AdminNotifications /></AdminRoute></Suspense>} />
                     <Route path="/admin/sessions" element={<Suspense fallback={<PageLoader />}><AdminRoute><AdminSessions /></AdminRoute></Suspense>} />
+                    <Route path="/admin/safety" element={<Suspense fallback={<PageLoader />}><AdminRoute><AdminSafety /></AdminRoute></Suspense>} />
 
                     {/* Seller routes */}
                     <Route path="/seller" element={<SellerDashboard />} />
