@@ -232,6 +232,7 @@ const SellerDashboard = () => {
     const [analytics, setAnalytics] = useState(null);
     const [loading, setLoading] = useState(true);
     const [showWelcomeModal, setShowWelcomeModal] = useState(false);
+    const [accountStatus, setAccountStatus] = useState(null); // For safety system
 
     // Check if first time seller on mount
     useEffect(() => {
@@ -265,9 +266,10 @@ const SellerDashboard = () => {
             const headers = { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' };
             const API_BASE = import.meta.env?.VITE_BACKEND_URL || 'https://backend-three-sigma-81.vercel.app/api';
 
-            const [prodRes, analyticsRes] = await Promise.all([
+            const [prodRes, analyticsRes, statusRes] = await Promise.all([
                 fetch(`${API_BASE}/seller/products`, { headers }),
-                fetch(`${API_BASE}/seller/analytics`, { headers })
+                fetch(`${API_BASE}/seller/analytics`, { headers }),
+                fetch(`${API_BASE}/seller/account-status`, { headers })
             ]);
 
             if (prodRes.ok) {
@@ -278,6 +280,11 @@ const SellerDashboard = () => {
             if (analyticsRes.ok) {
                 const analyticsData = await analyticsRes.json();
                 setAnalytics(analyticsData.data || {});
+            }
+
+            if (statusRes.ok) {
+                const statusData = await statusRes.json();
+                setAccountStatus(statusData.data || null);
             }
         } catch (err) {
             console.error('Error fetching seller data:', err);
@@ -320,6 +327,69 @@ const SellerDashboard = () => {
                         </button>
                     </div>
                 </header>
+
+                {/* Account Status Banner */}
+                {accountStatus && (accountStatus.violationCount > 0 || accountStatus.isOnProbation || accountStatus.status !== 'ACTIVE') && (
+                    <div className={`mb-6 rounded-2xl p-4 border ${accountStatus.status === 'BANNED' ? 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800' :
+                            accountStatus.status === 'LOCKED' ? 'bg-orange-50 dark:bg-orange-900/20 border-orange-200 dark:border-orange-800' :
+                                accountStatus.isOnProbation ? 'bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800' :
+                                    'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800'
+                        }`}>
+                        <div className="flex items-start gap-3">
+                            <Icon
+                                name={accountStatus.status === 'BANNED' ? 'Ban' : accountStatus.status === 'LOCKED' ? 'Lock' : 'AlertTriangle'}
+                                size={20}
+                                className={`flex-shrink-0 mt-0.5 ${accountStatus.status === 'BANNED' ? 'text-red-500' :
+                                        accountStatus.status === 'LOCKED' ? 'text-orange-500' :
+                                            'text-amber-500'
+                                    }`}
+                            />
+                            <div className="flex-1">
+                                <h3 className={`font-semibold ${accountStatus.status === 'BANNED' ? 'text-red-700 dark:text-red-400' :
+                                        accountStatus.status === 'LOCKED' ? 'text-orange-700 dark:text-orange-400' :
+                                            'text-amber-700 dark:text-amber-400'
+                                    }`}>
+                                    {accountStatus.status === 'BANNED' ? '⛔ Account Permanently Banned' :
+                                        accountStatus.status === 'LOCKED' ? '🔒 Account Locked' :
+                                            accountStatus.isOnProbation ? '⚠️ Account Under Probation' :
+                                                `⚠️ Safety Warning (${accountStatus.violationCount}/3)`}
+                                </h3>
+                                <p className={`text-sm mt-1 ${accountStatus.status === 'BANNED' ? 'text-red-600 dark:text-red-300' :
+                                        accountStatus.status === 'LOCKED' ? 'text-orange-600 dark:text-orange-300' :
+                                            'text-amber-600 dark:text-amber-300'
+                                    }`}>
+                                    {accountStatus.status === 'BANNED'
+                                        ? 'Your account has been permanently banned for repeated safety violations.'
+                                        : accountStatus.status === 'LOCKED'
+                                            ? 'Your account has been locked due to 3 safety violations. You can submit an appeal.'
+                                            : accountStatus.isOnProbation
+                                                ? 'Your account is on probation. Any further violations will result in permanent ban.'
+                                                : `You have ${accountStatus.violationCount} warning(s). 3 violations will result in account lock.`}
+                                </p>
+                                {(accountStatus.status === 'LOCKED' || accountStatus.violationCount > 0) && (
+                                    <button
+                                        onClick={() => navigate('/seller/violations')}
+                                        className={`mt-2 text-sm font-medium underline ${accountStatus.status === 'LOCKED' ? 'text-orange-600 dark:text-orange-400' : 'text-amber-600 dark:text-amber-400'
+                                            }`}
+                                    >
+                                        {accountStatus.status === 'LOCKED' ? 'Submit an Appeal' : 'View Violation History'}
+                                    </button>
+                                )}
+                            </div>
+                            {accountStatus.violationCount > 0 && accountStatus.status === 'ACTIVE' && (
+                                <div className="flex gap-1">
+                                    {[1, 2, 3].map((i) => (
+                                        <div
+                                            key={i}
+                                            className={`w-3 h-3 rounded-full ${i <= accountStatus.violationCount ? 'bg-amber-500' : 'bg-slate-200 dark:bg-slate-700'
+                                                }`}
+                                        />
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                )}
 
                 {/* Stats Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
