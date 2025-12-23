@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 const SplashLoader = ({ isVisible, onComplete }) => {
   const [shouldRender, setShouldRender] = useState(isVisible);
   const [fadeOut, setFadeOut] = useState(false);
+  const [animationProgress, setAnimationProgress] = useState(0);
 
   useEffect(() => {
     if (isVisible) {
@@ -13,18 +14,30 @@ const SplashLoader = ({ isVisible, onComplete }) => {
   useEffect(() => {
     if (!isVisible || !shouldRender) return;
 
-    // Fade out after 2 seconds
+    // Animate drawing progress
+    const interval = setInterval(() => {
+      setAnimationProgress(prev => {
+        if (prev >= 100) {
+          clearInterval(interval);
+          return 100;
+        }
+        return prev + 1.5;
+      });
+    }, 30);
+
+    // Fade out after drawing complete
     const fadeTimer = setTimeout(() => {
       setFadeOut(true);
-    }, 2000);
+    }, 3000);
 
-    // Complete after fade animation
+    // Complete after fade
     const completeTimer = setTimeout(() => {
       setShouldRender(false);
       onComplete && onComplete();
-    }, 2500);
+    }, 3500);
 
     return () => {
+      clearInterval(interval);
       clearTimeout(fadeTimer);
       clearTimeout(completeTimer);
     };
@@ -40,12 +53,34 @@ const SplashLoader = ({ isVisible, onComplete }) => {
         transition: 'opacity 0.5s ease-out'
       }}
     >
-      <h1
-        className="text-6xl md:text-7xl font-bold tracking-tight"
-        style={{ color: '#ec4899' }}
+      <svg
+        width="400"
+        height="100"
+        viewBox="0 0 400 100"
+        className="overflow-visible"
       >
-        Glowimatch
-      </h1>
+        {/* Hollow/Outline Glowimatch text with drawing animation */}
+        <text
+          x="200"
+          y="70"
+          textAnchor="middle"
+          style={{
+            fontSize: '56px',
+            fontWeight: 800,
+            fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, sans-serif',
+            fill: 'none',
+            stroke: '#ec4899',
+            strokeWidth: '2',
+            strokeLinecap: 'round',
+            strokeLinejoin: 'round',
+            strokeDasharray: 800,
+            strokeDashoffset: 800 - (800 * animationProgress / 100),
+            transition: 'stroke-dashoffset 0.05s ease-out'
+          }}
+        >
+          Glowimatch
+        </text>
+      </svg>
     </div>
   );
 };
