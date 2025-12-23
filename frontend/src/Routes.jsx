@@ -36,6 +36,7 @@ const AdminBlogs = lazy(() => import('./pages/admin/Blogs'));
 const AdminMessages = lazy(() => import('./pages/admin/Messages'));
 const AdminSessions = lazy(() => import('./pages/admin/Sessions'));
 const AdminNotifications = lazy(() => import('./pages/admin/Notifications'));
+const AdminSafety = lazy(() => import('./pages/admin/Safety'));
 const AdminRoute = lazy(() => import('./components/AdminRoute'));
 
 // ⚡ PERFORMANCE: Lazy load seller pages (only sellers need these)
