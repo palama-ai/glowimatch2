@@ -49,10 +49,29 @@ const SellerProfile = lazy(() => import('./pages/seller/Profile'));
 // Legal pages
 const TermsOfService = lazy(() => import('./pages/legal/TermsOfService'));
 
-// Loading component - Simple Glowimatch branding
+// Loading component - iOS-style spinner
 const PageLoader = () => (
   <div className="min-h-screen flex items-center justify-center bg-white">
-    <h1 className="text-5xl font-bold text-pink-500 tracking-tight">Glowimatch</h1>
+    <div className="relative w-10 h-10">
+      {[...Array(12)].map((_, i) => (
+        <div
+          key={i}
+          className="absolute w-1 h-3 bg-gray-400 rounded-full left-1/2 top-0 origin-bottom"
+          style={{
+            transform: `translateX(-50%) rotate(${i * 30}deg) translateY(8px)`,
+            opacity: 1 - (i * 0.07),
+            animation: `iosSpinner 1s linear infinite`,
+            animationDelay: `${-i * (1 / 12)}s`
+          }}
+        />
+      ))}
+      <style>{`
+        @keyframes iosSpinner {
+          0% { opacity: 1; }
+          100% { opacity: 0.2; }
+        }
+      `}</style>
+    </div>
   </div>
 );
 
