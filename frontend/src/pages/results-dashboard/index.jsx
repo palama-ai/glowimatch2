@@ -10,6 +10,124 @@ import SkincareRoutine from './components/SkincareRoutine';
 import ProductModal from './components/ProductModal';
 import Icon from '../../components/AppIcon';
 
+// Generate a fallback routine based on skin type when AI fails
+const generateFallbackRoutine = (skinType) => {
+  const baseRoutine = {
+    morning: [
+      {
+        type: 'cleanser',
+        name: 'Gentle Cleanser',
+        description: 'Start your day with a gentle cleanser to remove overnight oil and impurities.',
+        timing: '1-2 minutes',
+        tips: 'Use lukewarm water and massage in circular motions.'
+      },
+      {
+        type: 'toner',
+        name: 'Hydrating Toner',
+        description: 'Balance your skin\'s pH and prepare it for the next steps.',
+        timing: '30 seconds',
+        tips: 'Pat gently into skin rather than rubbing.'
+      },
+      {
+        type: 'serum',
+        name: 'Vitamin C Serum',
+        description: 'Antioxidant protection and brightening for the day ahead.',
+        timing: '1 minute',
+        tips: 'Apply to slightly damp skin for better absorption.'
+      },
+      {
+        type: 'moisturizer',
+        name: 'Lightweight Moisturizer',
+        description: 'Lock in hydration without feeling heavy.',
+        timing: '1 minute',
+        tips: 'Let it absorb before applying sunscreen.'
+      },
+      {
+        type: 'sunscreen',
+        name: 'SPF 30+ Sunscreen',
+        description: 'Protect your skin from UV damage - the most important step!',
+        timing: '1-2 minutes',
+        tips: 'Apply generously and reapply every 2 hours when outdoors.'
+      }
+    ],
+    evening: [
+      {
+        type: 'cleanser',
+        name: 'Double Cleanse - Oil Cleanser',
+        description: 'Remove makeup and sunscreen with an oil-based cleanser.',
+        timing: '1-2 minutes',
+        tips: 'Massage thoroughly to break down all impurities.'
+      },
+      {
+        type: 'cleanser',
+        name: 'Double Cleanse - Water Cleanser',
+        description: 'Follow up with a water-based cleanser for a deep clean.',
+        timing: '1-2 minutes',
+        tips: 'This ensures all residue is removed.'
+      },
+      {
+        type: 'toner',
+        name: 'Hydrating Toner',
+        description: 'Rebalance and hydrate your skin after cleansing.',
+        timing: '30 seconds',
+        tips: 'Use the same toner as your morning routine.'
+      },
+      {
+        type: 'serum',
+        name: 'Treatment Serum',
+        description: 'Target your specific skin concerns with an active serum.',
+        timing: '1 minute',
+        tips: 'Night is the best time for active ingredients like retinol.'
+      },
+      {
+        type: 'moisturizer',
+        name: 'Night Cream',
+        description: 'Rich moisturizer to nourish and repair while you sleep.',
+        timing: '1-2 minutes',
+        tips: 'Use a slightly heavier formula than your day cream.'
+      }
+    ]
+  };
+
+  // Customize based on skin type
+  const skinTypeCustomizations = {
+    oily: {
+      morning: { moisturizer: 'Oil-Free Gel Moisturizer', serum: 'Niacinamide Serum' },
+      evening: { moisturizer: 'Lightweight Gel Cream', serum: 'Salicylic Acid Serum' }
+    },
+    dry: {
+      morning: { moisturizer: 'Rich Hydrating Cream', serum: 'Hyaluronic Acid Serum' },
+      evening: { moisturizer: 'Intensive Night Balm', serum: 'Ceramide Serum' }
+    },
+    sensitive: {
+      morning: { moisturizer: 'Calming Moisturizer', serum: 'Centella Asiatica Serum' },
+      evening: { moisturizer: 'Soothing Night Cream', serum: 'Aloe Vera Serum' }
+    },
+    combination: {
+      morning: { moisturizer: 'Balancing Lotion', serum: 'Niacinamide Serum' },
+      evening: { moisturizer: 'Light Night Cream', serum: 'AHA/BHA Serum' }
+    }
+  };
+
+  const customization = skinTypeCustomizations[skinType?.toLowerCase()] || skinTypeCustomizations.combination;
+
+  // Apply customizations
+  if (customization.morning) {
+    const morningMoisturizer = baseRoutine.morning.find(s => s.type === 'moisturizer');
+    const morningSerum = baseRoutine.morning.find(s => s.type === 'serum');
+    if (morningMoisturizer) morningMoisturizer.name = customization.morning.moisturizer;
+    if (morningSerum) morningSerum.name = customization.morning.serum;
+  }
+  if (customization.evening) {
+    const eveningMoisturizer = baseRoutine.evening.find(s => s.type === 'moisturizer');
+    const eveningSerum = baseRoutine.evening.find(s => s.type === 'serum');
+    if (eveningMoisturizer) eveningMoisturizer.name = customization.evening.moisturizer;
+    if (eveningSerum) eveningSerum.name = customization.evening.serum;
+  }
+
+  return baseRoutine;
+};
+
 const ResultsDashboard = () => {
   const navigate = useNavigate();
   const [activeFilters, setActiveFilters] = useState({
@@ -159,7 +277,18 @@ const ResultsDashboard = () => {
           if (!resp.ok) {
             const errText = await resp.text().catch(() => 'Unknown error');
             console.warn('Expand API failed:', resp.status, errText);
-            setExpandError('Unable to generate detailed analysis');
+            // Use fallback routine when API fails
+            console.log('[Expand] Using fallback routine for skin type:', parsed?.skinType);
+            const fallbackRoutine = generateFallbackRoutine(parsed?.skinType);
+            setDetailedState(prev => ({
+              ...(prev || {}),
+              routine: fallbackRoutine,
+              metrics: [],
+              tips: [],
+              rationale: 'Personalized routine based on your skin type',
+              generatedAt: new Date().toISOString(),
+              isFallback: true
+            }));
             setExpandLoading(false);
             return;
           }
@@ -169,26 +298,60 @@ const ResultsDashboard = () => {
           setExpandProviderUsed(j?.data?.provider || null);
           const gen = j?.data?.generated || null;
 
-          if (gen && (gen.metrics?.length > 0 || gen.tips?.length > 0 || gen.routine)) {
-            // Update with AI generated data
+          // Check if we have a valid routine with morning/evening arrays
+          const hasValidRoutine = gen?.routine &&
+            (Array.isArray(gen.routine.morning) && gen.routine.morning.length > 0) ||
+            (Array.isArray(gen.routine.evening) && gen.routine.evening.length > 0);
+
+          if (gen && (gen.metrics?.length > 0 || gen.tips?.length > 0 || hasValidRoutine)) {
+            // Update with AI generated data, but ensure routine exists
+            const routineToUse = hasValidRoutine ? gen.routine : generateFallbackRoutine(parsed?.skinType);
             const newDetailedState = {
               metrics: gen.metrics?.length > 0 ? gen.metrics : [],
               tips: gen.tips?.length > 0 ? gen.tips : [],
-              routine: gen.routine || null,
+              routine: routineToUse,
               rationale: gen.rationale || null,
-              generatedAt: new Date().toISOString()
+              generatedAt: new Date().toISOString(),
+              isFallback: !hasValidRoutine
             };
             setDetailedState(prev => ({
               ...(prev || {}),
               ...newDetailedState
             }));
           } else {
-            console.warn('[Expand] No meaningful data in response:', gen);
-            setExpandError('AI could not generate detailed analysis');
+            console.warn('[Expand] No meaningful data in response, using fallback:', gen);
+            // Use fallback routine when AI returns incomplete data
+            const fallbackRoutine = generateFallbackRoutine(parsed?.skinType);
+            setDetailedState(prev => ({
+              ...(prev || {}),
+              routine: fallbackRoutine,
+              metrics: gen?.metrics || [],
+              tips: gen?.tips || [],
+              rationale: 'Personalized routine based on your skin type',
+              generatedAt: new Date().toISOString(),
+              isFallback: true
+            }));
           }
         } catch (e) {
           console.warn('Expand fetch failed:', e);
-          setExpandError('Failed to generate analysis');
+          // Use fallback routine on any error
+          const analysisData = localStorage.getItem('glowmatch-analysis');
+          let skinType = 'combination';
+          try {
+            const parsed = JSON.parse(analysisData);
+            skinType = parsed?.skinType || 'combination';
+          } catch { }
+          console.log('[Expand] Using fallback routine after error for skin type:', skinType);
+          const fallbackRoutine = generateFallbackRoutine(skinType);
+          setDetailedState(prev => ({
+            ...(prev || {}),
+            routine: fallbackRoutine,
+            metrics: [],
+            tips: [],
+            rationale: 'Personalized routine based on your skin type',
+            generatedAt: new Date().toISOString(),
+            isFallback: true
+          }));
         } finally {
           setExpandLoading(false);
         }
