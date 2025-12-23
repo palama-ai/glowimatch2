@@ -41,6 +41,7 @@ const AdminRoute = lazy(() => import('./components/AdminRoute'));
 // ⚡ PERFORMANCE: Lazy load seller pages (only sellers need these)
 const SellerDashboard = lazy(() => import('./pages/seller/Dashboard'));
 const SellerProducts = lazy(() => import('./pages/seller/Products'));
+const SellerViolations = lazy(() => import('./pages/seller/Violations'));
 const SellerNews = lazy(() => import('./pages/seller/News'));
 const SellerProfile = lazy(() => import('./pages/seller/Profile'));
 
@@ -125,6 +126,7 @@ const Routes = () => {
                     {/* Seller routes */}
                     <Route path="/seller" element={<SellerDashboard />} />
                     <Route path="/seller/products" element={<SellerProducts />} />
+                    <Route path="/seller/violations" element={<SellerViolations />} />
                     <Route path="/seller/news" element={<SellerNews />} />
                     <Route path="/seller/profile" element={<SellerProfile />} />
 
