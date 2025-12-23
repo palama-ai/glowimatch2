@@ -92,6 +92,7 @@ const ProductModal = ({ product, onClose, onSave }) => {
         name: '',
         brand: '',
         description: '',
+        ingredients: '',
         price: '',
         original_price: '',
         image_url: '',
@@ -104,6 +105,7 @@ const ProductModal = ({ product, onClose, onSave }) => {
     const [selectedFile, setSelectedFile] = useState(null);
     const [filePreview, setFilePreview] = useState(null);
     const [uploadError, setUploadError] = useState('');
+    const [safetyError, setSafetyError] = useState(null); // For toxic ingredient errors
 
     const API_BASE = import.meta.env?.VITE_BACKEND_URL || 'https://backend-three-sigma-81.vercel.app/api';
     const getHeaders = () => {
@@ -166,6 +168,7 @@ const ProductModal = ({ product, onClose, onSave }) => {
         e.preventDefault();
         setSaving(true);
         setUploadError('');
+        setSafetyError(null);
 
         let imageUrl = formData.image_url;
 
@@ -179,8 +182,26 @@ const ProductModal = ({ product, onClose, onSave }) => {
             imageUrl = uploadedUrl;
         }
 
-        await onSave({ ...formData, image_url: imageUrl });
+        // Call onSave and handle the result
+        const result = await onSave({ ...formData, image_url: imageUrl });
         setSaving(false);
+
+        // If result has error code, it's a safety rejection
+        if (result && result.error) {
+            if (result.code === 'TOXIC_INGREDIENTS_DETECTED' || result.code === 'INGREDIENTS_REQUIRED') {
+                setSafetyError({
+                    message: result.error,
+                    flaggedIngredients: result.flaggedIngredients || [],
+                    penalty: result.penalty || null
+                });
+            } else if (result.code === 'ACCOUNT_LOCKED') {
+                setSafetyError({
+                    message: result.message || 'Your account has been locked due to safety violations.',
+                    flaggedIngredients: [],
+                    penalty: null
+                });
+            }
+        }
     };
 
     return (
@@ -248,8 +269,58 @@ const ProductModal = ({ product, onClose, onSave }) => {
                             value={formData.description}
                             onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                             placeholder="Describe your product..."
-                            className="w-full px-4 py-3 border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 text-slate-900 dark:text-white min-h-[100px] focus:outline-none focus:ring-2 focus:ring-pink-500/50"
+                            className="w-full px-4 py-3 border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 text-slate-900 dark:text-white min-h-[80px] focus:outline-none focus:ring-2 focus:ring-pink-500/50"
                         />
+                    </div>
+
+                    {/* Ingredients Field - MANDATORY for safety check */}
+                    <div>
+                        <label className="block text-sm font-semibold text-slate-900 dark:text-white mb-2">
+                            Ingredients *
+                            <span className="text-xs font-normal text-slate-400 ml-2">(Required for safety verification)</span>
+                        </label>
+                        <textarea
+                            value={formData.ingredients}
+                            onChange={(e) => { setFormData({ ...formData, ingredients: e.target.value }); setSafetyError(null); }}
+                            placeholder="List all product ingredients, e.g.: Water, Glycerin, Niacinamide, Hyaluronic Acid..."
+                            required
+                            className={`w-full px-4 py-3 border rounded-xl bg-white dark:bg-slate-800 text-slate-900 dark:text-white min-h-[100px] focus:outline-none focus:ring-2 focus:ring-pink-500/50 ${safetyError ? 'border-red-400 dark:border-red-500' : 'border-slate-200 dark:border-slate-700'
+                                }`}
+                        />
+                        <p className="text-xs text-slate-400 mt-1">All products are scanned for harmful ingredients before publishing</p>
+
+                        {/* Safety Error Display */}
+                        {safetyError && (
+                            <div className="mt-3 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl">
+                                <div className="flex items-start gap-2">
+                                    <Icon name="AlertTriangle" size={18} className="text-red-500 flex-shrink-0 mt-0.5" />
+                                    <div>
+                                        <p className="text-sm font-semibold text-red-700 dark:text-red-400">Product Rejected - Safety Issue</p>
+                                        <p className="text-sm text-red-600 dark:text-red-300 mt-1">{safetyError.message}</p>
+                                        {safetyError.flaggedIngredients && safetyError.flaggedIngredients.length > 0 && (
+                                            <div className="mt-2">
+                                                <p className="text-xs font-medium text-red-600 dark:text-red-400">Flagged ingredients:</p>
+                                                <ul className="mt-1 space-y-1">
+                                                    {safetyError.flaggedIngredients.map((ing, i) => (
+                                                        <li key={i} className="text-xs text-red-600 dark:text-red-400 flex items-center gap-1">
+                                                            <span className={`w-2 h-2 rounded-full ${ing.severity === 'critical' ? 'bg-red-600' :
+                                                                ing.severity === 'high' ? 'bg-orange-500' : 'bg-yellow-500'
+                                                                }`} />
+                                                            <span className="font-medium">{ing.name}</span> - {ing.reason}
+                                                        </li>
+                                                    ))}
+                                                </ul>
+                                            </div>
+                                        )}
+                                        {safetyError.penalty && (
+                                            <p className="text-xs text-red-500 dark:text-red-400 mt-2 font-medium">
+                                                ⚠️ Warning {safetyError.penalty.violationCount}/3 - {safetyError.penalty.message}
+                                            </p>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                        )}
                     </div>
 
                     <div className="grid grid-cols-2 gap-4">
@@ -287,8 +358,8 @@ const ProductModal = ({ product, onClose, onSave }) => {
                                 type="button"
                                 onClick={() => setImageMode('url')}
                                 className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-lg text-sm font-medium transition-all ${imageMode === 'url'
-                                        ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm'
-                                        : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
+                                    ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm'
+                                    : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
                                     }`}
                             >
                                 <Icon name="Link" size={16} />
@@ -298,8 +369,8 @@ const ProductModal = ({ product, onClose, onSave }) => {
                                 type="button"
                                 onClick={() => setImageMode('upload')}
                                 className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-lg text-sm font-medium transition-all ${imageMode === 'upload'
-                                        ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm'
-                                        : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
+                                    ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm'
+                                    : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
                                     }`}
                             >
                                 <Icon name="Upload" size={16} />
@@ -467,12 +538,22 @@ const ProductsPage = () => {
                 await fetchProducts();
                 setShowModal(false);
                 setEditingProduct(null);
+                return { success: true };
             } else {
+                // Return error data for safety-related rejections
+                if (data.code === 'TOXIC_INGREDIENTS_DETECTED' ||
+                    data.code === 'INGREDIENTS_REQUIRED' ||
+                    data.code === 'ACCOUNT_LOCKED' ||
+                    data.code === 'ACCOUNT_BANNED') {
+                    return data; // Pass back to modal for display
+                }
                 alert(`Error: ${data.error || 'Failed to save product'}`);
+                return { error: data.error };
             }
         } catch (err) {
             console.error('Error saving product:', err);
             alert(`Error: ${err.message || 'Network error'}`);
+            return { error: err.message };
         }
     };
 
