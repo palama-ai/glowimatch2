@@ -49,13 +49,10 @@ const SellerProfile = lazy(() => import('./pages/seller/Profile'));
 // Legal pages
 const TermsOfService = lazy(() => import('./pages/legal/TermsOfService'));
 
-// Loading spinner component for Suspense fallback
+// Loading component - Simple Glowimatch branding
 const PageLoader = () => (
-  <div className="min-h-screen flex items-center justify-center bg-background">
-    <div className="text-center">
-      <div className="w-12 h-12 border-4 border-pink-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-      <p className="text-muted-foreground">Loading...</p>
-    </div>
+  <div className="min-h-screen flex items-center justify-center bg-white">
+    <h1 className="text-5xl font-bold text-pink-500 tracking-tight">Glowimatch</h1>
   </div>
 );
 
