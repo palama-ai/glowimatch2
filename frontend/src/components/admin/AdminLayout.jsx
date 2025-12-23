@@ -11,6 +11,7 @@ export default function AdminLayout({ children }) {
     { to: '/admin/messages', label: 'Messages' },
     { to: '/admin/notifications', label: 'Notifications' },
     { to: '/admin/sessions', label: 'Sessions' },
+    { to: '/admin/safety', label: '🛡️ Safety' },
   ];
 
   return (
