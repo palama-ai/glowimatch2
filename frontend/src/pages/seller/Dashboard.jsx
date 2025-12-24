@@ -234,14 +234,64 @@ const SellerDashboard = () => {
     const [loading, setLoading] = useState(true);
     const [showWelcomeModal, setShowWelcomeModal] = useState(false);
     const [accountStatus, setAccountStatus] = useState(null); // For safety system
+    const [showTermsModal, setShowTermsModal] = useState(false);
+    const [termsAccepted, setTermsAccepted] = useState(null);
+
+    const API_BASE = import.meta.env?.VITE_BACKEND_URL || 'https://backend-three-sigma-81.vercel.app/api';
+    const getHeaders = () => {
+        const token = JSON.parse(localStorage.getItem('gm_auth') || '{}')?.token;
+        return { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' };
+    };
+
+    // Check terms status on mount
+    useEffect(() => {
+        checkTermsStatus();
+    }, []);
+
+    const checkTermsStatus = async () => {
+        try {
+            const res = await fetch(`${API_BASE}/seller/terms-status`, { headers: getHeaders() });
+            if (res.ok) {
+                const data = await res.json();
+                setTermsAccepted(data.data?.termsAccepted || false);
+                if (!data.data?.termsAccepted) {
+                    setShowTermsModal(true);
+                }
+            }
+        } catch (err) {
+            console.error('Error checking terms status:', err);
+            setTermsAccepted(false);
+            setShowTermsModal(true);
+        }
+    };
+
+    const handleAcceptTerms = async (signatureData) => {
+        try {
+            const res = await fetch(`${API_BASE}/seller/accept-terms`, {
+                method: 'POST',
+                headers: getHeaders(),
+                body: JSON.stringify({ signatureData })
+            });
+
+            if (res.ok) {
+                setTermsAccepted(true);
+                setShowTermsModal(false);
+            } else {
+                throw new Error('Failed to accept terms');
+            }
+        } catch (err) {
+            console.error('Error accepting terms:', err);
+            throw err;
+        }
+    };
 
     // Check if first time seller on mount
     useEffect(() => {
         const hasSeenWelcome = localStorage.getItem('gm_seller_welcome_seen');
-        if (!hasSeenWelcome) {
+        if (!hasSeenWelcome && termsAccepted) {
             setShowWelcomeModal(true);
         }
-    }, []);
+    }, [termsAccepted]);
 
     const handleCloseWelcome = () => {
         localStorage.setItem('gm_seller_welcome_seen', 'true');
@@ -303,245 +353,252 @@ const SellerDashboard = () => {
     };
 
     return (
-        <div className="flex min-h-screen bg-slate-50 dark:bg-slate-950">
-            <SellerSidebar activePage={getActivePage()} />
+        <>
+            {/* Terms of Service Agreement Modal - Shows first for new sellers */}
+            {showTermsModal && (
+                <SellerAgreement onAccept={handleAcceptTerms} />
+            )}
 
-            <main className="flex-1 p-8 lg:p-10">
-                {/* Header Section */}
-                <header className="mb-10">
-                    <div className="flex items-center justify-between">
-                        <div>
-                            <p className="text-sm font-medium text-pink-500 mb-1">{getGreeting()}</p>
-                            <h1 className="text-3xl font-bold text-slate-900 dark:text-white tracking-tight">
-                                Welcome back, {userProfile?.full_name?.split(' ')[0] || 'Seller'}
-                            </h1>
-                            <p className="text-slate-500 mt-2">
-                                Here's an overview of your store performance
-                            </p>
-                        </div>
-                        <button
-                            onClick={() => navigate('/seller/products')}
-                            className="flex items-center gap-2 px-5 py-3 bg-gradient-to-r from-pink-500 to-rose-500 text-white rounded-xl font-semibold shadow-lg shadow-pink-500/25 hover:shadow-xl hover:shadow-pink-500/30 hover:-translate-y-0.5 transition-all duration-200"
-                        >
-                            <Icon name="Plus" size={18} />
-                            Add Product
-                        </button>
-                    </div>
-                </header>
+            <div className="flex min-h-screen bg-slate-50 dark:bg-slate-950">
+                <SellerSidebar activePage={getActivePage()} />
 
-                {/* Account Status Banner */}
-                {accountStatus && (accountStatus.violationCount > 0 || accountStatus.isOnProbation || accountStatus.status !== 'ACTIVE') && (
-                    <div className={`mb-6 rounded-2xl p-4 border ${accountStatus.status === 'BANNED' ? 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800' :
-                        accountStatus.status === 'LOCKED' ? 'bg-orange-50 dark:bg-orange-900/20 border-orange-200 dark:border-orange-800' :
-                            accountStatus.isOnProbation ? 'bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800' :
-                                'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800'
-                        }`}>
-                        <div className="flex items-start gap-3">
-                            <Icon
-                                name={accountStatus.status === 'BANNED' ? 'Ban' : accountStatus.status === 'LOCKED' ? 'Lock' : 'AlertTriangle'}
-                                size={20}
-                                className={`flex-shrink-0 mt-0.5 ${accountStatus.status === 'BANNED' ? 'text-red-500' :
-                                    accountStatus.status === 'LOCKED' ? 'text-orange-500' :
-                                        'text-amber-500'
-                                    }`}
-                            />
-                            <div className="flex-1">
-                                <h3 className={`font-semibold ${accountStatus.status === 'BANNED' ? 'text-red-700 dark:text-red-400' :
-                                    accountStatus.status === 'LOCKED' ? 'text-orange-700 dark:text-orange-400' :
-                                        'text-amber-700 dark:text-amber-400'
-                                    }`}>
-                                    {accountStatus.status === 'BANNED' ? '⛔ Account Permanently Banned' :
-                                        accountStatus.status === 'LOCKED' ? '🔒 Account Locked' :
-                                            accountStatus.isOnProbation ? '⚠️ Account Under Probation' :
-                                                `⚠️ Safety Warning (${accountStatus.violationCount}/3)`}
-                                </h3>
-                                <p className={`text-sm mt-1 ${accountStatus.status === 'BANNED' ? 'text-red-600 dark:text-red-300' :
-                                    accountStatus.status === 'LOCKED' ? 'text-orange-600 dark:text-orange-300' :
-                                        'text-amber-600 dark:text-amber-300'
-                                    }`}>
-                                    {accountStatus.status === 'BANNED'
-                                        ? 'Your account has been permanently banned for repeated safety violations.'
-                                        : accountStatus.status === 'LOCKED'
-                                            ? 'Your account has been locked due to 3 safety violations. You can submit an appeal.'
-                                            : accountStatus.isOnProbation
-                                                ? 'Your account is on probation. Any further violations will result in permanent ban.'
-                                                : `You have ${accountStatus.violationCount} warning(s). 3 violations will result in account lock.`}
+                <main className="flex-1 p-8 lg:p-10">
+                    {/* Header Section */}
+                    <header className="mb-10">
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <p className="text-sm font-medium text-pink-500 mb-1">{getGreeting()}</p>
+                                <h1 className="text-3xl font-bold text-slate-900 dark:text-white tracking-tight">
+                                    Welcome back, {userProfile?.full_name?.split(' ')[0] || 'Seller'}
+                                </h1>
+                                <p className="text-slate-500 mt-2">
+                                    Here's an overview of your store performance
                                 </p>
-                                {(accountStatus.status === 'LOCKED' || accountStatus.violationCount > 0) && (
-                                    <button
-                                        onClick={() => navigate('/seller/violations')}
-                                        className={`mt-2 text-sm font-medium underline ${accountStatus.status === 'LOCKED' ? 'text-orange-600 dark:text-orange-400' : 'text-amber-600 dark:text-amber-400'
-                                            }`}
-                                    >
-                                        {accountStatus.status === 'LOCKED' ? 'Submit an Appeal' : 'View Violation History'}
-                                    </button>
+                            </div>
+                            <button
+                                onClick={() => navigate('/seller/products')}
+                                className="flex items-center gap-2 px-5 py-3 bg-gradient-to-r from-pink-500 to-rose-500 text-white rounded-xl font-semibold shadow-lg shadow-pink-500/25 hover:shadow-xl hover:shadow-pink-500/30 hover:-translate-y-0.5 transition-all duration-200"
+                            >
+                                <Icon name="Plus" size={18} />
+                                Add Product
+                            </button>
+                        </div>
+                    </header>
+
+                    {/* Account Status Banner */}
+                    {accountStatus && (accountStatus.violationCount > 0 || accountStatus.isOnProbation || accountStatus.status !== 'ACTIVE') && (
+                        <div className={`mb-6 rounded-2xl p-4 border ${accountStatus.status === 'BANNED' ? 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800' :
+                            accountStatus.status === 'LOCKED' ? 'bg-orange-50 dark:bg-orange-900/20 border-orange-200 dark:border-orange-800' :
+                                accountStatus.isOnProbation ? 'bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800' :
+                                    'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800'
+                            }`}>
+                            <div className="flex items-start gap-3">
+                                <Icon
+                                    name={accountStatus.status === 'BANNED' ? 'Ban' : accountStatus.status === 'LOCKED' ? 'Lock' : 'AlertTriangle'}
+                                    size={20}
+                                    className={`flex-shrink-0 mt-0.5 ${accountStatus.status === 'BANNED' ? 'text-red-500' :
+                                        accountStatus.status === 'LOCKED' ? 'text-orange-500' :
+                                            'text-amber-500'
+                                        }`}
+                                />
+                                <div className="flex-1">
+                                    <h3 className={`font-semibold ${accountStatus.status === 'BANNED' ? 'text-red-700 dark:text-red-400' :
+                                        accountStatus.status === 'LOCKED' ? 'text-orange-700 dark:text-orange-400' :
+                                            'text-amber-700 dark:text-amber-400'
+                                        }`}>
+                                        {accountStatus.status === 'BANNED' ? '⛔ Account Permanently Banned' :
+                                            accountStatus.status === 'LOCKED' ? '🔒 Account Locked' :
+                                                accountStatus.isOnProbation ? '⚠️ Account Under Probation' :
+                                                    `⚠️ Safety Warning (${accountStatus.violationCount}/3)`}
+                                    </h3>
+                                    <p className={`text-sm mt-1 ${accountStatus.status === 'BANNED' ? 'text-red-600 dark:text-red-300' :
+                                        accountStatus.status === 'LOCKED' ? 'text-orange-600 dark:text-orange-300' :
+                                            'text-amber-600 dark:text-amber-300'
+                                        }`}>
+                                        {accountStatus.status === 'BANNED'
+                                            ? 'Your account has been permanently banned for repeated safety violations.'
+                                            : accountStatus.status === 'LOCKED'
+                                                ? 'Your account has been locked due to 3 safety violations. You can submit an appeal.'
+                                                : accountStatus.isOnProbation
+                                                    ? 'Your account is on probation. Any further violations will result in permanent ban.'
+                                                    : `You have ${accountStatus.violationCount} warning(s). 3 violations will result in account lock.`}
+                                    </p>
+                                    {(accountStatus.status === 'LOCKED' || accountStatus.violationCount > 0) && (
+                                        <button
+                                            onClick={() => navigate('/seller/violations')}
+                                            className={`mt-2 text-sm font-medium underline ${accountStatus.status === 'LOCKED' ? 'text-orange-600 dark:text-orange-400' : 'text-amber-600 dark:text-amber-400'
+                                                }`}
+                                        >
+                                            {accountStatus.status === 'LOCKED' ? 'Submit an Appeal' : 'View Violation History'}
+                                        </button>
+                                    )}
+                                </div>
+                                {accountStatus.violationCount > 0 && accountStatus.status === 'ACTIVE' && (
+                                    <div className="flex gap-1">
+                                        {[1, 2, 3].map((i) => (
+                                            <div
+                                                key={i}
+                                                className={`w-3 h-3 rounded-full ${i <= accountStatus.violationCount ? 'bg-amber-500' : 'bg-slate-200 dark:bg-slate-700'
+                                                    }`}
+                                            />
+                                        ))}
+                                    </div>
                                 )}
                             </div>
-                            {accountStatus.violationCount > 0 && accountStatus.status === 'ACTIVE' && (
-                                <div className="flex gap-1">
-                                    {[1, 2, 3].map((i) => (
-                                        <div
-                                            key={i}
-                                            className={`w-3 h-3 rounded-full ${i <= accountStatus.violationCount ? 'bg-amber-500' : 'bg-slate-200 dark:bg-slate-700'
-                                                }`}
-                                        />
-                                    ))}
+                        </div>
+                    )}
+
+                    {/* Stats Grid */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
+                        <StatsCard
+                            icon="Package"
+                            label="Total Products"
+                            value={analytics?.totalProducts || 0}
+                            gradient="from-violet-500 to-purple-500"
+                        />
+                        <StatsCard
+                            icon="Eye"
+                            label="Total Views"
+                            value={analytics?.totalViews || 0}
+                            trend={12}
+                            gradient="from-pink-500 to-rose-500"
+                        />
+                        <StatsCard
+                            icon="CheckCircle"
+                            label="Published"
+                            value={analytics?.publishedProducts || 0}
+                            gradient="from-emerald-500 to-teal-500"
+                        />
+                        <StatsCard
+                            icon="TrendingUp"
+                            label="This Week"
+                            value={analytics?.viewsByDay?.reduce((a, b) => a + (b.views || 0), 0) || 0}
+                            trend={8}
+                            gradient="from-amber-500 to-orange-500"
+                        />
+                    </div>
+
+                    {/* Chart Section */}
+                    <div className="mb-8">
+                        <ChartSection analytics={analytics} />
+                    </div>
+
+                    {/* Products Section */}
+                    <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-100 dark:border-slate-800">
+                        <div className="flex items-center justify-between mb-6">
+                            <div>
+                                <h2 className="text-lg font-bold text-slate-900 dark:text-white">Your Products</h2>
+                                <p className="text-sm text-slate-500 mt-0.5">{products.length} products in catalog</p>
+                            </div>
+                            <Link
+                                to="/seller/products"
+                                className="text-sm font-semibold text-pink-500 hover:text-pink-600 flex items-center gap-1 transition-colors"
+                            >
+                                View All
+                                <Icon name="ArrowRight" size={16} />
+                            </Link>
+                        </div>
+
+                        {loading ? (
+                            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
+                                {[1, 2, 3, 4].map((i) => (
+                                    <div key={i} className="aspect-[4/5] bg-slate-100 dark:bg-slate-800 rounded-2xl animate-pulse" />
+                                ))}
+                            </div>
+                        ) : products.length > 0 ? (
+                            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
+                                {products.slice(0, 8).map((product) => (
+                                    <ProductCard
+                                        key={product.id}
+                                        product={product}
+                                        onClick={() => navigate('/seller/products')}
+                                    />
+                                ))}
+                            </div>
+                        ) : (
+                            <div className="text-center py-16">
+                                <div className="w-20 h-20 rounded-3xl bg-gradient-to-br from-pink-100 to-rose-100 dark:from-pink-500/10 dark:to-rose-500/10 flex items-center justify-center mx-auto mb-5">
+                                    <Icon name="Package" size={36} className="text-pink-500" />
                                 </div>
-                            )}
+                                <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2">No products yet</h3>
+                                <p className="text-slate-500 mb-6 max-w-sm mx-auto">
+                                    Start adding products to showcase your brand on Glowimatch
+                                </p>
+                                <button
+                                    onClick={() => navigate('/seller/products')}
+                                    className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-pink-500 to-rose-500 text-white rounded-xl font-semibold shadow-lg shadow-pink-500/25 hover:shadow-xl hover:shadow-pink-500/30 transition-all"
+                                >
+                                    <Icon name="Plus" size={18} />
+                                    Add Your First Product
+                                </button>
+                            </div>
+                        )}
+                    </div>
+                </main>
+
+                {/* Welcome Modal for First-Time Sellers */}
+                {showWelcomeModal && (
+                    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+                        <div className="relative bg-white dark:bg-slate-900 rounded-3xl w-full max-w-md shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-300">
+                            {/* Close Button */}
+                            <button
+                                onClick={handleCloseWelcome}
+                                className="absolute top-4 right-4 p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors z-10"
+                            >
+                                <Icon name="X" size={20} className="text-slate-500" />
+                            </button>
+
+                            {/* Gradient Header */}
+                            <div className="h-32 bg-gradient-to-br from-pink-500 via-rose-500 to-fuchsia-500 relative overflow-hidden">
+                                <div className="absolute inset-0 flex items-center justify-center">
+                                    <div className="w-20 h-20 rounded-full bg-white/20 backdrop-blur flex items-center justify-center">
+                                        <Icon name="Gift" size={40} className="text-white" />
+                                    </div>
+                                </div>
+                                <div className="absolute -bottom-6 -left-6 w-24 h-24 bg-white/10 rounded-full blur-xl" />
+                                <div className="absolute -top-6 -right-6 w-32 h-32 bg-white/10 rounded-full blur-xl" />
+                            </div>
+
+                            {/* Content */}
+                            <div className="p-8 text-center">
+                                <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-sm font-semibold rounded-full mb-4">
+                                    <Icon name="Sparkles" size={16} />
+                                    Special Offer
+                                </div>
+
+                                <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-3">
+                                    Welcome to Glowimatch! 🎉
+                                </h2>
+
+                                <p className="text-slate-500 mb-6">
+                                    As a thank you for joining us, you've received
+                                </p>
+
+                                <div className="bg-gradient-to-r from-pink-50 to-fuchsia-50 dark:from-pink-500/10 dark:to-fuchsia-500/10 rounded-2xl p-6 mb-6">
+                                    <p className="text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-fuchsia-500 mb-2">
+                                        3 Months
+                                    </p>
+                                    <p className="text-lg font-semibold text-slate-700 dark:text-slate-300">
+                                        FREE Premium Access
+                                    </p>
+                                </div>
+
+                                <p className="text-sm text-slate-400 mb-6">
+                                    Start adding your products today and reach thousands of skincare enthusiasts!
+                                </p>
+
+                                <button
+                                    onClick={handleCloseWelcome}
+                                    className="w-full px-6 py-4 bg-gradient-to-r from-pink-500 to-rose-500 text-white rounded-xl font-bold text-lg shadow-lg shadow-pink-500/25 hover:shadow-xl hover:shadow-pink-500/30 hover:-translate-y-0.5 transition-all duration-200"
+                                >
+                                    Get Started
+                                </button>
+                            </div>
                         </div>
                     </div>
                 )}
-
-                {/* Stats Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
-                    <StatsCard
-                        icon="Package"
-                        label="Total Products"
-                        value={analytics?.totalProducts || 0}
-                        gradient="from-violet-500 to-purple-500"
-                    />
-                    <StatsCard
-                        icon="Eye"
-                        label="Total Views"
-                        value={analytics?.totalViews || 0}
-                        trend={12}
-                        gradient="from-pink-500 to-rose-500"
-                    />
-                    <StatsCard
-                        icon="CheckCircle"
-                        label="Published"
-                        value={analytics?.publishedProducts || 0}
-                        gradient="from-emerald-500 to-teal-500"
-                    />
-                    <StatsCard
-                        icon="TrendingUp"
-                        label="This Week"
-                        value={analytics?.viewsByDay?.reduce((a, b) => a + (b.views || 0), 0) || 0}
-                        trend={8}
-                        gradient="from-amber-500 to-orange-500"
-                    />
-                </div>
-
-                {/* Chart Section */}
-                <div className="mb-8">
-                    <ChartSection analytics={analytics} />
-                </div>
-
-                {/* Products Section */}
-                <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-100 dark:border-slate-800">
-                    <div className="flex items-center justify-between mb-6">
-                        <div>
-                            <h2 className="text-lg font-bold text-slate-900 dark:text-white">Your Products</h2>
-                            <p className="text-sm text-slate-500 mt-0.5">{products.length} products in catalog</p>
-                        </div>
-                        <Link
-                            to="/seller/products"
-                            className="text-sm font-semibold text-pink-500 hover:text-pink-600 flex items-center gap-1 transition-colors"
-                        >
-                            View All
-                            <Icon name="ArrowRight" size={16} />
-                        </Link>
-                    </div>
-
-                    {loading ? (
-                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
-                            {[1, 2, 3, 4].map((i) => (
-                                <div key={i} className="aspect-[4/5] bg-slate-100 dark:bg-slate-800 rounded-2xl animate-pulse" />
-                            ))}
-                        </div>
-                    ) : products.length > 0 ? (
-                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
-                            {products.slice(0, 8).map((product) => (
-                                <ProductCard
-                                    key={product.id}
-                                    product={product}
-                                    onClick={() => navigate('/seller/products')}
-                                />
-                            ))}
-                        </div>
-                    ) : (
-                        <div className="text-center py-16">
-                            <div className="w-20 h-20 rounded-3xl bg-gradient-to-br from-pink-100 to-rose-100 dark:from-pink-500/10 dark:to-rose-500/10 flex items-center justify-center mx-auto mb-5">
-                                <Icon name="Package" size={36} className="text-pink-500" />
-                            </div>
-                            <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2">No products yet</h3>
-                            <p className="text-slate-500 mb-6 max-w-sm mx-auto">
-                                Start adding products to showcase your brand on Glowimatch
-                            </p>
-                            <button
-                                onClick={() => navigate('/seller/products')}
-                                className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-pink-500 to-rose-500 text-white rounded-xl font-semibold shadow-lg shadow-pink-500/25 hover:shadow-xl hover:shadow-pink-500/30 transition-all"
-                            >
-                                <Icon name="Plus" size={18} />
-                                Add Your First Product
-                            </button>
-                        </div>
-                    )}
-                </div>
-            </main>
-
-            {/* Welcome Modal for First-Time Sellers */}
-            {showWelcomeModal && (
-                <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-                    <div className="relative bg-white dark:bg-slate-900 rounded-3xl w-full max-w-md shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-300">
-                        {/* Close Button */}
-                        <button
-                            onClick={handleCloseWelcome}
-                            className="absolute top-4 right-4 p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors z-10"
-                        >
-                            <Icon name="X" size={20} className="text-slate-500" />
-                        </button>
-
-                        {/* Gradient Header */}
-                        <div className="h-32 bg-gradient-to-br from-pink-500 via-rose-500 to-fuchsia-500 relative overflow-hidden">
-                            <div className="absolute inset-0 flex items-center justify-center">
-                                <div className="w-20 h-20 rounded-full bg-white/20 backdrop-blur flex items-center justify-center">
-                                    <Icon name="Gift" size={40} className="text-white" />
-                                </div>
-                            </div>
-                            <div className="absolute -bottom-6 -left-6 w-24 h-24 bg-white/10 rounded-full blur-xl" />
-                            <div className="absolute -top-6 -right-6 w-32 h-32 bg-white/10 rounded-full blur-xl" />
-                        </div>
-
-                        {/* Content */}
-                        <div className="p-8 text-center">
-                            <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-sm font-semibold rounded-full mb-4">
-                                <Icon name="Sparkles" size={16} />
-                                Special Offer
-                            </div>
-
-                            <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-3">
-                                Welcome to Glowimatch! 🎉
-                            </h2>
-
-                            <p className="text-slate-500 mb-6">
-                                As a thank you for joining us, you've received
-                            </p>
-
-                            <div className="bg-gradient-to-r from-pink-50 to-fuchsia-50 dark:from-pink-500/10 dark:to-fuchsia-500/10 rounded-2xl p-6 mb-6">
-                                <p className="text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-fuchsia-500 mb-2">
-                                    3 Months
-                                </p>
-                                <p className="text-lg font-semibold text-slate-700 dark:text-slate-300">
-                                    FREE Premium Access
-                                </p>
-                            </div>
-
-                            <p className="text-sm text-slate-400 mb-6">
-                                Start adding your products today and reach thousands of skincare enthusiasts!
-                            </p>
-
-                            <button
-                                onClick={handleCloseWelcome}
-                                className="w-full px-6 py-4 bg-gradient-to-r from-pink-500 to-rose-500 text-white rounded-xl font-bold text-lg shadow-lg shadow-pink-500/25 hover:shadow-xl hover:shadow-pink-500/30 hover:-translate-y-0.5 transition-all duration-200"
-                            >
-                                Get Started
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
-        </div>
+            </div>
+        </>
     );
 };
 
