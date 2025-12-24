@@ -4,6 +4,7 @@ import Icon from '../../components/AppIcon';
 import { useAuth } from '../../contexts/AuthContext';
 import Button from '../../components/ui/Button';
 import Input from '../../components/ui/Input';
+import SellerAgreement from '../../components/seller/SellerAgreement';
 
 // Modern Sidebar (shared with Dashboard)
 const SellerSidebar = ({ activePage }) => {
@@ -559,6 +560,8 @@ const ProductsPage = () => {
     const [loading, setLoading] = useState(true);
     const [showModal, setShowModal] = useState(false);
     const [editingProduct, setEditingProduct] = useState(null);
+    const [showTermsModal, setShowTermsModal] = useState(false);
+    const [termsAccepted, setTermsAccepted] = useState(null); // null = loading, false = not accepted, true = accepted
 
     const API_BASE = import.meta.env?.VITE_BACKEND_URL || 'https://backend-three-sigma-81.vercel.app/api';
     const getHeaders = () => {
@@ -567,8 +570,46 @@ const ProductsPage = () => {
     };
 
     useEffect(() => {
+        checkTermsStatus();
         fetchProducts();
     }, []);
+
+    const checkTermsStatus = async () => {
+        try {
+            const res = await fetch(`${API_BASE}/seller/terms-status`, { headers: getHeaders() });
+            if (res.ok) {
+                const data = await res.json();
+                setTermsAccepted(data.data?.termsAccepted || false);
+                if (!data.data?.termsAccepted) {
+                    setShowTermsModal(true);
+                }
+            }
+        } catch (err) {
+            console.error('Error checking terms status:', err);
+            setTermsAccepted(false);
+            setShowTermsModal(true);
+        }
+    };
+
+    const handleAcceptTerms = async (signatureData) => {
+        try {
+            const res = await fetch(`${API_BASE}/seller/accept-terms`, {
+                method: 'POST',
+                headers: getHeaders(),
+                body: JSON.stringify({ signatureData })
+            });
+
+            if (res.ok) {
+                setTermsAccepted(true);
+                setShowTermsModal(false);
+            } else {
+                throw new Error('Failed to accept terms');
+            }
+        } catch (err) {
+            console.error('Error accepting terms:', err);
+            throw err;
+        }
+    };
 
     const fetchProducts = async () => {
         try {
@@ -635,103 +676,110 @@ const ProductsPage = () => {
     };
 
     return (
-        <div className="flex min-h-screen bg-slate-50 dark:bg-slate-950">
-            <SellerSidebar activePage="products" />
+        <>
+            {/* Terms of Service Agreement Modal */}
+            {showTermsModal && (
+                <SellerAgreement onAccept={handleAcceptTerms} />
+            )}
 
-            <main className="flex-1 p-8 lg:p-10">
-                {/* Header */}
-                <header className="mb-8">
-                    <div className="flex items-center justify-between">
-                        <div>
-                            <h1 className="text-3xl font-bold text-slate-900 dark:text-white tracking-tight">Products</h1>
-                            <p className="text-slate-500 mt-1">Manage your product catalog</p>
-                        </div>
-                        <button
-                            onClick={() => { setEditingProduct(null); setShowModal(true); }}
-                            className="flex items-center gap-2 px-5 py-3 bg-gradient-to-r from-pink-500 to-rose-500 text-white rounded-xl font-semibold shadow-lg shadow-pink-500/25 hover:shadow-xl hover:shadow-pink-500/30 hover:-translate-y-0.5 transition-all duration-200"
-                        >
-                            <Icon name="Plus" size={18} />
-                            Add Product
-                        </button>
-                    </div>
-                </header>
+            <div className="flex min-h-screen bg-slate-50 dark:bg-slate-950">
+                <SellerSidebar activePage="products" />
 
-                {/* Products Grid */}
-                {loading ? (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-                        {[1, 2, 3].map((i) => (
-                            <div key={i} className="aspect-[4/5] bg-slate-200 dark:bg-slate-800 rounded-2xl animate-pulse" />
-                        ))}
-                    </div>
-                ) : products.length > 0 ? (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-                        {products.map((product) => (
-                            <div key={product.id} className="group bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-2xl overflow-hidden hover:shadow-xl hover:shadow-pink-500/10 transition-all duration-300">
-                                <div className="h-48 bg-slate-100 dark:bg-slate-800 relative overflow-hidden">
-                                    {product.image_url ? (
-                                        <img src={product.image_url} alt={product.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                                    ) : (
-                                        <div className="w-full h-full flex items-center justify-center">
-                                            <Icon name="Image" size={40} className="text-slate-300 dark:text-slate-600" />
-                                        </div>
-                                    )}
-                                    <div className={`absolute top-3 right-3 px-2.5 py-1 rounded-full text-xs font-semibold ${product.published
-                                        ? 'bg-emerald-500/90 text-white'
-                                        : 'bg-amber-500/90 text-white'
-                                        }`}>
-                                        {product.published ? 'Live' : 'Draft'}
-                                    </div>
-                                </div>
-                                <div className="p-5">
-                                    <h3 className="font-bold text-slate-900 dark:text-white mb-1">{product.name}</h3>
-                                    <p className="text-sm text-slate-500 mb-3">{product.brand || 'No brand'}</p>
-                                    <div className="flex items-center justify-between">
-                                        <span className="text-xl font-bold text-slate-900 dark:text-white">${product.price || '0.00'}</span>
-                                        <div className="flex items-center gap-1">
-                                            <button
-                                                onClick={() => { setEditingProduct(product); setShowModal(true); }}
-                                                className="p-2.5 text-slate-400 hover:text-pink-500 hover:bg-pink-50 dark:hover:bg-pink-500/10 rounded-xl transition-colors"
-                                            >
-                                                <Icon name="Edit" size={18} />
-                                            </button>
-                                            <button
-                                                onClick={() => handleDelete(product.id)}
-                                                className="p-2.5 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-xl transition-colors"
-                                            >
-                                                <Icon name="Trash2" size={18} />
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
+                <main className="flex-1 p-8 lg:p-10">
+                    {/* Header */}
+                    <header className="mb-8">
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <h1 className="text-3xl font-bold text-slate-900 dark:text-white tracking-tight">Products</h1>
+                                <p className="text-slate-500 mt-1">Manage your product catalog</p>
                             </div>
-                        ))}
-                    </div>
-                ) : (
-                    <div className="text-center py-20 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-3xl">
-                        <div className="w-20 h-20 rounded-3xl bg-gradient-to-br from-pink-100 to-rose-100 dark:from-pink-500/10 dark:to-rose-500/10 flex items-center justify-center mx-auto mb-5">
-                            <Icon name="Package" size={36} className="text-pink-500" />
+                            <button
+                                onClick={() => { setEditingProduct(null); setShowModal(true); }}
+                                className="flex items-center gap-2 px-5 py-3 bg-gradient-to-r from-pink-500 to-rose-500 text-white rounded-xl font-semibold shadow-lg shadow-pink-500/25 hover:shadow-xl hover:shadow-pink-500/30 hover:-translate-y-0.5 transition-all duration-200"
+                            >
+                                <Icon name="Plus" size={18} />
+                                Add Product
+                            </button>
                         </div>
-                        <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2">No products yet</h3>
-                        <p className="text-slate-500 mb-6 max-w-sm mx-auto">Start by adding your first product to showcase on Glowimatch</p>
-                        <button
-                            onClick={() => setShowModal(true)}
-                            className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-pink-500 to-rose-500 text-white rounded-xl font-semibold shadow-lg shadow-pink-500/25"
-                        >
-                            <Icon name="Plus" size={18} />
-                            Add Product
-                        </button>
-                    </div>
-                )}
+                    </header>
 
-                {showModal && (
-                    <ProductModal
-                        product={editingProduct}
-                        onClose={() => { setShowModal(false); setEditingProduct(null); }}
-                        onSave={handleSave}
-                    />
-                )}
-            </main>
-        </div>
+                    {/* Products Grid */}
+                    {loading ? (
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                            {[1, 2, 3].map((i) => (
+                                <div key={i} className="aspect-[4/5] bg-slate-200 dark:bg-slate-800 rounded-2xl animate-pulse" />
+                            ))}
+                        </div>
+                    ) : products.length > 0 ? (
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                            {products.map((product) => (
+                                <div key={product.id} className="group bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-2xl overflow-hidden hover:shadow-xl hover:shadow-pink-500/10 transition-all duration-300">
+                                    <div className="h-48 bg-slate-100 dark:bg-slate-800 relative overflow-hidden">
+                                        {product.image_url ? (
+                                            <img src={product.image_url} alt={product.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                                        ) : (
+                                            <div className="w-full h-full flex items-center justify-center">
+                                                <Icon name="Image" size={40} className="text-slate-300 dark:text-slate-600" />
+                                            </div>
+                                        )}
+                                        <div className={`absolute top-3 right-3 px-2.5 py-1 rounded-full text-xs font-semibold ${product.published
+                                            ? 'bg-emerald-500/90 text-white'
+                                            : 'bg-amber-500/90 text-white'
+                                            }`}>
+                                            {product.published ? 'Live' : 'Draft'}
+                                        </div>
+                                    </div>
+                                    <div className="p-5">
+                                        <h3 className="font-bold text-slate-900 dark:text-white mb-1">{product.name}</h3>
+                                        <p className="text-sm text-slate-500 mb-3">{product.brand || 'No brand'}</p>
+                                        <div className="flex items-center justify-between">
+                                            <span className="text-xl font-bold text-slate-900 dark:text-white">${product.price || '0.00'}</span>
+                                            <div className="flex items-center gap-1">
+                                                <button
+                                                    onClick={() => { setEditingProduct(product); setShowModal(true); }}
+                                                    className="p-2.5 text-slate-400 hover:text-pink-500 hover:bg-pink-50 dark:hover:bg-pink-500/10 rounded-xl transition-colors"
+                                                >
+                                                    <Icon name="Edit" size={18} />
+                                                </button>
+                                                <button
+                                                    onClick={() => handleDelete(product.id)}
+                                                    className="p-2.5 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-xl transition-colors"
+                                                >
+                                                    <Icon name="Trash2" size={18} />
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    ) : (
+                        <div className="text-center py-20 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-3xl">
+                            <div className="w-20 h-20 rounded-3xl bg-gradient-to-br from-pink-100 to-rose-100 dark:from-pink-500/10 dark:to-rose-500/10 flex items-center justify-center mx-auto mb-5">
+                                <Icon name="Package" size={36} className="text-pink-500" />
+                            </div>
+                            <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2">No products yet</h3>
+                            <p className="text-slate-500 mb-6 max-w-sm mx-auto">Start by adding your first product to showcase on Glowimatch</p>
+                            <button
+                                onClick={() => setShowModal(true)}
+                                className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-pink-500 to-rose-500 text-white rounded-xl font-semibold shadow-lg shadow-pink-500/25"
+                            >
+                                <Icon name="Plus" size={18} />
+                                Add Product
+                            </button>
+                        </div>
+                    )}
+
+                    {showModal && (
+                        <ProductModal
+                            product={editingProduct}
+                            onClose={() => { setShowModal(false); setEditingProduct(null); }}
+                            onSave={handleSave}
+                        />
+                    )}
+                </main>
+            </div>
+        </>
     );
 };
 
