@@ -137,6 +137,8 @@ const GoogleSignInButton = ({ onSuccess, onError, accountType = 'user' }) => {
     const completeGoogleAuth = async (credential, selectedAccountType) => {
         setLoading(true);
         try {
+            console.log('[GoogleSignIn] Starting auth with accountType:', selectedAccountType || accountType);
+
             const res = await fetch(`${API_BASE}/auth/google`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -147,23 +149,41 @@ const GoogleSignInButton = ({ onSuccess, onError, accountType = 'user' }) => {
             });
 
             const data = await res.json();
+            console.log('[GoogleSignIn] Response status:', res.status, 'data:', data);
 
             if (!res.ok) {
-                throw new Error(data.message || data.error || 'Google sign-in failed');
+                const errorMsg = data.message || data.error || data.details || 'Google sign-in failed';
+                console.error('[GoogleSignIn] Auth failed:', errorMsg);
+                throw new Error(errorMsg);
             }
 
             // Store auth data
             if (data.data?.token) {
+                console.log('[GoogleSignIn] Storing token and user data');
                 localStorage.setItem('gm_auth', JSON.stringify({
                     token: data.data.token,
                     user: data.data.user
                 }));
+
+                // Force a brief delay before callback to ensure storage is complete
+                await new Promise(resolve => setTimeout(resolve, 100));
             }
 
             setShowAccountTypeModal(false);
+
+            console.log('[GoogleSignIn] Auth successful, calling onSuccess');
+
+            // Call onSuccess which should trigger navigation
             onSuccess?.(data.data);
+
+            // If we're still on the same page after a moment, force reload to refresh auth state
+            setTimeout(() => {
+                // Page reload ensures AuthContext reinitializes with new token
+                window.location.reload();
+            }, 500);
+
         } catch (error) {
-            console.error('Google auth error:', error);
+            console.error('[GoogleSignIn] Auth error:', error);
             onError?.({ message: error.message || 'Google sign-in failed' });
         } finally {
             setLoading(false);
