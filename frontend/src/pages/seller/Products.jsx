@@ -105,7 +105,8 @@ const ProductModal = ({ product, onClose, onSave }) => {
     const [selectedFile, setSelectedFile] = useState(null);
     const [filePreview, setFilePreview] = useState(null);
     const [uploadError, setUploadError] = useState('');
-    const [safetyError, setSafetyError] = useState(null); // For toxic ingredient errors
+    const [safetyError, setSafetyError] = useState(null); // For toxic ingredient errors (blocking)
+    const [safetyWarnings, setSafetyWarnings] = useState(null); // For medium-risk warnings (non-blocking)
 
     const API_BASE = import.meta.env?.VITE_BACKEND_URL || 'https://backend-three-sigma-81.vercel.app/api';
     const getHeaders = () => {
@@ -186,7 +187,7 @@ const ProductModal = ({ product, onClose, onSave }) => {
         const result = await onSave({ ...formData, image_url: imageUrl });
         setSaving(false);
 
-        // If result has error code, it's a safety rejection
+        // If result has error code, it's a safety rejection (blocking)
         if (result && result.error) {
             if (result.code === 'TOXIC_INGREDIENTS_DETECTED' || result.code === 'INGREDIENTS_REQUIRED') {
                 setSafetyError({
@@ -201,6 +202,10 @@ const ProductModal = ({ product, onClose, onSave }) => {
                     penalty: null
                 });
             }
+        } else if (result && result.warnings && result.warnings.length > 0) {
+            // Product was created but has warnings (non-blocking)
+            setSafetyWarnings(result.warnings);
+            // Don't close modal yet - show warnings first
         }
     };
 
@@ -466,6 +471,65 @@ const ProductModal = ({ product, onClose, onSave }) => {
                         />
                         <label htmlFor="published" className="text-sm font-medium text-slate-900 dark:text-white">Publish product (visible to users)</label>
                     </div>
+
+                    {/* Safety Error Alert (Blocking - product rejected) */}
+                    {safetyError && (
+                        <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl">
+                            <div className="flex items-start gap-3">
+                                <Icon name="ShieldX" size={20} className="text-red-500 flex-shrink-0 mt-0.5" />
+                                <div className="flex-1">
+                                    <h4 className="font-semibold text-red-700 dark:text-red-400">Product Rejected - Safety Issue</h4>
+                                    <p className="text-sm text-red-600 dark:text-red-300 mt-1">{safetyError.message}</p>
+                                    {safetyError.flaggedIngredients?.length > 0 && (
+                                        <div className="mt-2">
+                                            <p className="text-xs font-medium text-red-600 dark:text-red-400">Flagged ingredients:</p>
+                                            <div className="flex flex-wrap gap-1 mt-1">
+                                                {safetyError.flaggedIngredients.map((ing, i) => (
+                                                    <span key={i} className="px-2 py-0.5 bg-red-100 dark:bg-red-800 text-red-700 dark:text-red-200 text-xs rounded">
+                                                        {ing.name || ing}
+                                                    </span>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+                                    {safetyError.penalty && (
+                                        <p className="text-xs text-red-500 mt-2">⚠️ {safetyError.penalty.message}</p>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Safety Warnings Alert (Non-blocking - product created with warnings) */}
+                    {safetyWarnings && safetyWarnings.length > 0 && (
+                        <div className="p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl">
+                            <div className="flex items-start gap-3">
+                                <Icon name="AlertTriangle" size={20} className="text-amber-500 flex-shrink-0 mt-0.5" />
+                                <div className="flex-1">
+                                    <h4 className="font-semibold text-amber-700 dark:text-amber-400">
+                                        ✅ Product Created with Warnings
+                                    </h4>
+                                    <p className="text-sm text-amber-600 dark:text-amber-300 mt-1">
+                                        Your product was published, but contains ingredients that may cause sensitivity in some users:
+                                    </p>
+                                    <div className="mt-2 space-y-1">
+                                        {safetyWarnings.map((w, i) => (
+                                            <div key={i} className="text-xs text-amber-600 dark:text-amber-400">
+                                                • <strong>{w.ingredient}</strong>: {w.reason}
+                                            </div>
+                                        ))}
+                                    </div>
+                                    <button
+                                        type="button"
+                                        onClick={onClose}
+                                        className="mt-3 text-sm font-medium text-amber-700 dark:text-amber-400 underline"
+                                    >
+                                        Close and continue
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
 
                     <div className="flex gap-3 pt-4">
                         <button
