@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import Icon from '../../components/AppIcon';
 import { useAuth } from '../../contexts/AuthContext';
+import SellerAgreement from '../../components/seller/SellerAgreement';
 
 // Modern Minimal Sidebar
 const SellerSidebar = ({ activePage }) => {
@@ -331,23 +332,23 @@ const SellerDashboard = () => {
                 {/* Account Status Banner */}
                 {accountStatus && (accountStatus.violationCount > 0 || accountStatus.isOnProbation || accountStatus.status !== 'ACTIVE') && (
                     <div className={`mb-6 rounded-2xl p-4 border ${accountStatus.status === 'BANNED' ? 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800' :
-                            accountStatus.status === 'LOCKED' ? 'bg-orange-50 dark:bg-orange-900/20 border-orange-200 dark:border-orange-800' :
-                                accountStatus.isOnProbation ? 'bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800' :
-                                    'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800'
+                        accountStatus.status === 'LOCKED' ? 'bg-orange-50 dark:bg-orange-900/20 border-orange-200 dark:border-orange-800' :
+                            accountStatus.isOnProbation ? 'bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800' :
+                                'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800'
                         }`}>
                         <div className="flex items-start gap-3">
                             <Icon
                                 name={accountStatus.status === 'BANNED' ? 'Ban' : accountStatus.status === 'LOCKED' ? 'Lock' : 'AlertTriangle'}
                                 size={20}
                                 className={`flex-shrink-0 mt-0.5 ${accountStatus.status === 'BANNED' ? 'text-red-500' :
-                                        accountStatus.status === 'LOCKED' ? 'text-orange-500' :
-                                            'text-amber-500'
+                                    accountStatus.status === 'LOCKED' ? 'text-orange-500' :
+                                        'text-amber-500'
                                     }`}
                             />
                             <div className="flex-1">
                                 <h3 className={`font-semibold ${accountStatus.status === 'BANNED' ? 'text-red-700 dark:text-red-400' :
-                                        accountStatus.status === 'LOCKED' ? 'text-orange-700 dark:text-orange-400' :
-                                            'text-amber-700 dark:text-amber-400'
+                                    accountStatus.status === 'LOCKED' ? 'text-orange-700 dark:text-orange-400' :
+                                        'text-amber-700 dark:text-amber-400'
                                     }`}>
                                     {accountStatus.status === 'BANNED' ? '⛔ Account Permanently Banned' :
                                         accountStatus.status === 'LOCKED' ? '🔒 Account Locked' :
@@ -355,8 +356,8 @@ const SellerDashboard = () => {
                                                 `⚠️ Safety Warning (${accountStatus.violationCount}/3)`}
                                 </h3>
                                 <p className={`text-sm mt-1 ${accountStatus.status === 'BANNED' ? 'text-red-600 dark:text-red-300' :
-                                        accountStatus.status === 'LOCKED' ? 'text-orange-600 dark:text-orange-300' :
-                                            'text-amber-600 dark:text-amber-300'
+                                    accountStatus.status === 'LOCKED' ? 'text-orange-600 dark:text-orange-300' :
+                                        'text-amber-600 dark:text-amber-300'
                                     }`}>
                                     {accountStatus.status === 'BANNED'
                                         ? 'Your account has been permanently banned for repeated safety violations.'
