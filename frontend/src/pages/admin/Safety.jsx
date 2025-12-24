@@ -14,8 +14,8 @@ const TabButton = ({ active, onClick, icon, label, count }) => (
     <button
         onClick={onClick}
         className={`flex items-center gap-2 px-4 py-3 rounded-xl font-medium transition-all ${active
-                ? 'bg-pink-500 text-white shadow-lg shadow-pink-500/25'
-                : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700'
+            ? 'bg-pink-500 text-white shadow-lg shadow-pink-500/25'
+            : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700'
             }`}
     >
         <Icon name={icon} size={18} />
@@ -87,8 +87,8 @@ const AppealsTab = () => {
                         <div className="flex-1">
                             <div className="flex items-center gap-3 mb-2">
                                 <span className={`px-2 py-1 rounded-lg text-xs font-semibold ${appeal.status === 'pending' ? 'bg-amber-100 text-amber-700' :
-                                        appeal.status === 'approved' ? 'bg-emerald-100 text-emerald-700' :
-                                            'bg-red-100 text-red-700'
+                                    appeal.status === 'approved' ? 'bg-emerald-100 text-emerald-700' :
+                                        'bg-red-100 text-red-700'
                                     }`}>
                                     {appeal.status?.toUpperCase()}
                                 </span>
@@ -189,8 +189,8 @@ const ProblemSellersTab = () => {
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-4">
                             <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${seller.account_status === 'BANNED' ? 'bg-red-100 dark:bg-red-900/30' :
-                                    seller.account_status === 'LOCKED' ? 'bg-orange-100 dark:bg-orange-900/30' :
-                                        'bg-amber-100 dark:bg-amber-900/30'
+                                seller.account_status === 'LOCKED' ? 'bg-orange-100 dark:bg-orange-900/30' :
+                                    'bg-amber-100 dark:bg-amber-900/30'
                                 }`}>
                                 <Icon
                                     name={seller.account_status === 'BANNED' ? 'Ban' : seller.account_status === 'LOCKED' ? 'Lock' : 'AlertTriangle'}
@@ -207,8 +207,8 @@ const ProblemSellersTab = () => {
                                 <p className="text-sm text-slate-500">{seller.email}</p>
                                 <div className="flex items-center gap-2 mt-1">
                                     <span className={`px-2 py-0.5 rounded text-xs font-semibold ${seller.account_status === 'BANNED' ? 'bg-red-100 text-red-700' :
-                                            seller.account_status === 'LOCKED' ? 'bg-orange-100 text-orange-700' :
-                                                'bg-amber-100 text-amber-700'
+                                        seller.account_status === 'LOCKED' ? 'bg-orange-100 text-orange-700' :
+                                            'bg-amber-100 text-amber-700'
                                         }`}>
                                         {seller.account_status}
                                     </span>
@@ -361,6 +361,135 @@ const RejectedProductsTab = () => {
     );
 };
 
+// Database Settings Tab
+const DatabaseTab = () => {
+    const [stats, setStats] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [seeding, setSeeding] = useState(false);
+    const [seedResult, setSeedResult] = useState(null);
+
+    useEffect(() => {
+        fetchStats();
+    }, []);
+
+    const fetchStats = async () => {
+        try {
+            const res = await fetch(`${API_BASE}/admin/violations/toxic-ingredients/stats`, { headers: getHeaders() });
+            if (res.ok) {
+                const data = await res.json();
+                setStats(data.data);
+            }
+        } catch (err) {
+            console.error('Error fetching stats:', err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleSeed = async () => {
+        setSeeding(true);
+        setSeedResult(null);
+        try {
+            const res = await fetch(`${API_BASE}/admin/violations/seed-toxic-ingredients`, {
+                method: 'POST',
+                headers: getHeaders()
+            });
+            const data = await res.json();
+            setSeedResult(data);
+            fetchStats();
+        } catch (err) {
+            console.error('Error seeding:', err);
+            setSeedResult({ success: false, message: err.message });
+        } finally {
+            setSeeding(false);
+        }
+    };
+
+    if (loading) return <div className="p-8 text-center"><div className="animate-spin w-8 h-8 border-4 border-pink-500 border-t-transparent rounded-full mx-auto"></div></div>;
+
+    return (
+        <div className="space-y-6">
+            {/* Stats Card */}
+            <div className="bg-white dark:bg-slate-800 rounded-2xl p-6 border border-slate-200 dark:border-slate-700">
+                <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
+                    <Icon name="Database" size={20} className="text-pink-500" />
+                    Toxic Ingredients Database
+                </h3>
+
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                    <div className="p-4 bg-slate-50 dark:bg-slate-900 rounded-xl text-center">
+                        <p className="text-3xl font-bold text-pink-500">{stats?.totalInDatabase || 0}</p>
+                        <p className="text-sm text-slate-500">In Database</p>
+                    </div>
+                    <div className="p-4 bg-slate-50 dark:bg-slate-900 rounded-xl text-center">
+                        <p className="text-3xl font-bold text-emerald-500">{stats?.availableToSeed || 0}</p>
+                        <p className="text-sm text-slate-500">Available</p>
+                    </div>
+                    {stats?.bySeverity?.map(s => (
+                        <div key={s.severity} className="p-4 bg-slate-50 dark:bg-slate-900 rounded-xl text-center">
+                            <p className={`text-2xl font-bold ${s.severity === 'critical' ? 'text-red-500' :
+                                    s.severity === 'high' ? 'text-orange-500' :
+                                        s.severity === 'medium' ? 'text-amber-500' : 'text-slate-500'
+                                }`}>{s.count}</p>
+                            <p className="text-sm text-slate-500 capitalize">{s.severity}</p>
+                        </div>
+                    ))}
+                </div>
+
+                <button
+                    onClick={handleSeed}
+                    disabled={seeding}
+                    className="w-full py-3 px-4 bg-gradient-to-r from-pink-500 to-rose-500 text-white rounded-xl font-semibold hover:from-pink-600 hover:to-rose-600 disabled:opacity-50 flex items-center justify-center gap-2"
+                >
+                    {seeding ? (
+                        <>
+                            <div className="animate-spin w-5 h-5 border-2 border-white border-t-transparent rounded-full"></div>
+                            Seeding Database...
+                        </>
+                    ) : (
+                        <>
+                            <Icon name="Download" size={20} />
+                            Seed 100+ Toxic Ingredients
+                        </>
+                    )}
+                </button>
+
+                {seedResult && (
+                    <div className={`mt-4 p-4 rounded-xl ${seedResult.success ? 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600' : 'bg-red-50 dark:bg-red-900/20 text-red-600'}`}>
+                        <p className="font-medium">{seedResult.message}</p>
+                        {seedResult.data && (
+                            <p className="text-sm mt-1">
+                                Added: {seedResult.data.added} | Already existed: {seedResult.data.skipped}
+                            </p>
+                        )}
+                    </div>
+                )}
+            </div>
+
+            {/* Info Card */}
+            <div className="bg-gradient-to-r from-pink-50 to-rose-50 dark:from-pink-900/20 dark:to-rose-900/20 rounded-2xl p-6 border border-pink-200 dark:border-pink-800">
+                <h4 className="font-semibold text-slate-900 dark:text-white mb-2 flex items-center gap-2">
+                    <Icon name="Shield" size={18} className="text-pink-500" />
+                    AI-Powered Safety Check
+                </h4>
+                <p className="text-sm text-slate-600 dark:text-slate-300 mb-3">
+                    النظام يستخدم طبقتين من الحماية:
+                </p>
+                <ul className="text-sm text-slate-600 dark:text-slate-300 space-y-2">
+                    <li className="flex items-start gap-2">
+                        <span className="text-pink-500 font-bold">1.</span>
+                        <span><strong>Quick Check:</strong> قاعدة بيانات + Gemini AI للفحص السريع</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                        <span className="text-pink-500 font-bold">2.</span>
+                        <span><strong>Deep Scan:</strong> تحليل عميق بالذكاء الاصطناعي للمنتجات المشبوهة</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    );
+};
+
 // Main Admin Safety Page
 const AdminSafety = () => {
     const [activeTab, setActiveTab] = useState('appeals');
@@ -436,6 +565,12 @@ const AdminSafety = () => {
                         label="Rejected Products"
                         count={counts.rejected}
                     />
+                    <TabButton
+                        active={activeTab === 'database'}
+                        onClick={() => setActiveTab('database')}
+                        icon="Database"
+                        label="Database"
+                    />
                 </div>
 
                 {/* Tab Content */}
@@ -443,6 +578,7 @@ const AdminSafety = () => {
                 {activeTab === 'sellers' && <ProblemSellersTab />}
                 {activeTab === 'blacklist' && <BlacklistTab />}
                 {activeTab === 'rejected' && <RejectedProductsTab />}
+                {activeTab === 'database' && <DatabaseTab />}
             </div>
         </AdminLayout>
     );
