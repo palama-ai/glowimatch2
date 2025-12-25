@@ -25,6 +25,10 @@ const supabase = {
       if (json?.data?.token) {
         localStorage.setItem(authStorageKey, JSON.stringify({ token: json.data.token, user: json.data.user }));
       }
+      // Return requiresVerification flag if present
+      if (json?.data?.requiresVerification) {
+        return makeResp(r.ok, { ...json.data, requiresVerification: true }, null);
+      }
       return makeResp(r.ok, json.data ?? null, json.error ?? null);
     },
 
@@ -42,8 +46,18 @@ const supabase = {
 
         let err = null;
         if (!r.ok) {
+          // Handle email not verified (requires verification)
+          if (r.status === 403 && json?.requiresVerification) {
+            err = {
+              message: json?.message || 'Please verify your email before logging in.',
+              type: 'requires_verification',
+              requiresVerification: true,
+              email: json?.email || email,
+              raw: json
+            };
+          }
           // 🛡️ SECURITY: Handle different error types
-          if (r.status === 423) {
+          else if (r.status === 423) {
             // Account locked - brute force protection
             err = {
               message: json?.message || 'Account temporarily locked. Please try again later.',
