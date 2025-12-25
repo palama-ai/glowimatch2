@@ -16,6 +16,9 @@ import LandingPage from './pages/landing-page';
 import LoginPage from './pages/auth/LoginPage';
 import SignupPage from './pages/auth/SignupPage';
 
+// Email verification page
+const EmailVerificationPage = lazy(() => import('./pages/auth/EmailVerificationPage'));
+
 // ⚡ PERFORMANCE: Lazy load heavy/rarely used pages (Code Splitting)
 const About = lazy(() => import('./pages/about'));
 const Blog = lazy(() => import('./pages/blog'));
@@ -127,6 +130,7 @@ const Routes = () => {
                     {/* Auth routes */}
                     <Route path="/login" element={<LoginPage />} />
                     <Route path="/signup" element={<SignupPage />} />
+                    <Route path="/verify-email" element={<Suspense fallback={<PageLoader />}><EmailVerificationPage /></Suspense>} />
                     <Route path="/profile" element={<ProfilePage />} />
                     <Route path="/quiz-history" element={<QuizHistory />} />
                     <Route path="/notifications" element={<NotificationsPage />} />
