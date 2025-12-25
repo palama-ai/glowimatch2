@@ -41,6 +41,13 @@ const LoginPage = () => {
     const { data, error } = await signIn(formData?.email, formData?.password);
 
     if (error) {
+      // Check if email verification is required
+      if (error?.requiresVerification || error?.type === 'requires_verification') {
+        const emailToVerify = error?.email || formData?.email;
+        navigate(`/verify-email?email=${encodeURIComponent(emailToVerify)}`);
+        setLoading(false);
+        return;
+      }
       setError(error?.message);
     } else {
       try {
