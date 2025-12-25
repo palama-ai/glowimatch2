@@ -151,10 +151,28 @@ const GoogleSignInButton = ({ onSuccess, onError, accountType = 'user' }) => {
             const data = await res.json();
             console.log('[GoogleSignIn] Response status:', res.status, 'data:', data);
 
+            // Handle 403 with requiresVerification
+            if (res.status === 403 && data.requiresVerification) {
+                console.log('[GoogleSignIn] Email verification required');
+                setShowAccountTypeModal(false);
+                const emailToVerify = data.email || pendingUserInfo.email;
+                window.location.href = `/verify-email?email=${encodeURIComponent(emailToVerify)}`;
+                return;
+            }
+
             if (!res.ok) {
                 const errorMsg = data.message || data.error || data.details || 'Google sign-in failed';
                 console.error('[GoogleSignIn] Auth failed:', errorMsg);
                 throw new Error(errorMsg);
+            }
+
+            // Check if new user needs verification
+            if (data.data?.requiresVerification) {
+                console.log('[GoogleSignIn] New user requires email verification');
+                setShowAccountTypeModal(false);
+                const emailToVerify = data.data?.user?.email || pendingUserInfo.email;
+                window.location.href = `/verify-email?email=${encodeURIComponent(emailToVerify)}`;
+                return;
             }
 
             // Store auth data
