@@ -96,17 +96,23 @@ const SignupPage = () => {
 
     // store referral code locally (if present in the form)
     if (referralCode) localStorage.setItem('referral_code', referralCode);
-    const { error } = await signUp(formData?.email, formData?.password, formData?.fullName, formData?.accountType);
+    const { error, data } = await signUp(formData?.email, formData?.password, formData?.fullName, formData?.accountType);
 
     if (error) {
-      setError(error?.message);
+      setError(error?.message || error);
     } else {
-      setSuccess(t('account_created'));
-      // Redirect sellers to seller dashboard, users to login
-      if (formData?.accountType === 'seller') {
-        setTimeout(() => navigate('/seller'), 2000);
+      // Check if verification is required
+      if (data?.requiresVerification) {
+        setSuccess('Account created! Please check your email for the verification code.');
+        setTimeout(() => navigate(`/verify-email?email=${encodeURIComponent(formData?.email)}`), 1500);
       } else {
-        setTimeout(() => navigate('/login'), 3000);
+        setSuccess(t('account_created'));
+        // Redirect sellers to seller dashboard, users to home
+        if (formData?.accountType === 'seller') {
+          setTimeout(() => navigate('/seller'), 2000);
+        } else {
+          setTimeout(() => navigate('/'), 2000);
+        }
       }
     }
 
