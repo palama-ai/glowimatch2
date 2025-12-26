@@ -33,6 +33,23 @@ const translations = {
     quick_start: 'Quick Start',
     questions: 'Questions?',
     questions_sub: 'Reach out to our team or explore the blog for tips.',
+    why_choose: 'Why Choose Glowimatch?',
+    why_choose_sub: 'Powered by AI and dermatological expertise to deliver your best skin',
+    trusted_by: 'Trusted by thousands',
+    trusted_by_sub: 'Our AI-powered skincare analysis has helped thousands of people achieve their skin goals. Get personalized recommendations based on your unique skin characteristics.',
+    active_users: 'Active Users',
+    avg_rating: 'Average Rating',
+    learn_more: 'Learn More',
+    skincare_tips: 'Skincare Tips & Insights',
+    skincare_tips_sub: 'Expert advice to help you care for your skin',
+    blog_simple_routine: 'How to build a simple skincare routine',
+    blog_simple_routine_desc: 'A practical guide to choosing the essentials and building consistency.',
+    blog_skin_types: 'Understanding skin types',
+    blog_skin_types_desc: 'Learn the differences between oily, dry, combination and sensitive skin.',
+    ready_to_find: 'Ready to find your perfect skincare routine?',
+    join_thousands: 'Join thousands of people discovering their best skin',
+    start_quiz_now: 'Start Quiz Now',
+    get_in_touch: 'Get in Touch',
 
     // About
     about_title: 'About GlowMatch',
@@ -313,6 +330,23 @@ const translations = {
     quick_start: 'ابدأ بسرعة',
     questions: 'لديك أسئلة؟',
     questions_sub: 'تواصل مع فريقنا أو اكتشف النصائح من المدونة.',
+    why_choose: 'لماذا تختار GlowMatch؟',
+    why_choose_sub: 'مدعوم بالذكاء الاصطناعي والخبرة الجلدية لتقديم أفضل بشرة لك',
+    trusted_by: 'موثوق به من قبل الآلاف',
+    trusted_by_sub: 'ساعد تحليل العناية بالبشرة المدعوم بالذكاء الاصطناعي الآلاف من الأشخاص في تحقيق أهداف بشرتهم. احصل على توصيات مخصصة بناءً على خصائص بشرتك الفريدة.',
+    active_users: 'مستخدم نشط',
+    avg_rating: 'متوسط التقييم',
+    learn_more: 'اقرأ المزيد',
+    skincare_tips: 'نصائح ورؤى للعناية بالبشرة',
+    skincare_tips_sub: 'نصيحة الخبراء لمساعدتك في العناية ببشرتك',
+    blog_simple_routine: 'كيف تبني روتين عناية بسيط',
+    blog_simple_routine_desc: 'دليل عملي لاختيار الأساسيات وبناء الاستمرارية.',
+    blog_skin_types: 'فهم أنواع البشرة',
+    blog_skin_types_desc: 'تعرف على الفروق بين البشرة الدهنية والجافة والمختلطة والحساسة.',
+    ready_to_find: 'هل أنت مستعد للعثور على روتينك المثالي؟',
+    join_thousands: 'انضم لآلاف الأشخاص الذين يكتشفون أفضل نسخة من بشرتهم',
+    start_quiz_now: 'ابدأ الاختبار الآن',
+    get_in_touch: 'تواصل معنا',
 
     // About
     about_title: 'حول غلوم ماتش',
@@ -439,7 +473,7 @@ export const I18nProvider = ({ children }) => {
       document.documentElement.lang = lang;
       document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
       localStorage.setItem('lang', lang);
-    } catch (e) {}
+    } catch (e) { }
   }, [lang]);
 
   const t = (key) => {
