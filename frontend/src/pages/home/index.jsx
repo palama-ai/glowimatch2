@@ -50,24 +50,24 @@ const Home = () => {
             <section className="py-20 px-5 lg:px-8 bg-background">
               <div className="max-w-6xl mx-auto">
                 <div className="text-center mb-16">
-                  <h2 className="text-4xl font-bold text-foreground mb-4">Why Choose Glowimatch?</h2>
-                  <p className="text-lg text-muted-foreground max-w-2xl mx-auto">Powered by AI and dermatological expertise to deliver your best skin</p>
+                  <h2 className="text-4xl font-bold text-foreground mb-4">{t('why_choose')}</h2>
+                  <p className="text-lg text-muted-foreground max-w-2xl mx-auto">{t('why_choose_sub')}</p>
                 </div>
                 <div className="grid md:grid-cols-3 gap-8">
                   <Feature
                     icon="Brain"
-                    title="AI-Driven Analysis"
-                    desc="We combine quiz answers with image-derived features to improve recommendations with advanced machine learning."
+                    title={t('ai_driven')}
+                    desc={t('ai_driven_desc')}
                   />
                   <Feature
                     icon="Heart"
-                    title="Personalized Routines"
-                    desc="Get a routine tailored to your skin type, sensitivity and goals for maximum effectiveness."
+                    title={t('personalized_routines')}
+                    desc={t('routines_desc')}
                   />
                   <Feature
                     icon="Download"
-                    title="Easy Reports"
-                    desc="Download PDF reports of your results and recommended products in a beautiful, shareable format."
+                    title={t('easy_reports')}
+                    desc={t('reports_desc')}
                   />
                 </div>
               </div>
@@ -78,22 +78,22 @@ const Home = () => {
               <div className="max-w-6xl mx-auto px-5 lg:px-8">
                 <div className="grid lg:grid-cols-2 gap-12 items-center">
                   <div>
-                    <h2 className="text-4xl font-bold text-foreground mb-6">Trusted by thousands</h2>
+                    <h2 className="text-4xl font-bold text-foreground mb-6">{t('trusted_by')}</h2>
                     <p className="text-lg text-muted-foreground mb-6 leading-relaxed">
-                      Our AI-powered skincare analysis has helped thousands of people achieve their skin goals. Get personalized recommendations based on your unique skin characteristics.
+                      {t('trusted_by_sub')}
                     </p>
                     <div className="grid grid-cols-2 gap-6 mb-8">
                       <div>
                         <p className="text-3xl font-bold text-accent">50K+</p>
-                        <p className="text-muted-foreground">Active Users</p>
+                        <p className="text-muted-foreground">{t('active_users')}</p>
                       </div>
                       <div>
                         <p className="text-3xl font-bold text-accent">4.8★</p>
-                        <p className="text-muted-foreground">Average Rating</p>
+                        <p className="text-muted-foreground">{t('avg_rating')}</p>
                       </div>
                     </div>
                     <Link to="/contact" className="px-6 py-3 bg-accent text-white rounded-lg font-semibold hover:shadow-lg transition-all">
-                      Learn More
+                      {t('learn_more')}
                     </Link>
                   </div>
                   <div className="relative">
@@ -112,8 +112,8 @@ const Home = () => {
             <section className="py-20 px-5 lg:px-8">
               <div className="max-w-6xl mx-auto">
                 <div className="text-center mb-16">
-                  <h2 className="text-4xl font-bold text-foreground mb-4">Skincare Tips & Insights</h2>
-                  <p className="text-lg text-muted-foreground">Expert advice to help you care for your skin</p>
+                  <h2 className="text-4xl font-bold text-foreground mb-4">{t('skincare_tips')}</h2>
+                  <p className="text-lg text-muted-foreground">{t('skincare_tips_sub')}</p>
                 </div>
                 <div className="grid md:grid-cols-2 gap-8">
                   <Link to="/blog/simple-skincare-routine" className="group block overflow-hidden bg-card rounded-xl border border-border hover:border-accent transition-all hover:shadow-xl">
@@ -125,10 +125,10 @@ const Home = () => {
                       />
                     </div>
                     <div className="p-6">
-                      <h4 className="font-semibold text-foreground mb-2 text-lg group-hover:text-accent transition-colors">How to build a simple skincare routine</h4>
-                      <p className="text-sm text-muted-foreground mb-4">A practical guide to choosing the essentials and building consistency.</p>
+                      <h4 className="font-semibold text-foreground mb-2 text-lg group-hover:text-accent transition-colors">{t('blog_simple_routine')}</h4>
+                      <p className="text-sm text-muted-foreground mb-4">{t('blog_simple_routine_desc')}</p>
                       <span className="inline-flex items-center text-accent font-semibold">
-                        Read More <Icon name="ArrowRight" size={16} className="ml-2 group-hover:translate-x-2 transition-transform" />
+                        {t('read_more')} <Icon name="ArrowRight" size={16} className="ml-2 group-hover:translate-x-2 transition-transform" />
                       </span>
                     </div>
                   </Link>
@@ -141,10 +141,10 @@ const Home = () => {
                       />
                     </div>
                     <div className="p-6">
-                      <h4 className="font-semibold text-foreground mb-2 text-lg group-hover:text-accent transition-colors">Understanding skin types</h4>
-                      <p className="text-sm text-muted-foreground mb-4">Learn the differences between oily, dry, combination and sensitive skin.</p>
+                      <h4 className="font-semibold text-foreground mb-2 text-lg group-hover:text-accent transition-colors">{t('blog_skin_types')}</h4>
+                      <p className="text-sm text-muted-foreground mb-4">{t('blog_skin_types_desc')}</p>
                       <span className="inline-flex items-center text-accent font-semibold">
-                        Read More <Icon name="ArrowRight" size={16} className="ml-2 group-hover:translate-x-2 transition-transform" />
+                        {t('read_more')} <Icon name="ArrowRight" size={16} className="ml-2 group-hover:translate-x-2 transition-transform" />
                       </span>
                     </div>
                   </Link>
@@ -159,14 +159,14 @@ const Home = () => {
                 <div className={`absolute inset-0 bg-gradient-to-r ${GRADIENTS.overlay_dark}`}></div>
               </div>
               <div className="relative max-w-4xl mx-auto px-5 lg:px-8 text-center text-white py-16">
-                <h3 className="text-4xl font-bold mb-4">Ready to find your perfect skincare routine?</h3>
-                <p className="text-xl text-gray-200 mb-8">Join thousands of people discovering their best skin</p>
+                <h3 className="text-4xl font-bold mb-4">{t('ready_to_find')}</h3>
+                <p className="text-xl text-gray-200 mb-8">{t('join_thousands')}</p>
                 <div className="flex flex-col sm:flex-row gap-4 justify-center">
                   <Link to="/interactive-skin-quiz" className="px-8 py-4 bg-accent text-white rounded-lg font-semibold hover:shadow-lg transition-all hover:scale-105">
-                    Start Quiz Now
+                    {t('start_quiz_now')}
                   </Link>
                   <Link to="/contact" className="px-8 py-4 bg-white/10 backdrop-blur border border-white/30 text-white rounded-lg font-semibold hover:bg-white/20 transition-all">
-                    Get in Touch
+                    {t('get_in_touch')}
                   </Link>
                 </div>
               </div>
