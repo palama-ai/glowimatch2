@@ -171,15 +171,17 @@ const About = () => {
 
               {/* Ayoub Alioui - Co-Founder & CEO */}
               <div className="group bg-card border border-border rounded-xl overflow-hidden hover:border-accent hover:shadow-lg transition-all">
-                <div className="h-56 bg-gradient-to-br from-accent/20 to-purple-500/20 flex items-center justify-center group-hover:scale-105 transition-transform">
-                  <div className="w-24 h-24 rounded-full bg-gradient-to-br from-accent to-purple-600 flex items-center justify-center">
-                    <span className="text-3xl font-bold text-white">AA</span>
-                  </div>
+                <div className="h-56 overflow-hidden">
+                  <img
+                    src="/images/team/ayoub-alioui.jpg"
+                    alt="Ayoub Alioui"
+                    className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform"
+                  />
                 </div>
                 <div className="p-6 text-center">
                   <div className="text-xl font-semibold text-foreground">Ayoub Alioui</div>
                   <div className="text-sm text-accent font-medium mt-1">Co-Founder & CEO</div>
-                  <p className="text-sm text-muted-foreground mt-3">{t('team_dev_desc')}</p>
+                  <p className="text-sm text-muted-foreground mt-3">Leading the vision, strategy, and technical innovation behind Glowimatch.</p>
                   <a
                     href="https://www.linkedin.com/in/ayoub--alioui"
                     target="_blank"
