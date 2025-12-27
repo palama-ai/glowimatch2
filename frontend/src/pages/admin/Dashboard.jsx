@@ -8,16 +8,17 @@ import Button from '../../components/ui/Button';
 const API_BASE = import.meta.env?.VITE_BACKEND_URL || 'https://backend-three-sigma-81.vercel.app/api';
 
 const StatCard = ({ title, value, note, icon, color = 'accent' }) => (
-  <div className="bg-gradient-to-br from-card to-card/50 border border-border rounded-lg p-6 hover:border-accent/50 transition-colors">
+  <div className="bg-gradient-to-br from-card to-card/50 border border-border rounded-lg p-4 sm:p-6 hover:border-accent/50 transition-colors">
     <div className="flex items-start justify-between">
       <div className="flex-1">
-        <div className="text-sm font-medium text-muted-foreground">{title}</div>
-        <div className="text-4xl font-bold text-foreground mt-3">{value}</div>
-        {note && <div className="text-xs text-muted-foreground mt-2">{note}</div>}
+        <div className="text-xs sm:text-sm font-medium text-muted-foreground">{title}</div>
+        <div className="text-2xl sm:text-4xl font-bold text-foreground mt-2 sm:mt-3">{value}</div>
+        {note && <div className="text-xs text-muted-foreground mt-1 sm:mt-2">{note}</div>}
       </div>
       {icon && (
-        <div className={`p-3 rounded-lg bg-${color}/10`}>
-          <Icon name={icon} size={24} className={`text-${color}`} />
+        <div className={`p-2 sm:p-3 rounded-lg bg-${color}/10`}>
+          <Icon name={icon} size={20} className={`text-${color} sm:hidden`} />
+          <Icon name={icon} size={24} className={`text-${color} hidden sm:block`} />
         </div>
       )}
     </div>
@@ -140,24 +141,24 @@ const Dashboard = () => {
   return (
     <AdminLayout>
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8">
+      <div className="flex flex-col gap-4 mb-6 sm:mb-8">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">Dashboard</h1>
-          <p className="text-muted-foreground mt-1">Welcome back! Here's your platform overview.</p>
+          <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Dashboard</h1>
+          <p className="text-sm sm:text-base text-muted-foreground mt-1">Welcome back! Here's your platform overview.</p>
         </div>
-        <div className="flex gap-2 mt-4 md:mt-0">
+        <div className="flex flex-wrap gap-2">
           <Link to="/admin/users">
-            <Button variant="outline" iconName="Users" iconPosition="left">
+            <Button variant="outline" iconName="Users" iconPosition="left" className="text-xs sm:text-sm">
               Users
             </Button>
           </Link>
           <Link to="/admin/blogs">
-            <Button variant="outline" iconName="BookOpen" iconPosition="left">
+            <Button variant="outline" iconName="BookOpen" iconPosition="left" className="text-xs sm:text-sm">
               Blogs
             </Button>
           </Link>
           <Link to="/admin/messages">
-            <Button variant="outline" iconName="Mail" iconPosition="left">
+            <Button variant="outline" iconName="Mail" iconPosition="left" className="text-xs sm:text-sm">
               Messages
             </Button>
           </Link>
@@ -165,18 +166,19 @@ const Dashboard = () => {
       </div>
 
       {/* Signup Settings Section */}
-      <div className="bg-card border border-border rounded-lg p-6 mb-8">
-        <div className="flex items-center justify-between mb-4">
+      <div className="bg-card border border-border rounded-lg p-4 sm:p-6 mb-6 sm:mb-8">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
           <div>
-            <h3 className="text-lg font-semibold text-foreground flex items-center gap-2">
-              <Icon name="ShieldAlert" size={20} className="text-accent" />
+            <h3 className="text-base sm:text-lg font-semibold text-foreground flex items-center gap-2">
+              <Icon name="ShieldAlert" size={18} className="text-accent sm:hidden" />
+              <Icon name="ShieldAlert" size={20} className="text-accent hidden sm:block" />
               Signup Control
             </h3>
-            <p className="text-sm text-muted-foreground mt-1">Block new account registrations during maintenance</p>
+            <p className="text-xs sm:text-sm text-muted-foreground mt-1">Block new account registrations</p>
           </div>
           {signupBlockSuccess && (
-            <div className="px-3 py-1.5 bg-green-100 border border-green-300 text-green-700 rounded-lg text-sm font-medium flex items-center gap-2">
-              <Icon name="CheckCircle2" size={16} />
+            <div className="px-2 sm:px-3 py-1 sm:py-1.5 bg-green-100 border border-green-300 text-green-700 rounded-lg text-xs sm:text-sm font-medium flex items-center gap-2">
+              <Icon name="CheckCircle2" size={14} />
               {signupBlockSuccess}
             </div>
           )}
@@ -188,8 +190,8 @@ const Dashboard = () => {
             onClick={() => updateSignupBlock('user', !signupBlock.blockUserSignup)}
             disabled={signupBlockLoading}
             className={`flex-1 flex items-center justify-center gap-3 px-4 py-3 rounded-lg border-2 transition-all font-medium ${signupBlock.blockUserSignup
-                ? 'bg-red-50 border-red-300 text-red-700 hover:bg-red-100'
-                : 'bg-green-50 border-green-300 text-green-700 hover:bg-green-100'
+              ? 'bg-red-50 border-red-300 text-red-700 hover:bg-red-100'
+              : 'bg-green-50 border-green-300 text-green-700 hover:bg-green-100'
               } ${signupBlockLoading ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
           >
             <Icon
@@ -211,8 +213,8 @@ const Dashboard = () => {
             onClick={() => updateSignupBlock('seller', !signupBlock.blockSellerSignup)}
             disabled={signupBlockLoading}
             className={`flex-1 flex items-center justify-center gap-3 px-4 py-3 rounded-lg border-2 transition-all font-medium ${signupBlock.blockSellerSignup
-                ? 'bg-red-50 border-red-300 text-red-700 hover:bg-red-100'
-                : 'bg-green-50 border-green-300 text-green-700 hover:bg-green-100'
+              ? 'bg-red-50 border-red-300 text-red-700 hover:bg-red-100'
+              : 'bg-green-50 border-green-300 text-green-700 hover:bg-green-100'
               } ${signupBlockLoading ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
           >
             <Icon
@@ -254,7 +256,7 @@ const Dashboard = () => {
 
       {/* Key Metrics */}
       {stats && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6 sm:mb-8">
           <StatCard
             title="Total Users"
             value={stats.total ?? 0}
@@ -286,13 +288,13 @@ const Dashboard = () => {
 
       {/* Plans Breakdown */}
       {stats && (
-        <div className="bg-card border border-border rounded-lg p-6 mb-8">
-          <div className="flex items-center justify-between mb-6">
+        <div className="bg-card border border-border rounded-lg p-4 sm:p-6 mb-6 sm:mb-8">
+          <div className="flex items-center justify-between mb-4 sm:mb-6">
             <div>
-              <h3 className="text-lg font-semibold text-foreground">Subscription Plans</h3>
-              <p className="text-sm text-muted-foreground mt-1">Active subscriptions by plan</p>
+              <h3 className="text-base sm:text-lg font-semibold text-foreground">Subscription Plans</h3>
+              <p className="text-xs sm:text-sm text-muted-foreground mt-1">Active subscriptions by plan</p>
             </div>
-            <Icon name="PieChart" className="text-accent" size={24} />
+            <Icon name="PieChart" className="text-accent" size={20} />
           </div>
 
           {Object.keys(stats.planBreakdown || {}).length === 0 ? (

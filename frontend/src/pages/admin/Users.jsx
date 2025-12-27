@@ -100,32 +100,34 @@ const Users = () => {
   return (
     <div className="min-h-screen bg-background">
       <Header />
-      <main className="max-w-6xl mx-auto px-5 lg:px-8 py-12">
-        <h1 className="text-2xl font-bold mb-6">Manage Users</h1>
+      <main className="max-w-6xl mx-auto px-3 sm:px-5 lg:px-8 py-6 sm:py-12">
+        <h1 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6">Manage Users</h1>
         {loading ? <div>Loading...</div> : (
-          <div className="space-y-4">
+          <div className="space-y-3 sm:space-y-4">
             {error && <div className="text-sm text-red-600">Error: {error}</div>}
             {users.length === 0 && !error && <div className="text-sm text-muted-foreground">No users found.</div>}
             {users.map(u => (
-              <div key={u.id} className="bg-card border border-border rounded-lg p-4 flex items-center justify-between">
-                <div>
-                  <div className="font-medium">{u.full_name || u.email}</div>
-                  <div className="text-xs text-muted-foreground">{u.email}</div>
-                  <div className="text-xs text-muted-foreground">Role: {u.role} | Subscription: {u.subscription?.plan_id || 'none'}</div>
-                </div>
-                <div className="space-x-2">
-                  {u.deleted ? (
-                    <span className="px-3 py-1 rounded bg-gray-100 text-sm text-muted-foreground">Deleted</span>
-                  ) : (
-                    <>
-                      <button onClick={() => toggleDisabled(u.id, !u.disabled)} className={`px-3 py-1 rounded ${u.disabled ? 'bg-green-100' : 'bg-red-100'}`}>
-                        {u.disabled ? 'Enable' : 'Disable'}
-                      </button>
-                      <button onClick={() => setStatusMessage(u.id)} className="px-3 py-1 rounded bg-yellow-100">Set Message</button>
-                      <button onClick={() => deleteUser(u.id)} className="px-3 py-1 rounded bg-red-100">Delete</button>
-                    </>
-                  )}
-                  <button onClick={() => setPlan(u.id)} className="px-3 py-1 rounded bg-accent/10">Set Plan</button>
+              <div key={u.id} className="bg-card border border-border rounded-lg p-3 sm:p-4">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div className="flex-1 min-w-0">
+                    <div className="font-medium text-sm sm:text-base truncate">{u.full_name || u.email}</div>
+                    <div className="text-xs text-muted-foreground truncate">{u.email}</div>
+                    <div className="text-xs text-muted-foreground">Role: {u.role} | Sub: {u.subscription?.plan_id || 'none'}</div>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {u.deleted ? (
+                      <span className="px-2 sm:px-3 py-1 rounded bg-gray-100 text-xs sm:text-sm text-muted-foreground">Deleted</span>
+                    ) : (
+                      <>
+                        <button onClick={() => toggleDisabled(u.id, !u.disabled)} className={`px-2 sm:px-3 py-1 rounded text-xs sm:text-sm ${u.disabled ? 'bg-green-100' : 'bg-red-100'}`}>
+                          {u.disabled ? 'Enable' : 'Disable'}
+                        </button>
+                        <button onClick={() => setStatusMessage(u.id)} className="px-2 sm:px-3 py-1 rounded bg-yellow-100 text-xs sm:text-sm">Message</button>
+                        <button onClick={() => deleteUser(u.id)} className="px-2 sm:px-3 py-1 rounded bg-red-100 text-xs sm:text-sm">Delete</button>
+                      </>
+                    )}
+                    <button onClick={() => setPlan(u.id)} className="px-2 sm:px-3 py-1 rounded bg-accent/10 text-xs sm:text-sm">Plan</button>
+                  </div>
                 </div>
               </div>
             ))}
