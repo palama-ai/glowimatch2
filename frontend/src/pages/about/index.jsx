@@ -145,35 +145,50 @@ const About = () => {
               <h2 className="text-4xl font-bold text-foreground mb-4">{t('team')}</h2>
               <p className="text-lg text-muted-foreground">{t('team_sub')}</p>
             </div>
-            <div className="grid md:grid-cols-3 gap-8">
+            <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+              {/* Aicha Alaoui - Founder */}
               <div className="group bg-card border border-border rounded-xl overflow-hidden hover:border-accent hover:shadow-lg transition-all">
-                <div className="h-56 bg-gradient-to-br from-accent/20 to-purple-500/20 flex items-center justify-center group-hover:scale-105 transition-transform">
-                  <Icon name="User" size={64} className="text-accent/40" />
+                <div className="h-56 bg-gradient-to-br from-pink-500/20 to-rose-500/20 flex items-center justify-center group-hover:scale-105 transition-transform">
+                  <div className="w-24 h-24 rounded-full bg-gradient-to-br from-pink-500 to-rose-500 flex items-center justify-center">
+                    <span className="text-3xl font-bold text-white">AA</span>
+                  </div>
                 </div>
                 <div className="p-6 text-center">
-                  <div className="text-lg font-semibold text-foreground">Aicha</div>
-                  <div className="text-sm text-accent font-medium">{t('team_aicha_role')}</div>
+                  <div className="text-xl font-semibold text-foreground">Aicha Alaoui</div>
+                  <div className="text-sm text-accent font-medium mt-1">Founder</div>
                   <p className="text-sm text-muted-foreground mt-3">{t('team_aicha_desc')}</p>
+                  <a
+                    href="https://www.linkedin.com/in/aicha-alaoui-65478439b/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 mt-4 px-4 py-2 bg-[#0077B5]/10 hover:bg-[#0077B5]/20 text-[#0077B5] rounded-full text-sm font-medium transition-colors"
+                  >
+                    <Icon name="Linkedin" size={16} />
+                    LinkedIn
+                  </a>
                 </div>
               </div>
+
+              {/* Ayoub Alioui - Co-Founder & CEO */}
               <div className="group bg-card border border-border rounded-xl overflow-hidden hover:border-accent hover:shadow-lg transition-all">
                 <div className="h-56 bg-gradient-to-br from-accent/20 to-purple-500/20 flex items-center justify-center group-hover:scale-105 transition-transform">
-                  <Icon name="Code" size={64} className="text-accent/40" />
+                  <div className="w-24 h-24 rounded-full bg-gradient-to-br from-accent to-purple-600 flex items-center justify-center">
+                    <span className="text-3xl font-bold text-white">AA</span>
+                  </div>
                 </div>
                 <div className="p-6 text-center">
-                  <div className="text-lg font-semibold text-foreground">Dev Team</div>
-                  <div className="text-sm text-accent font-medium">{t('team_dev_role')}</div>
+                  <div className="text-xl font-semibold text-foreground">Ayoub Alioui</div>
+                  <div className="text-sm text-accent font-medium mt-1">Co-Founder & CEO</div>
                   <p className="text-sm text-muted-foreground mt-3">{t('team_dev_desc')}</p>
-                </div>
-              </div>
-              <div className="group bg-card border border-border rounded-xl overflow-hidden hover:border-accent hover:shadow-lg transition-all">
-                <div className="h-56 bg-gradient-to-br from-accent/20 to-purple-500/20 flex items-center justify-center group-hover:scale-105 transition-transform">
-                  <Icon name="Headphones" size={64} className="text-accent/40" />
-                </div>
-                <div className="p-6 text-center">
-                  <div className="text-lg font-semibold text-foreground">Support Team</div>
-                  <div className="text-sm text-accent font-medium">{t('team_support_role')}</div>
-                  <p className="text-sm text-muted-foreground mt-3">{t('team_support_desc')}</p>
+                  <a
+                    href="https://www.linkedin.com/in/ayoub--alioui"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 mt-4 px-4 py-2 bg-[#0077B5]/10 hover:bg-[#0077B5]/20 text-[#0077B5] rounded-full text-sm font-medium transition-colors"
+                  >
+                    <Icon name="Linkedin" size={16} />
+                    LinkedIn
+                  </a>
                 </div>
               </div>
             </div>
