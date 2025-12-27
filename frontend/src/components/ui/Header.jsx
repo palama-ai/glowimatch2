@@ -158,8 +158,8 @@ const Header = () => {
             </div>
           </nav>
 
-          {/* Right Section */}
-          <div className="flex items-center gap-2 flex-shrink-0">
+          {/* Right Section - Hidden on mobile, shown on desktop */}
+          <div className="hidden lg:flex items-center gap-2 flex-shrink-0">
             {user ? (
               <>
                 {/* Notifications - Circular */}
@@ -307,7 +307,7 @@ const Header = () => {
               <>
                 <button
                   onClick={() => navigate('/login')}
-                  className="hidden sm:block px-4 sm:px-6 py-2 sm:py-2.5 text-gray-700 font-semibold hover:text-pink-600 transition-all duration-300 hover:bg-pink-50 rounded-full border border-pink-200 hover:border-pink-400 text-sm sm:text-base"
+                  className="px-4 sm:px-6 py-2 sm:py-2.5 text-gray-700 font-semibold hover:text-pink-600 transition-all duration-300 hover:bg-pink-50 rounded-full border border-pink-200 hover:border-pink-400 text-sm sm:text-base"
                 >
                   {t('sign_in')}
                 </button>
