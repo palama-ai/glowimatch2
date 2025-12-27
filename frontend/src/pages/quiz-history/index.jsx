@@ -158,13 +158,14 @@ const QuizHistory = () => {
   return (
     <div className="min-h-screen bg-background">
       <Header />
-      <main className="max-w-5xl mx-auto px-5 lg:px-8 py-8 pb-12">
+      <main className="max-w-5xl mx-auto px-4 sm:px-5 lg:px-8 py-6 sm:py-8 pb-12">
         {/* Page Header */}
-        <div className="flex items-start justify-between mb-8">
+        <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-6 sm:mb-8">
           <div>
-            <Icon name="History" size={40} className="mb-4 text-accent" />
-            <h1 className="text-4xl font-bold text-foreground mb-2">{t('quiz_history_title')}</h1>
-            <p className="text-lg text-muted-foreground">
+            <Icon name="History" size={32} className="mb-3 sm:mb-4 text-accent sm:hidden" />
+            <Icon name="History" size={40} className="mb-3 sm:mb-4 text-accent hidden sm:block" />
+            <h1 className="text-2xl sm:text-4xl font-bold text-foreground mb-1 sm:mb-2">{t('quiz_history_title')}</h1>
+            <p className="text-sm sm:text-lg text-muted-foreground">
               {t('quiz_history_subtitle')}
             </p>
           </div>
@@ -200,20 +201,20 @@ const QuizHistory = () => {
         ) : (
           <div className="space-y-4">
             {/* Summary Stats */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
-              <div className="bg-card border border-border rounded-lg p-4">
-                <div className="text-sm text-muted-foreground">{t('total_quizzes')}</div>
-                <div className="text-3xl font-bold text-accent mt-1">{quizAttempts.length}</div>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 mb-6 sm:mb-8">
+              <div className="bg-card border border-border rounded-lg p-3 sm:p-4">
+                <div className="text-xs sm:text-sm text-muted-foreground">{t('total_quizzes')}</div>
+                <div className="text-2xl sm:text-3xl font-bold text-accent mt-1">{quizAttempts.length}</div>
               </div>
-              <div className="bg-card border border-border rounded-lg p-4">
-                <div className="text-sm text-muted-foreground">{t('latest_result')}</div>
-                <div className="text-lg font-semibold text-foreground mt-1 capitalize">
+              <div className="bg-card border border-border rounded-lg p-3 sm:p-4">
+                <div className="text-xs sm:text-sm text-muted-foreground">{t('latest_result')}</div>
+                <div className="text-base sm:text-lg font-semibold text-foreground mt-1 capitalize">
                   {getSkinType(quizAttempts[0]?.results)}{t('skin_type_suffix')}
                 </div>
               </div>
-              <div className="bg-card border border-border rounded-lg p-4">
-                <div className="text-sm text-muted-foreground">{t('last_taken')}</div>
-                <div className="text-sm font-medium text-foreground mt-1">
+              <div className="bg-card border border-border rounded-lg p-3 sm:p-4">
+                <div className="text-xs sm:text-sm text-muted-foreground">{t('last_taken')}</div>
+                <div className="text-xs sm:text-sm font-medium text-foreground mt-1">
                   {formatDate(quizAttempts[0]?.attempt_date || quizAttempts[0]?.created_at)}
                 </div>
               </div>
@@ -230,33 +231,33 @@ const QuizHistory = () => {
                   key={attempt.id}
                   className="bg-card border border-border rounded-lg hover:border-accent/50 transition-colors overflow-hidden"
                 >
-                  <div className="p-6">
+                  <div className="p-4 sm:p-6">
                     <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
                       {/* Left Section */}
                       <div className="flex-1">
-                        <div className="flex items-center space-x-3 mb-3">
-                          <div className="flex items-center justify-center w-8 h-8 rounded-full bg-accent/10 text-accent font-semibold text-sm">
+                        <div className="flex flex-wrap items-center gap-2 sm:space-x-3 mb-3">
+                          <div className="flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-accent/10 text-accent font-semibold text-xs sm:text-sm">
                             #{quizAttempts.length - index}
                           </div>
-                          <span className="text-sm font-medium text-muted-foreground">
+                          <span className="text-xs sm:text-sm font-medium text-muted-foreground">
                             {formatDate(attempt.attempt_date || attempt.created_at)}
                           </span>
                           {attempt.has_image_analysis && (
-                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                              <Icon name="Image" size={12} className="mr-1" />
+                            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                              <Icon name="Image" size={10} className="mr-1" />
                               {t('with_image')}
                             </span>
                           )}
                         </div>
 
-                        <div className="space-y-2 mb-4">
+                        <div className="space-y-2 mb-3 sm:mb-4">
                           <div className="flex items-center space-x-2">
-                            <div className={`text-2xl font-bold capitalize ${getSkinTypeColor(skinType)}`}>
+                            <div className={`text-xl sm:text-2xl font-bold capitalize ${getSkinTypeColor(skinType)}`}>
                               {skinType}{t('skin_type_suffix')}
                             </div>
                           </div>
 
-                          <div className="flex flex-wrap gap-2">
+                          <div className="flex flex-wrap gap-1.5 sm:gap-2">
                             {concerns.slice(0, 3).map((concern, i) => (
                               <span
                                 key={i}

@@ -442,15 +442,16 @@ const ResultsDashboard = () => {
         <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
           {/* Page Header */}
-          <div className="text-center mb-8 animate-fade-in">
-            <div className="inline-flex items-center gap-2 px-4 py-2 bg-accent/10 rounded-full text-sm text-accent font-medium mb-4">
-              <Icon name="Sparkles" size={16} />
+          <div className="text-center mb-6 sm:mb-8 animate-fade-in">
+            <div className="inline-flex items-center gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-accent/10 rounded-full text-xs sm:text-sm text-accent font-medium mb-3 sm:mb-4">
+              <Icon name="Sparkles" size={14} className="sm:hidden" />
+              <Icon name="Sparkles" size={16} className="hidden sm:block" />
               {t('analysis_complete_badge')}
             </div>
-            <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-3">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mb-2 sm:mb-3">
               {t('results_profile_title')}
             </h1>
-            <p className="text-muted-foreground max-w-lg mx-auto">
+            <p className="text-muted-foreground max-w-lg mx-auto text-sm sm:text-base">
               {t('results_profile_desc')}
             </p>
           </div>
@@ -463,18 +464,19 @@ const ResultsDashboard = () => {
           />
 
           {/* Tab Navigation */}
-          <div className="flex justify-center mb-8">
-            <div className="inline-flex p-1.5 bg-muted/50 rounded-2xl">
+          <div className="flex justify-center mb-6 sm:mb-8">
+            <div className="inline-flex p-1 sm:p-1.5 bg-muted/50 rounded-xl sm:rounded-2xl overflow-x-auto max-w-full">
               {tabs?.map((tab) => (
                 <button
                   key={tab?.id}
                   onClick={() => setActiveTab(tab?.id)}
-                  className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-medium transition-all ${activeTab === tab?.id
+                  className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-5 py-2 sm:py-2.5 rounded-lg sm:rounded-xl text-xs sm:text-sm font-medium transition-all whitespace-nowrap ${activeTab === tab?.id
                     ? 'bg-background text-foreground shadow-sm'
                     : 'text-muted-foreground hover:text-foreground'
                     }`}
                 >
-                  <Icon name={tab?.icon} size={16} />
+                  <Icon name={tab?.icon} size={14} className="sm:hidden" />
+                  <Icon name={tab?.icon} size={16} className="hidden sm:block" />
                   {tab?.label}
                 </button>
               ))}
@@ -537,7 +539,7 @@ const ResultsDashboard = () => {
               )}
 
               {!productsLoading && filteredProducts?.length > 0 ? (
-                <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
                   {filteredProducts?.map((product, index) => (
                     <div key={product?.id} onClick={() => setSelectedProduct({ product, index })} className="cursor-pointer">
                       <ProductCard product={product} />
@@ -566,15 +568,16 @@ const ResultsDashboard = () => {
           )}
 
           {/* Retake Quiz CTA */}
-          <div className="mt-12 text-center">
-            <div className="inline-flex flex-col items-center p-6 glass-accent rounded-2xl">
-              <Icon name="RefreshCw" size={24} className="text-accent mb-3" />
-              <p className="text-sm text-foreground mb-3">
+          <div className="mt-8 sm:mt-12 text-center">
+            <div className="inline-flex flex-col items-center p-4 sm:p-6 glass-accent rounded-2xl">
+              <Icon name="RefreshCw" size={20} className="text-accent mb-2 sm:mb-3 sm:hidden" />
+              <Icon name="RefreshCw" size={24} className="text-accent mb-2 sm:mb-3 hidden sm:block" />
+              <p className="text-xs sm:text-sm text-foreground mb-2 sm:mb-3">
                 {t('retake_quiz_desc')}
               </p>
               <button
                 onClick={handleRetakeQuiz}
-                className="px-5 py-2.5 bg-accent text-white text-sm font-medium rounded-xl hover:bg-accent/90 transition-colors"
+                className="px-4 sm:px-5 py-2 sm:py-2.5 bg-accent text-white text-xs sm:text-sm font-medium rounded-xl hover:bg-accent/90 transition-colors"
               >
                 {t('take_another_quiz')}
               </button>

@@ -127,17 +127,18 @@ const SignupPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-accent/5 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-accent/5 flex items-center justify-center p-3 sm:p-4">
       <div className="max-w-md w-full">
         {/* Logo Section */}
-        <div className="text-center mb-8">
-          <div className="inline-block p-3 bg-gradient-to-br from-accent/20 to-pink-500/20 rounded-full mb-4">
-            <Icon name="Sparkles" size={40} className="text-accent" />
+        <div className="text-center mb-4 sm:mb-8">
+          <div className="inline-block p-2 sm:p-3 bg-gradient-to-br from-accent/20 to-pink-500/20 rounded-full mb-2 sm:mb-4">
+            <Icon name="Sparkles" size={32} className="text-accent sm:hidden" />
+            <Icon name="Sparkles" size={40} className="text-accent hidden sm:block" />
           </div>
-          <h1 className="text-4xl font-black bg-gradient-to-r from-pink-500 to-rose-500 bg-clip-text text-transparent mb-2">
+          <h1 className="text-3xl sm:text-4xl font-black bg-gradient-to-r from-pink-500 to-rose-500 bg-clip-text text-transparent mb-1 sm:mb-2">
             Glowimatch
           </h1>
-          <p className="text-muted-foreground text-sm">Discover Your Perfect Skincare</p>
+          <p className="text-muted-foreground text-xs sm:text-sm">Discover Your Perfect Skincare</p>
         </div>
 
         {/* Card */}
@@ -145,20 +146,20 @@ const SignupPage = () => {
           {/* Header gradient */}
           <div className="h-1 bg-gradient-to-r from-pink-500 via-rose-500 to-pink-600" />
 
-          <div className="p-8 space-y-6">
+          <div className="p-4 sm:p-8 space-y-4 sm:space-y-6">
             <div className="text-center">
-              <h2 className="text-2xl font-bold text-foreground mb-1">
+              <h2 className="text-xl sm:text-2xl font-bold text-foreground mb-1">
                 {t('join_glowmatch')}
               </h2>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-xs sm:text-sm text-muted-foreground">
                 {t('skincare_journey')}
               </p>
             </div>
 
-            <form className="space-y-5" onSubmit={handleSubmit}>
+            <form className="space-y-4 sm:space-y-5" onSubmit={handleSubmit}>
               {/* Account Type Toggle */}
               <div>
-                <label className="block text-sm font-medium text-foreground mb-3">{t('account_type')}</label>
+                <label className="block text-xs sm:text-sm font-medium text-foreground mb-2 sm:mb-3">{t('account_type')}</label>
                 <div className="flex p-1 bg-muted/50 rounded-xl">
                   <button
                     type="button"
@@ -211,9 +212,9 @@ const SignupPage = () => {
                   )}
               </div>
 
-              <div className="space-y-4">
+              <div className="space-y-3 sm:space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-foreground mb-2">{t('full_name')}</label>
+                  <label className="block text-xs sm:text-sm font-medium text-foreground mb-1.5 sm:mb-2">{t('full_name')}</label>
                   <Input
                     id="fullName"
                     name="fullName"

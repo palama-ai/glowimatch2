@@ -85,16 +85,17 @@ const ProfilePage = () => {
     <div className="min-h-screen bg-background">
       <div></div>
       <Header />
-      <main className="max-w-4xl mx-auto px-5 lg:px-8 py-8">
-        <div className="space-y-8">
+      <main className="max-w-4xl mx-auto px-4 sm:px-5 lg:px-8 py-6 sm:py-8">
+        <div className="space-y-6 sm:space-y-8">
           {/* Profile Header */}
-          <div className="bg-card rounded-xl border border-border p-6">
-            <div className="flex items-center justify-between mb-6">
-              <h1 className="text-2xl font-semibold text-card-foreground">{t('profile_settings')}</h1>
+          <div className="bg-card rounded-xl border border-border p-4 sm:p-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4 sm:mb-6">
+              <h1 className="text-xl sm:text-2xl font-semibold text-card-foreground">{t('profile_settings')}</h1>
               <Button
                 variant="outline"
                 onClick={handleSignOut}
                 iconName="LogOut"
+                className="w-full sm:w-auto"
               >
                 {t('sign_out')}
               </Button>
@@ -172,18 +173,19 @@ const ProfilePage = () => {
           </div>
 
           {/* Referral Info (replaces subscription UI) */}
-          <div className="bg-gradient-to-br from-accent/5 to-secondary/5 border border-accent/20 rounded-xl p-6">
-            <div className="flex items-center space-x-2 mb-6">
-              <Icon name="Share2" size={24} className="text-accent" />
-              <h2 className="text-xl font-semibold text-foreground">{t('referral_program')}</h2>
+          <div className="bg-gradient-to-br from-accent/5 to-secondary/5 border border-accent/20 rounded-xl p-4 sm:p-6">
+            <div className="flex items-center space-x-2 mb-4 sm:mb-6">
+              <Icon name="Share2" size={20} className="text-accent sm:hidden" />
+              <Icon name="Share2" size={24} className="text-accent hidden sm:block" />
+              <h2 className="text-lg sm:text-xl font-semibold text-foreground">{t('referral_program')}</h2>
             </div>
 
             {/* Referral Code Display */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* Code Section */}
-              <div className="bg-background/60 border border-accent/20 p-5 rounded-lg">
-                <p className="text-sm text-muted-foreground font-medium mb-2">{t('your_referral_code')}</p>
-                <div className="bg-card border border-border rounded-lg p-4 mb-3">
+              <div className="bg-background/60 border border-accent/20 p-4 sm:p-5 rounded-lg">
+                <p className="text-xs sm:text-sm text-muted-foreground font-medium mb-2">{t('your_referral_code')}</p>
+                <div className="bg-card border border-border rounded-lg p-3 sm:p-4 mb-3">
                   <code className="text-lg font-mono font-bold text-accent">
                     {userProfile?.referral_code || '—'}
                   </code>
@@ -256,8 +258,8 @@ const ProfilePage = () => {
               </div>
 
               {/* Stats Section */}
-              <div className="bg-background/60 border border-accent/20 p-5 rounded-lg">
-                <p className="text-sm text-muted-foreground font-medium mb-3">{t('referral_stats')}</p>
+              <div className="bg-background/60 border border-accent/20 p-4 sm:p-5 rounded-lg">
+                <p className="text-xs sm:text-sm text-muted-foreground font-medium mb-3">{t('referral_stats')}</p>
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
                     <span className="text-sm text-muted-foreground">{t('referral_total')}:</span>

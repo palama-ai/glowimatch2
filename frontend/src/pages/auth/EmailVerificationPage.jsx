@@ -162,20 +162,21 @@ const EmailVerificationPage = () => {
     }, [code]);
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-background via-background to-accent/5 flex items-center justify-center p-4">
+        <div className="min-h-screen bg-gradient-to-br from-background via-background to-accent/5 flex items-center justify-center p-3 sm:p-4">
             <div className="max-w-md w-full">
                 {/* Logo Section */}
-                <div className="text-center mb-8">
-                    <div className="inline-block p-3 bg-gradient-to-br from-accent/20 to-pink-500/20 rounded-full mb-4">
-                        <Icon name="Mail" size={40} className="text-accent" />
+                <div className="text-center mb-6 sm:mb-8">
+                    <div className="inline-block p-2 sm:p-3 bg-gradient-to-br from-accent/20 to-pink-500/20 rounded-full mb-3 sm:mb-4">
+                        <Icon name="Mail" size={32} className="text-accent sm:hidden" />
+                        <Icon name="Mail" size={40} className="text-accent hidden sm:block" />
                     </div>
-                    <h1 className="text-4xl font-black bg-gradient-to-r from-pink-500 to-rose-500 bg-clip-text text-transparent mb-2">
+                    <h1 className="text-2xl sm:text-4xl font-black bg-gradient-to-r from-pink-500 to-rose-500 bg-clip-text text-transparent mb-2">
                         {t('verify_email_title')}
                     </h1>
-                    <p className="text-muted-foreground text-sm">
+                    <p className="text-muted-foreground text-xs sm:text-sm">
                         {t('code_sent_to')}
                     </p>
-                    <p className="text-foreground font-medium mt-1">{email}</p>
+                    <p className="text-foreground font-medium mt-1 text-sm sm:text-base break-all">{email}</p>
                 </div>
 
                 {/* Card */}
@@ -183,15 +184,15 @@ const EmailVerificationPage = () => {
                     {/* Header gradient */}
                     <div className="h-1 bg-gradient-to-r from-pink-500 via-rose-500 to-pink-600" />
 
-                    <div className="p-8 space-y-6">
+                    <div className="p-5 sm:p-8 space-y-4 sm:space-y-6">
                         <div className="text-center">
-                            <p className="text-sm text-muted-foreground">
+                            <p className="text-xs sm:text-sm text-muted-foreground">
                                 {t('enter_code_desc')}
                             </p>
                         </div>
 
                         {/* Code Input */}
-                        <div className="flex justify-center gap-2" onPaste={handlePaste}>
+                        <div className="flex justify-center gap-1.5 sm:gap-2" onPaste={handlePaste}>
                             {code.map((digit, index) => (
                                 <input
                                     key={index}
@@ -202,7 +203,7 @@ const EmailVerificationPage = () => {
                                     value={digit}
                                     onChange={(e) => handleCodeChange(index, e.target.value)}
                                     onKeyDown={(e) => handleKeyDown(index, e)}
-                                    className="w-12 h-14 text-center text-2xl font-bold border-2 border-border rounded-lg focus:border-accent focus:ring-2 focus:ring-accent/20 outline-none transition-all bg-background"
+                                    className="w-10 h-12 sm:w-12 sm:h-14 text-center text-xl sm:text-2xl font-bold border-2 border-border rounded-lg focus:border-accent focus:ring-2 focus:ring-accent/20 outline-none transition-all bg-background"
                                 />
                             ))}
                         </div>

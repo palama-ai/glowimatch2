@@ -40,6 +40,7 @@ const Header = () => {
   const { theme, toggle } = useTheme();
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showSettingsMenu, setShowSettingsMenu] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { openAnalysisPrompt } = useModal();
 
   const handleSignOut = async () => {
@@ -130,9 +131,18 @@ const Header = () => {
     <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-pink-100/50 shadow-sm">
       <div className="max-w-7xl mx-auto px-5 lg:px-8">
         <div className="flex items-center justify-between h-16 gap-4">
+          {/* Mobile Menu Button */}
+          <button
+            className="lg:hidden p-2 rounded-lg hover:bg-pink-100 transition-colors"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            aria-label="Toggle menu"
+          >
+            <Icon name={mobileMenuOpen ? "X" : "Menu"} size={24} className="text-gray-700" />
+          </button>
+
           {/* Logo - Left */}
           <Link to="/" className="flex items-center space-x-2 group flex-shrink-0">
-            <span className="text-2xl font-bold bg-gradient-to-r from-pink-500 to-rose-500 bg-clip-text text-transparent hidden sm:inline">Glowimatch</span>
+            <span className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-pink-500 to-rose-500 bg-clip-text text-transparent">Glowimatch</span>
           </Link>
 
           {/* Navigation - Center */}
@@ -297,13 +307,13 @@ const Header = () => {
               <>
                 <button
                   onClick={() => navigate('/login')}
-                  className="px-6 py-2.5 text-gray-700 font-semibold hover:text-pink-600 transition-all duration-300 hover:bg-pink-50 rounded-full border border-pink-200 hover:border-pink-400"
+                  className="hidden sm:block px-4 sm:px-6 py-2 sm:py-2.5 text-gray-700 font-semibold hover:text-pink-600 transition-all duration-300 hover:bg-pink-50 rounded-full border border-pink-200 hover:border-pink-400 text-sm sm:text-base"
                 >
                   {t('sign_in')}
                 </button>
                 <button
                   onClick={() => navigate('/signup')}
-                  className="px-6 py-2.5 text-white font-semibold bg-gradient-to-r from-pink-500 to-rose-500 rounded-full hover:shadow-lg hover:shadow-pink-400/50 transition-all duration-300 transform hover:scale-105"
+                  className="px-4 sm:px-6 py-2 sm:py-2.5 text-white font-semibold bg-gradient-to-r from-pink-500 to-rose-500 rounded-full hover:shadow-lg hover:shadow-pink-400/50 transition-all duration-300 transform hover:scale-105 text-sm sm:text-base"
                 >
                   {t('sign_up')}
                 </button>
@@ -311,6 +321,86 @@ const Header = () => {
             )}
           </div>
         </div>
+
+        {/* Mobile Menu Drawer */}
+        {mobileMenuOpen && (
+          <div className="lg:hidden border-t border-pink-100 bg-white/95 backdrop-blur-md animate-fade-in">
+            <nav className="py-4 space-y-1">
+              <Link
+                to="/"
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex items-center gap-3 px-5 py-3 text-gray-700 hover:bg-pink-50 hover:text-pink-600 transition-colors"
+              >
+                <Icon name="Home" size={18} />
+                {t('home')}
+              </Link>
+              <Link
+                to="/about"
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex items-center gap-3 px-5 py-3 text-gray-700 hover:bg-pink-50 hover:text-pink-600 transition-colors"
+              >
+                <Icon name="Info" size={18} />
+                {t('about')}
+              </Link>
+              <Link
+                to="/contact"
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex items-center gap-3 px-5 py-3 text-gray-700 hover:bg-pink-50 hover:text-pink-600 transition-colors"
+              >
+                <Icon name="Mail" size={18} />
+                {t('contact')}
+              </Link>
+              <Link
+                to="/blog"
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex items-center gap-3 px-5 py-3 text-gray-700 hover:bg-pink-50 hover:text-pink-600 transition-colors"
+              >
+                <Icon name="BookOpen" size={18} />
+                {t('blog')}
+              </Link>
+              {user && isSeller && isSeller() && (
+                <Link
+                  to="/seller"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex items-center gap-3 px-5 py-3 text-gray-700 hover:bg-pink-50 hover:text-pink-600 transition-colors"
+                >
+                  <Icon name="LayoutDashboard" size={18} />
+                  {t('dashboard') || 'Dashboard'}
+                </Link>
+              )}
+              {user && (!isSeller || !isSeller()) && (
+                <Link
+                  to="/interactive-skin-quiz"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex items-center gap-3 px-5 py-3 text-gray-700 hover:bg-pink-50 hover:text-pink-600 transition-colors"
+                >
+                  <Icon name="Sparkles" size={18} />
+                  {t('skin_quiz')}
+                </Link>
+              )}
+              {user && isAdmin && isAdmin() && (
+                <Link
+                  to="/admin"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex items-center gap-3 px-5 py-3 text-gray-700 hover:bg-pink-50 hover:text-pink-600 transition-colors"
+                >
+                  <Icon name="ShieldCheck" size={18} />
+                  {t('admin')}
+                </Link>
+              )}
+              {!user && (
+                <div className="border-t border-pink-100 mt-2 pt-3 px-5">
+                  <button
+                    onClick={() => { navigate('/login'); setMobileMenuOpen(false); }}
+                    className="w-full mb-2 px-4 py-2.5 text-gray-700 font-semibold hover:text-pink-600 transition-all rounded-full border border-pink-200 hover:border-pink-400"
+                  >
+                    {t('sign_in')}
+                  </button>
+                </div>
+              )}
+            </nav>
+          </div>
+        )}
       </div>
     </header>
   );

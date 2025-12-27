@@ -8,10 +8,10 @@ const Footer = () => {
     return (
         <footer className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white">
             {/* Main Footer */}
-            <div className="max-w-7xl mx-auto px-4 py-12">
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+            <div className="max-w-7xl mx-auto px-4 py-8 sm:py-12">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8">
                     {/* Brand */}
-                    <div className="md:col-span-1">
+                    <div className="col-span-2 md:col-span-1">
                         <div className="flex items-center gap-2 mb-4">
                             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-pink-500 to-rose-500 flex items-center justify-center">
                                 <Icon name="Sparkles" size={20} className="text-white" />
@@ -95,8 +95,8 @@ const Footer = () => {
 
             {/* Bottom Bar */}
             <div className="border-t border-white/10">
-                <div className="max-w-7xl mx-auto px-4 py-4 flex flex-col md:flex-row items-center justify-between gap-2">
-                    <p className="text-slate-500 text-sm">
+                <div className="max-w-7xl mx-auto px-4 py-3 sm:py-4 flex flex-col sm:flex-row items-center justify-between gap-2">
+                    <p className="text-slate-500 text-xs sm:text-sm text-center sm:text-left">
                         © {currentYear} Glowimatch. All rights reserved.
                     </p>
                     <div className="flex items-center gap-4 text-sm">
