@@ -171,12 +171,14 @@ const About = () => {
 
               {/* Ayoub Alioui - Co-Founder & CEO */}
               <div className="group bg-card border border-border rounded-xl overflow-hidden hover:border-accent hover:shadow-lg transition-all">
-                <div className="h-56 overflow-hidden">
-                  <img
-                    src="/images/team/ayoub-alioui.jpg"
-                    alt="Ayoub Alioui"
-                    className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform"
-                  />
+                <div className="h-56 bg-gradient-to-br from-accent/20 to-purple-500/20 flex items-center justify-center">
+                  <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-white shadow-lg group-hover:scale-105 transition-transform">
+                    <img
+                      src="/images/team/ayoub-alioui.jpg"
+                      alt="Ayoub Alioui"
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
                 </div>
                 <div className="p-6 text-center">
                   <div className="text-xl font-semibold text-foreground">Ayoub Alioui</div>
