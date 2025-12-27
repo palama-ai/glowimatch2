@@ -46,8 +46,8 @@ const AccountTypeModal = ({ isOpen, onSelect, userEmail, userName }) => {
                             <button
                                 onClick={() => setSelectedType('user')}
                                 className={`p-4 rounded-xl border-2 transition-all text-left ${selectedType === 'user'
-                                    ? 'border-pink-500 bg-pink-50 dark:bg-pink-500/10'
-                                    : 'border-border hover:border-pink-300'
+                                        ? 'border-pink-500 bg-pink-50 dark:bg-pink-500/10'
+                                        : 'border-border hover:border-pink-300'
                                     }`}
                             >
                                 <div className="flex items-start gap-3">
@@ -71,8 +71,8 @@ const AccountTypeModal = ({ isOpen, onSelect, userEmail, userName }) => {
                             <button
                                 onClick={() => setSelectedType('seller')}
                                 className={`p-4 rounded-xl border-2 transition-all text-left ${selectedType === 'seller'
-                                    ? 'border-purple-500 bg-purple-50 dark:bg-purple-500/10'
-                                    : 'border-border hover:border-purple-300'
+                                        ? 'border-purple-500 bg-purple-50 dark:bg-purple-500/10'
+                                        : 'border-border hover:border-purple-300'
                                     }`}
                             >
                                 <div className="flex items-start gap-3">

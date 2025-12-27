@@ -205,6 +205,7 @@ const SignupPage = () => {
                           ? t('reg_disabled_seller')
                           : t('reg_disabled_user')
                         }
+
                       </div>
                     </div>
                   )}
@@ -277,7 +278,6 @@ const SignupPage = () => {
                           if (index === 2) label = t('req_number');
                           if (index === 3) label = t('req_symbol');
                           if (index === 4) label = t('req_length');
-
                           return (
                             <div key={index} className="flex items-center gap-2">
                               <Icon
