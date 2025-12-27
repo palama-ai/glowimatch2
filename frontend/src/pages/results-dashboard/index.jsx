@@ -1,6 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Header from '../../components/ui/Header';
+import { useI18n } from '../../contexts/I18nContext';
+import { quizService } from '../../lib/supabase';
 import SkinTypeSummary from './components/SkinTypeSummary';
 import ProductCard from './components/ProductCard';
 import ProductFilters from './components/ProductFilters';
@@ -9,8 +11,127 @@ import SkincareRoutine from './components/SkincareRoutine';
 import ProductModal from './components/ProductModal';
 import Icon from '../../components/AppIcon';
 
+// Generate a fallback routine based on skin type when AI fails
+const generateFallbackRoutine = (skinType) => {
+  const baseRoutine = {
+    morning: [
+      {
+        type: 'cleanser',
+        name: 'Gentle Cleanser',
+        description: 'Start your day with a gentle cleanser to remove overnight oil and impurities.',
+        timing: '1-2 minutes',
+        tips: 'Use lukewarm water and massage in circular motions.'
+      },
+      {
+        type: 'toner',
+        name: 'Hydrating Toner',
+        description: 'Balance your skin\'s pH and prepare it for the next steps.',
+        timing: '30 seconds',
+        tips: 'Pat gently into skin rather than rubbing.'
+      },
+      {
+        type: 'serum',
+        name: 'Vitamin C Serum',
+        description: 'Antioxidant protection and brightening for the day ahead.',
+        timing: '1 minute',
+        tips: 'Apply to slightly damp skin for better absorption.'
+      },
+      {
+        type: 'moisturizer',
+        name: 'Lightweight Moisturizer',
+        description: 'Lock in hydration without feeling heavy.',
+        timing: '1 minute',
+        tips: 'Let it absorb before applying sunscreen.'
+      },
+      {
+        type: 'sunscreen',
+        name: 'SPF 30+ Sunscreen',
+        description: 'Protect your skin from UV damage - the most important step!',
+        timing: '1-2 minutes',
+        tips: 'Apply generously and reapply every 2 hours when outdoors.'
+      }
+    ],
+    evening: [
+      {
+        type: 'cleanser',
+        name: 'Double Cleanse - Oil Cleanser',
+        description: 'Remove makeup and sunscreen with an oil-based cleanser.',
+        timing: '1-2 minutes',
+        tips: 'Massage thoroughly to break down all impurities.'
+      },
+      {
+        type: 'cleanser',
+        name: 'Double Cleanse - Water Cleanser',
+        description: 'Follow up with a water-based cleanser for a deep clean.',
+        timing: '1-2 minutes',
+        tips: 'This ensures all residue is removed.'
+      },
+      {
+        type: 'toner',
+        name: 'Hydrating Toner',
+        description: 'Rebalance and hydrate your skin after cleansing.',
+        timing: '30 seconds',
+        tips: 'Use the same toner as your morning routine.'
+      },
+      {
+        type: 'serum',
+        name: 'Treatment Serum',
+        description: 'Target your specific skin concerns with an active serum.',
+        timing: '1 minute',
+        tips: 'Night is the best time for active ingredients like retinol.'
+      },
+      {
+        type: 'moisturizer',
+        name: 'Night Cream',
+        description: 'Rich moisturizer to nourish and repair while you sleep.',
+        timing: '1-2 minutes',
+        tips: 'Use a slightly heavier formula than your day cream.'
+      }
+    ]
+  };
+
+  // Customize based on skin type
+  const skinTypeCustomizations = {
+    oily: {
+      morning: { moisturizer: 'Oil-Free Gel Moisturizer', serum: 'Niacinamide Serum' },
+      evening: { moisturizer: 'Lightweight Gel Cream', serum: 'Salicylic Acid Serum' }
+    },
+    dry: {
+      morning: { moisturizer: 'Rich Hydrating Cream', serum: 'Hyaluronic Acid Serum' },
+      evening: { moisturizer: 'Intensive Night Balm', serum: 'Ceramide Serum' }
+    },
+    sensitive: {
+      morning: { moisturizer: 'Calming Moisturizer', serum: 'Centella Asiatica Serum' },
+      evening: { moisturizer: 'Soothing Night Cream', serum: 'Aloe Vera Serum' }
+    },
+    combination: {
+      morning: { moisturizer: 'Balancing Lotion', serum: 'Niacinamide Serum' },
+      evening: { moisturizer: 'Light Night Cream', serum: 'AHA/BHA Serum' }
+    }
+  };
+
+  const customization = skinTypeCustomizations[skinType?.toLowerCase()] || skinTypeCustomizations.combination;
+
+  // Apply customizations
+  if (customization.morning) {
+    const morningMoisturizer = baseRoutine.morning.find(s => s.type === 'moisturizer');
+    const morningSerum = baseRoutine.morning.find(s => s.type === 'serum');
+    if (morningMoisturizer) morningMoisturizer.name = customization.morning.moisturizer;
+    if (morningSerum) morningSerum.name = customization.morning.serum;
+  }
+  if (customization.evening) {
+    const eveningMoisturizer = baseRoutine.evening.find(s => s.type === 'moisturizer');
+    const eveningSerum = baseRoutine.evening.find(s => s.type === 'serum');
+    if (eveningMoisturizer) eveningMoisturizer.name = customization.evening.moisturizer;
+    if (eveningSerum) eveningSerum.name = customization.evening.serum;
+  }
+
+  return baseRoutine;
+};
+
 const ResultsDashboard = () => {
   const navigate = useNavigate();
+  const { t } = useI18n();
   const [activeFilters, setActiveFilters] = useState({
     type: [],
     priceRange: [],
@@ -28,6 +149,8 @@ const ResultsDashboard = () => {
   const [productsError, setProductsError] = useState(null);
   const [allProducts, setAllProducts] = useState([]); // Store all fetched products for filtering
   const [selectedProduct, setSelectedProduct] = useState(null); // { product, index }
+  const [attemptId, setAttemptId] = useState(null); // Track current quiz attempt ID
+  const analysisAlreadySaved = useRef(false); // Track if we've already saved for this session
 
   // Mock analysis results data
   const analysisResults = {
@@ -41,40 +164,6 @@ const ResultsDashboard = () => {
     ]
   };
 
-  // Mock detailed analysis data
-  const detailedAnalysis = {
-    metrics: [
-      { name: "Moisture", score: 65, icon: "Droplets" },
-      { name: "Oil Level", score: 78, icon: "Zap" },
-      { name: "Pore Size", score: 45, icon: "Circle" },
-      { name: "Texture", score: 82, icon: "Layers" },
-      { name: "Sensitivity", score: 70, icon: "Shield" }
-    ],
-    tips: [
-      "Use a gentle cleanser twice daily to maintain balance",
-      "Apply different moisturizers to T-zone and cheeks",
-      "Incorporate a BHA exfoliant 2-3 times per week",
-      "Always use SPF 30+ sunscreen during the day"
-    ]
-  };
-
-  // Mock skincare routine data
-  const skincareRoutine = {
-    morning: [
-      { type: "cleanser", name: "Gentle Foaming Cleanser", description: "Start with a mild, pH-balanced cleanser.", timing: "2 min", tips: "Use lukewarm water and gentle motions." },
-      { type: "toner", name: "Balancing Toner", description: "Restore pH balance and prep skin.", timing: "30 sec", tips: "Focus on T-zone for oil control." },
-      { type: "serum", name: "Niacinamide Serum", description: "Target pores and oil production.", timing: "1 min", tips: "Apply to T-zone primarily." },
-      { type: "moisturizer", name: "Lightweight Moisturizer", description: "Gel-based for T-zone, cream for cheeks.", timing: "1 min" },
-      { type: "sunscreen", name: "SPF 30+ Sunscreen", description: "Broad-spectrum protection.", timing: "1 min", tips: "Reapply every 2 hours outdoors." }
-    ],
-    evening: [
-      { type: "cleanser", name: "Double Cleanse", description: "Oil cleanser then foaming cleanser.", timing: "3 min" },
-      { type: "treatment", name: "BHA Exfoliant", description: "Salicylic acid 2-3x per week.", timing: "Leave on", tips: "Apply to problem areas." },
-      { type: "serum", name: "Hydrating Serum", description: "Hyaluronic acid for moisture.", timing: "1 min", tips: "Apply to damp skin." },
-      { type: "moisturizer", name: "Night Moisturizer", description: "Richer formula for overnight repair.", timing: "2 min" }
-    ]
-  };
-
   // No fallback mock products - show empty state when no products available
 
   // Fetch AI-recommended products using voting system
@@ -84,9 +173,19 @@ const ResultsDashboard = () => {
     try {
       const API_BASE = import.meta.env?.VITE_BACKEND_URL || 'https://backend-three-sigma-81.vercel.app/api';
 
+      // Get auth header for authenticated requests
+      const getAuthHeader = () => {
+        try {
+          const raw = localStorage.getItem('gm_auth');
+          if (!raw) return {};
+          const p = JSON.parse(raw);
+          return { Authorization: `Bearer ${p.token}` };
+        } catch { return {}; }
+      };
+
       const resp = await fetch(`${API_BASE}/products/ai-recommend`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...getAuthHeader() },
         body: JSON.stringify({ analysis })
       });
 
@@ -119,18 +218,35 @@ const ResultsDashboard = () => {
   // Initial data loading - runs once on mount
   useEffect(() => {
     const analysisData = localStorage.getItem('glowmatch-analysis');
-    const quizData = localStorage.getItem('glowmatch-quiz-data');
-    if (!analysisData || !quizData) {
+    const quizDataRaw = localStorage.getItem('glowmatch-quiz-data');
+    if (!analysisData || !quizDataRaw) {
       navigate('/interactive-skin-quiz');
       return;
     }
 
     try {
       const parsed = JSON.parse(analysisData);
-      const detailed = parsed?.detailed || parsed?.raw?.detailed || null;
+      const quizParsed = JSON.parse(quizDataRaw);
+      const currentAttemptId = quizParsed?.attemptId || null;
+      setAttemptId(currentAttemptId);
       setAnalysisState(parsed);
 
+      // Check if we have pre-saved analysis data (from quiz history)
+      const savedAnalysis = parsed?.savedAnalysis || null;
+      if (savedAnalysis && savedAnalysis.metrics) {
+        console.log('[Results] Using saved analysis data');
+        setDetailedState(savedAnalysis);
+        if (savedAnalysis.products?.length > 0) {
+          setAllProducts(savedAnalysis.products);
+          setFilteredProducts(savedAnalysis.products);
+        } else {
+          fetchRecommendedProducts(parsed);
+        }
+        return; // Don't re-fetch AI data
+      }
+
       // Set initial detailed state from local data
+      const detailed = parsed?.detailed || parsed?.raw?.detailed || null;
       if (detailed) {
         setDetailedState(detailed);
       }
@@ -143,30 +259,104 @@ const ResultsDashboard = () => {
         try {
           setExpandLoading(true); setExpandError(null);
           const API_BASE = import.meta.env?.VITE_BACKEND_URL || 'https://backend-three-sigma-81.vercel.app/api';
+
+          // Get auth header for authenticated requests
+          const getAuthHeader = () => {
+            try {
+              const raw = localStorage.getItem('gm_auth');
+              if (!raw) return {};
+              const p = JSON.parse(raw);
+              return { Authorization: `Bearer ${p.token}` };
+            } catch { return {}; }
+          };
+
           const resp = await fetch(`${API_BASE}/analysis/expand`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 'Content-Type': 'application/json', ...getAuthHeader() },
             body: JSON.stringify({ analysis: parsed, provider })
           });
+
           if (!resp.ok) {
-            console.warn('Expand API failed, keeping existing data');
-            return;
-          }
-          const j = await resp.json();
-          setExpandProviderUsed(j?.data?.provider || null);
-          const gen = j?.data?.generated || null;
-          if (gen && (gen.metrics?.length > 0 || gen.tips?.length > 0 || gen.routine)) {
-            // Only update if we got meaningful data back
+            const errText = await resp.text().catch(() => 'Unknown error');
+            console.warn('Expand API failed:', resp.status, errText);
+            // Use fallback routine when API fails
+            console.log('[Expand] Using fallback routine for skin type:', parsed?.skinType);
+            const fallbackRoutine = generateFallbackRoutine(parsed?.skinType);
             setDetailedState(prev => ({
               ...(prev || {}),
-              metrics: gen.metrics?.length > 0 ? gen.metrics : (prev?.metrics || []),
-              tips: gen.tips?.length > 0 ? gen.tips : (prev?.tips || []),
-              routine: gen.routine || prev?.routine || null
+              routine: fallbackRoutine,
+              metrics: [],
+              tips: [],
+              rationale: 'Personalized routine based on your skin type',
+              generatedAt: new Date().toISOString(),
+              isFallback: true
+            }));
+            setExpandLoading(false);
+            return;
+          }
+
+          const j = await resp.json();
+          console.log('[Expand] Response:', j);
+          setExpandProviderUsed(j?.data?.provider || null);
+          const gen = j?.data?.generated || null;
+
+          // Check if we have a valid routine with morning/evening arrays
+          const hasValidRoutine = gen?.routine &&
+            (Array.isArray(gen.routine.morning) && gen.routine.morning.length > 0) ||
+            (Array.isArray(gen.routine.evening) && gen.routine.evening.length > 0);
+
+          if (gen && (gen.metrics?.length > 0 || gen.tips?.length > 0 || hasValidRoutine)) {
+            // Update with AI generated data, but ensure routine exists
+            const routineToUse = hasValidRoutine ? gen.routine : generateFallbackRoutine(parsed?.skinType);
+            const newDetailedState = {
+              metrics: gen.metrics?.length > 0 ? gen.metrics : [],
+              tips: gen.tips?.length > 0 ? gen.tips : [],
+              routine: routineToUse,
+              rationale: gen.rationale || null,
+              generatedAt: new Date().toISOString(),
+              isFallback: !hasValidRoutine
+            };
+            setDetailedState(prev => ({
+              ...(prev || {}),
+              ...newDetailedState
+            }));
+          } else {
+            console.warn('[Expand] No meaningful data in response, using fallback:', gen);
+            // Use fallback routine when AI returns incomplete data
+            const fallbackRoutine = generateFallbackRoutine(parsed?.skinType);
+            setDetailedState(prev => ({
+              ...(prev || {}),
+              routine: fallbackRoutine,
+              metrics: gen?.metrics || [],
+              tips: gen?.tips || [],
+              rationale: 'Personalized routine based on your skin type',
+              generatedAt: new Date().toISOString(),
+              isFallback: true
             }));
           }
         } catch (e) {
-          console.warn('Expand fetch failed, keeping existing data:', e);
-        } finally { setExpandLoading(false); }
+          console.warn('Expand fetch failed:', e);
+          // Use fallback routine on any error
+          const analysisData = localStorage.getItem('glowmatch-analysis');
+          let skinType = 'combination';
+          try {
+            const parsed = JSON.parse(analysisData);
+            skinType = parsed?.skinType || 'combination';
+          } catch { }
+          console.log('[Expand] Using fallback routine after error for skin type:', skinType);
+          const fallbackRoutine = generateFallbackRoutine(skinType);
+          setDetailedState(prev => ({
+            ...(prev || {}),
+            routine: fallbackRoutine,
+            metrics: [],
+            tips: [],
+            rationale: 'Personalized routine based on your skin type',
+            generatedAt: new Date().toISOString(),
+            isFallback: true
+          }));
+        } finally {
+          setExpandLoading(false);
+        }
       })();
     } catch (error) {
       console.error('Error parsing analysis data:', error);
@@ -195,6 +385,34 @@ const ResultsDashboard = () => {
     setFilteredProducts(filtered);
   }, [activeFilters, allProducts]);
 
+  // Combined save: Save both analysis AND products together when both are ready
+  useEffect(() => {
+    // Wait until we have: attemptId, products loaded, and not already saved
+    const hasProducts = allProducts.length > 0 && !productsLoading;
+    const hasAnalysis = detailedState && (detailedState.metrics?.length > 0 || detailedState.routine);
+
+    if (attemptId && hasProducts && !analysisAlreadySaved.current) {
+      analysisAlreadySaved.current = true;
+
+      const completeAnalysis = {
+        ...(detailedState || {}),
+        products: allProducts,
+        savedAt: new Date().toISOString()
+      };
+
+      console.log('[Results] Saving complete analysis + products to database for attempt:', attemptId);
+      quizService.saveQuizAnalysis(attemptId, completeAnalysis)
+        .then(result => {
+          if (result.success) {
+            console.log('[Results] Complete analysis saved successfully');
+          } else {
+            console.warn('[Results] Failed to save:', result.error);
+          }
+        })
+        .catch(err => console.warn('[Results] Error saving:', err));
+    }
+  }, [allProducts, attemptId, productsLoading, detailedState]); // Trigger when any of these change
+
   const handleFilterChange = (category, values) => {
     setActiveFilters((prev) => ({ ...prev, [category]: values }));
   };
@@ -207,13 +425,13 @@ const ResultsDashboard = () => {
   };
 
   const tabs = [
-    { id: 'analysis', label: 'Analysis', icon: 'BarChart3' },
-    { id: 'routine', label: 'Routine', icon: 'Clock' },
-    { id: 'products', label: 'Products', icon: 'ShoppingBag' }
+    { id: 'analysis', label: t('tab_analysis'), icon: 'BarChart3' },
+    { id: 'routine', label: t('tab_routine'), icon: 'Clock' },
+    { id: 'products', label: t('tab_products'), icon: 'ShoppingBag' }
   ];
 
   const currentAnalysis = analysisState || analysisResults;
-  const currentDetailed = detailedState || detailedAnalysis;
+  const currentDetailed = detailedState || null;
 
   return (
     <div className="min-h-screen bg-background">
@@ -227,13 +445,13 @@ const ResultsDashboard = () => {
           <div className="text-center mb-8 animate-fade-in">
             <div className="inline-flex items-center gap-2 px-4 py-2 bg-accent/10 rounded-full text-sm text-accent font-medium mb-4">
               <Icon name="Sparkles" size={16} />
-              Analysis Complete
+              {t('analysis_complete_badge')}
             </div>
             <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-3">
-              Your Skin Profile
+              {t('results_profile_title')}
             </h1>
             <p className="text-muted-foreground max-w-lg mx-auto">
-              Personalized insights and recommendations based on your unique skin analysis.
+              {t('results_profile_desc')}
             </p>
           </div>
 
@@ -269,7 +487,7 @@ const ResultsDashboard = () => {
               {expandLoading && (
                 <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground mb-4">
                   <Icon name="Loader2" size={16} className="animate-spin" />
-                  Generating detailed analysis...
+                  {t('generating_analysis')}
                 </div>
               )}
               <SkinAnalysisBreakdown analysisData={currentDetailed} />
@@ -280,7 +498,9 @@ const ResultsDashboard = () => {
             <div className="animate-fade-in">
               <SkincareRoutine
                 skinType={currentAnalysis?.skinType}
-                routineSteps={(currentDetailed?.routine) || skincareRoutine}
+                routineSteps={currentDetailed?.routine || null}
+                isLoading={expandLoading}
+                error={expandError}
               />
             </div>
           )}
@@ -291,10 +511,10 @@ const ResultsDashboard = () => {
 
               <div className="flex items-center justify-between mb-4 mt-6">
                 <h2 className="text-lg font-semibold text-foreground">
-                  Recommended for You
+                  {t('recommended_for_you')}
                 </h2>
                 <span className="text-sm text-muted-foreground">
-                  {productsLoading ? 'Loading...' : `${filteredProducts?.length} products`}
+                  {productsLoading ? t('loading') : `${filteredProducts?.length} ${t('tab_products')}`}
                 </span>
               </div>
 
@@ -302,8 +522,8 @@ const ResultsDashboard = () => {
                 <div className="flex flex-col items-center justify-center gap-3 text-sm text-muted-foreground py-12">
                   <Icon name="Loader2" size={24} className="animate-spin text-accent" />
                   <div className="text-center">
-                    <p className="font-medium text-foreground">AI is analyzing products for you...</p>
-                    <p className="text-xs mt-1">Multiple AI models are voting on the best matches</p>
+                    <p className="font-medium text-foreground">{t('products_analyzing')}</p>
+                    <p className="text-xs mt-1">{t('products_analyzing_sub')}</p>
                   </div>
                 </div>
               )}
@@ -311,8 +531,8 @@ const ResultsDashboard = () => {
               {productsError && !productsLoading && (
                 <div className="text-center py-8 px-4 bg-yellow-50 border border-yellow-200 rounded-2xl mb-4">
                   <Icon name="AlertCircle" size={24} className="text-yellow-600 mx-auto mb-2" />
-                  <p className="text-sm text-yellow-700">{productsError}</p>
-                  <p className="text-xs text-yellow-600 mt-1">Showing fallback recommendations</p>
+                  <p className="text-sm text-yellow-700">{productsError || t('products_error')}</p>
+                  <p className="text-xs text-yellow-600 mt-1">{t('products_fallback')}</p>
                 </div>
               )}
 
@@ -327,18 +547,18 @@ const ResultsDashboard = () => {
               ) : !productsLoading && allProducts?.length === 0 ? (
                 <div className="text-center py-12 bg-muted/30 rounded-2xl">
                   <Icon name="Package" size={40} className="text-muted-foreground mx-auto mb-3" />
-                  <p className="text-foreground font-medium mb-2">No products available yet</p>
-                  <p className="text-sm text-muted-foreground">Products will appear here once they are added by sellers</p>
+                  <p className="text-foreground font-medium mb-2">{t('no_products_title')}</p>
+                  <p className="text-sm text-muted-foreground">{t('no_products_desc')}</p>
                 </div>
               ) : !productsLoading ? (
                 <div className="text-center py-12 bg-muted/30 rounded-2xl">
                   <Icon name="Search" size={40} className="text-muted-foreground mx-auto mb-3" />
-                  <p className="text-muted-foreground mb-4">No products match your filters</p>
+                  <p className="text-muted-foreground mb-4">{t('no_match_title')}</p>
                   <button
                     onClick={() => setActiveFilters({ type: [], priceRange: [], concerns: [] })}
                     className="text-sm text-accent hover:underline"
                   >
-                    Clear filters
+                    {t('clear_filters')}
                   </button>
                 </div>
               ) : null}
@@ -350,13 +570,13 @@ const ResultsDashboard = () => {
             <div className="inline-flex flex-col items-center p-6 glass-accent rounded-2xl">
               <Icon name="RefreshCw" size={24} className="text-accent mb-3" />
               <p className="text-sm text-foreground mb-3">
-                Skin changes over time. Retake the quiz for updated recommendations.
+                {t('retake_quiz_desc')}
               </p>
               <button
                 onClick={handleRetakeQuiz}
                 className="px-5 py-2.5 bg-accent text-white text-sm font-medium rounded-xl hover:bg-accent/90 transition-colors"
               >
-                Retake Quiz
+                {t('take_another_quiz')}
               </button>
             </div>
           </div>

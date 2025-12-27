@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useI18n } from '../../contexts/I18nContext';
 import Header from '../../components/ui/Header';
 import Button from '../../components/ui/Button';
 import Icon from '../../components/AppIcon';
@@ -8,6 +9,7 @@ import Icon from '../../components/AppIcon';
 // to the existing backend `/api/analysis` route and displays the structured result.
 const ImageUploadAnalysis = () => {
   const navigate = useNavigate();
+  const { t } = useI18n();
   const [fileDataUrl, setFileDataUrl] = useState(null);
   const [fileName, setFileName] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -25,7 +27,7 @@ const ImageUploadAnalysis = () => {
     const f = e.target.files && e.target.files[0];
     if (!f) return;
     if (f.size > 10 * 1024 * 1024) {
-      setError('File too large (max 10 MB). Please choose a smaller image.');
+      setError(t('analysis_file_too_large'));
       return;
     }
     const reader = new FileReader();
@@ -35,8 +37,19 @@ const ImageUploadAnalysis = () => {
       setError(null);
       setUploadProgress(0);
     };
-    reader.onerror = () => setError('Failed to read file');
+    reader.onerror = () => setError(t('analysis_read_error'));
     reader.readAsDataURL(f);
+  };
+
+  const getAuthHeader = () => {
+    try {
+      const raw = localStorage.getItem('gm_auth');
+      if (!raw) return {};
+      const parsed = JSON.parse(raw);
+      return { Authorization: `Bearer ${parsed.token}` };
+    } catch {
+      return {};
+    }
   };
 
   const submitAnalysis = async () => {
@@ -56,7 +69,7 @@ const ImageUploadAnalysis = () => {
 
       const resp = await fetch(`${API_BASE}/analysis`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...getAuthHeader() },
         body: JSON.stringify(payload)
       });
 
@@ -103,9 +116,9 @@ const ImageUploadAnalysis = () => {
         {/* Page Header */}
         <div className="text-center mb-8">
           <Icon name="Image" size={48} className="mx-auto text-accent mb-4" />
-          <h1 className="text-3xl font-bold text-foreground mb-2">Upload Your Photo</h1>
+          <h1 className="text-3xl font-bold text-foreground mb-2">{t('analysis_title')}</h1>
           <p className="text-muted-foreground max-w-xl mx-auto">
-            Take a clear, well-lit selfie of your face. Our AI will analyze your skin condition combined with your quiz responses.
+            {t('analysis_desc')}
           </p>
         </div>
 
@@ -123,14 +136,14 @@ const ImageUploadAnalysis = () => {
               {fileDataUrl ? (
                 <div className="space-y-4">
                   <Icon name="CheckCircle2" size={48} className="mx-auto text-green-600" />
-                  <p className="font-medium text-foreground">Image selected</p>
+                  <p className="font-medium text-foreground">{t('analysis_image_selected')}</p>
                   <p className="text-sm text-muted-foreground">{fileName}</p>
                 </div>
               ) : (
                 <div className="space-y-3">
                   <Icon name="Upload" size={40} className="mx-auto text-muted-foreground" />
-                  <p className="font-medium text-foreground">Click to upload or drag and drop</p>
-                  <p className="text-sm text-muted-foreground">PNG, JPG, GIF up to 10 MB</p>
+                  <p className="font-medium text-foreground">{t('analysis_upload_prompt')}</p>
+                  <p className="text-sm text-muted-foreground">{t('analysis_upload_formats')}</p>
                 </div>
               )}
             </div>
@@ -139,7 +152,7 @@ const ImageUploadAnalysis = () => {
             {fileDataUrl && (
               <div className="space-y-3">
                 <img src={fileDataUrl} alt="preview" className="w-full h-64 object-cover rounded-lg border border-border" />
-                <p className="text-xs text-muted-foreground text-center">Preview of your uploaded image</p>
+                <p className="text-xs text-muted-foreground text-center">{t('analysis_preview_label')}</p>
               </div>
             )}
 
@@ -147,7 +160,7 @@ const ImageUploadAnalysis = () => {
             {loading && uploadProgress > 0 && (
               <div className="space-y-2">
                 <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">Analyzing your skin...</span>
+                  <span className="text-muted-foreground">{t('analysis_analyzing')}</span>
                   <span className="font-medium">{Math.round(uploadProgress)}%</span>
                 </div>
                 <div className="w-full bg-muted rounded-full h-2 overflow-hidden">
@@ -165,7 +178,7 @@ const ImageUploadAnalysis = () => {
                 <div className="flex items-start space-x-3">
                   <Icon name="AlertTriangle" className="h-5 w-5 text-destructive flex-shrink-0 mt-0.5" />
                   <div className="flex-1">
-                    <p className="font-medium text-destructive">Analysis Error</p>
+                    <p className="font-medium text-destructive">{t('analysis_error_title')}</p>
                     <p className="text-sm text-muted-foreground mt-1">{error}</p>
                   </div>
                 </div>
@@ -178,11 +191,11 @@ const ImageUploadAnalysis = () => {
                 <div className="flex items-start space-x-3">
                   <Icon name="CheckCircle2" className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />
                   <div className="flex-1">
-                    <p className="font-medium text-green-900">Analysis Complete!</p>
+                    <p className="font-medium text-green-900">{t('analysis_complete_title')}</p>
                     <p className="text-sm text-green-700 mt-1">
-                      Detected: <strong>{result.skinType}</strong> skin ({result.confidence}% confidence)
+                      {t('analysis_detected')} <strong>{result.skinType}</strong> ({result.confidence}% {t('confidence') || 'confidence'})
                     </p>
-                    <p className="text-xs text-green-600 mt-2">Redirecting to results dashboard...</p>
+                    <p className="text-xs text-green-600 mt-2">{t('analysis_redirecting')}</p>
                   </div>
                 </div>
               </div>
@@ -196,7 +209,7 @@ const ImageUploadAnalysis = () => {
                 iconName={loading ? "Loader2" : "Zap"}
                 className={loading ? "" : ""}
               >
-                {loading ? 'Analyzing...' : 'Run Analysis'}
+                {loading ? t('analysis_btn_running') : t('analysis_btn_run')}
               </Button>
 
               {fileDataUrl && !loading && (
@@ -210,7 +223,7 @@ const ImageUploadAnalysis = () => {
                   }}
                   iconName="Trash2"
                 >
-                  Clear Image
+                  {t('analysis_btn_clear')}
                 </Button>
               )}
 
@@ -220,7 +233,7 @@ const ImageUploadAnalysis = () => {
                 iconName="ArrowRight"
                 className="ml-auto"
               >
-                Skip to Results
+                {t('analysis_btn_skip')}
               </Button>
             </div>
 
@@ -228,13 +241,13 @@ const ImageUploadAnalysis = () => {
             <div className="bg-accent/5 border border-accent/10 rounded-lg p-4 mt-6">
               <h3 className="font-medium text-foreground mb-2 flex items-center space-x-2">
                 <Icon name="Lightbulb" className="h-4 w-4 text-accent" />
-                <span>Tips for best results:</span>
+                <span>{t('analysis_tips_title')}</span>
               </h3>
               <ul className="text-sm text-muted-foreground space-y-1">
-                <li>• Use good lighting (natural light is best)</li>
-                <li>• Remove makeup if possible</li>
-                <li>• Take a clear, frontal face photo</li>
-                <li>• Include your full face in the frame</li>
+                <li>• {t('analysis_tip_1')}</li>
+                <li>• {t('analysis_tip_2')}</li>
+                <li>• {t('analysis_tip_3')}</li>
+                <li>• {t('analysis_tip_4')}</li>
               </ul>
             </div>
           </div>

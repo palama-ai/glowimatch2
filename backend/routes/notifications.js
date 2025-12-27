@@ -4,7 +4,11 @@ const { v4: uuidv4 } = require('uuid');
 const jwt = require('jsonwebtoken');
 const { sql } = require('../db');
 
-const JWT_SECRET = process.env.GLOWMATCH_JWT_SECRET || 'dev_secret_change_me';
+const JWT_SECRET = process.env.GLOWMATCH_JWT_SECRET;
+if (!JWT_SECRET) {
+  console.error('[SECURITY] CRITICAL: GLOWMATCH_JWT_SECRET environment variable is not set!');
+  process.exit(1);
+}
 
 function authFromHeader(req) {
   try {
@@ -53,7 +57,7 @@ router.post('/admin', requireAdmin, async (req, res) => {
     const id = uuidv4();
     const sender = req.admin.id;
     const targetAll = target === 'all' ? 1 : 0;
-    
+
     await sql`
       INSERT INTO notifications (id, title, body, sender_id, target_all, created_at)
       VALUES (${id}, ${title}, ${msgBody}, ${sender}, ${targetAll}, NOW())
@@ -93,7 +97,7 @@ router.get('/me', async (req, res) => {
     if (!payload || !payload.id) return res.status(401).json({ error: 'Unauthorized' });
     const userId = payload.id;
     console.log('[notifications] fetch for user', userId);
-    
+
     const rows = await sql`
       SELECT un.id as link_id, n.id as notification_id, n.title, n.body, n.sender_id, un.read, un.created_at
       FROM user_notifications un
@@ -108,14 +112,20 @@ router.get('/me', async (req, res) => {
   }
 });
 
-// User: mark notification read
+// User: mark notification read - NOW PROTECTED against IDOR
 router.post('/me/:linkId/read', async (req, res) => {
   try {
     const payload = authFromHeader(req);
     if (!payload || !payload.id) return res.status(401).json({ error: 'Unauthorized' });
     const linkId = req.params.linkId;
-    console.log('[notifications] mark read request by user', payload.id, 'link', linkId);
-    await sql`UPDATE user_notifications SET read = 1 WHERE id = ${linkId}`;
+
+    // SECURITY FIX: Verify the notification belongs to this user
+    const check = await sql`SELECT id FROM user_notifications WHERE id = ${linkId} AND user_id = ${payload.id}`;
+    if (!check || check.length === 0) {
+      return res.status(403).json({ error: 'You can only mark your own notifications as read' });
+    }
+
+    await sql`UPDATE user_notifications SET read = 1 WHERE id = ${linkId} AND user_id = ${payload.id}`;
     res.json({ data: { id: linkId } });
   } catch (e) {
     console.error('notifications mark read error', e);

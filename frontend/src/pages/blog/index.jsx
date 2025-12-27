@@ -34,9 +34,9 @@ const Blog = () => {
             slug: blog.slug,
             excerpt: blog.excerpt || blog.content?.substring(0, 150) + '...',
             image: blog.image_url || IMAGES.blog_routine, // Use uploaded image or default
-            category: 'Blog',
+            category: blog.category || t('blog_category_default'),
             date: new Date(blog.created_at || Date.now()).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }),
-            readTime: `${Math.ceil((blog.content?.length || 0) / 200)} min read`
+            readTime: `${Math.ceil((blog.content?.length || 0) / 200)} ${t('min_read')}`
           }));
 
           console.log('[Blog] Mapped blogs:', mappedBlogs);
@@ -68,10 +68,10 @@ const Blog = () => {
         <section className="relative py-20 px-5 lg:px-8 bg-gradient-to-br from-accent/10 to-purple-500/10">
           <div className="max-w-6xl mx-auto">
             <div className="inline-block px-4 py-2 bg-accent/20 border border-accent/40 rounded-full mb-4">
-              <span className="text-accent text-sm font-semibold">Skincare Insights</span>
+              <span className="text-accent text-sm font-semibold">{t('blog_badge')}</span>
             </div>
-            <h1 className="text-5xl md:text-6xl font-bold text-foreground mb-4">Skincare Tips & Guides</h1>
-            <p className="text-xl text-muted-foreground max-w-2xl">Expert advice, tutorials, and insights to help you achieve and maintain healthy, glowing skin</p>
+            <h1 className="text-5xl md:text-6xl font-bold text-foreground mb-4">{t('blog_hero_title')}</h1>
+            <p className="text-xl text-muted-foreground max-w-2xl">{t('blog_hero_desc')}</p>
           </div>
         </section>
 
@@ -85,8 +85,8 @@ const Blog = () => {
             ) : posts.length === 0 ? (
               <div className="text-center py-20 bg-card border border-border rounded-xl">
                 <Icon name="FileText" size={48} className="mx-auto text-muted-foreground mb-4" />
-                <h3 className="text-xl font-semibold text-foreground mb-2">No Blog Posts Yet</h3>
-                <p className="text-muted-foreground">Check back soon for skincare tips and guides!</p>
+                <h3 className="text-xl font-semibold text-foreground mb-2">{t('no_blogs_title')}</h3>
+                <p className="text-muted-foreground">{t('no_blogs_desc')}</p>
               </div>
             ) : (
               <div className="grid md:grid-cols-3 gap-8">
@@ -123,7 +123,7 @@ const Blog = () => {
                       <p className="text-sm text-muted-foreground mb-4 line-clamp-3">{p.excerpt}</p>
 
                       <Link to={`/blog/${p.slug}`} className="inline-flex items-center text-accent font-semibold hover:gap-3 transition-all gap-2">
-                        Read More <Icon name="ArrowRight" size={16} />
+                        {t('read_more')} <Icon name="ArrowRight" size={16} />
                       </Link>
                     </div>
                   </article>
@@ -136,19 +136,19 @@ const Blog = () => {
         {/* Newsletter Section */}
         <section className="py-20 px-5 lg:px-8 bg-accent/5 border-t border-accent/20">
           <div className="max-w-2xl mx-auto text-center">
-            <h2 className="text-4xl font-bold text-foreground mb-4">Stay Updated</h2>
-            <p className="text-lg text-muted-foreground mb-8">Get the latest skincare tips and beauty insights delivered to your inbox</p>
+            <h2 className="text-4xl font-bold text-foreground mb-4">{t('newsletter_title')}</h2>
+            <p className="text-lg text-muted-foreground mb-8">{t('newsletter_desc')}</p>
             <form className="flex flex-col sm:flex-row gap-3">
               <input
                 type="email"
-                placeholder="Enter your email"
+                placeholder={t('email_placeholder')}
                 className="flex-1 px-6 py-3 bg-background border border-border rounded-lg focus:border-accent focus:ring-2 focus:ring-accent/20 transition-all"
               />
               <button
                 type="submit"
                 className="px-8 py-3 bg-gradient-to-r from-pink-500 to-rose-500 text-white font-semibold rounded-lg hover:shadow-lg hover:shadow-pink-500/40 transition-all hover:scale-105"
               >
-                Subscribe
+                {t('subscribe_btn')}
               </button>
             </form>
           </div>

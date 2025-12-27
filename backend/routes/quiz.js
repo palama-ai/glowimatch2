@@ -4,7 +4,11 @@ const { v4: uuidv4 } = require('uuid');
 const jwt = require('jsonwebtoken');
 const { sql } = require('../db');
 
-const JWT_SECRET = process.env.GLOWMATCH_JWT_SECRET || 'dev_secret_change_me';
+const JWT_SECRET = process.env.GLOWMATCH_JWT_SECRET;
+if (!JWT_SECRET) {
+  console.error('[SECURITY] CRITICAL: GLOWMATCH_JWT_SECRET environment variable is not set!');
+  process.exit(1);
+}
 
 function authFromHeader(req) {
   try {
@@ -17,11 +21,14 @@ function authFromHeader(req) {
   }
 }
 
-// autosave
+// autosave - NOW PROTECTED: uses userId from JWT token
 router.post('/autosave', async (req, res) => {
   try {
-    const { userId, quiz_data } = req.body;
-    if (!userId) return res.status(400).json({ error: 'userId required' });
+    const payload = authFromHeader(req);
+    if (!payload || !payload.id) return res.status(401).json({ error: 'Unauthorized' });
+
+    const userId = payload.id; // Use userId from JWT, not from body
+    const { quiz_data } = req.body;
 
     await sql`
       INSERT INTO quiz_autosave (user_id, quiz_data, updated_at)
@@ -37,6 +44,14 @@ router.post('/autosave', async (req, res) => {
 
 router.get('/autosave/:userId', async (req, res) => {
   try {
+    const payload = authFromHeader(req);
+    if (!payload || !payload.id) return res.status(401).json({ error: 'Unauthorized' });
+
+    // Verify user can only access their own autosave
+    if (payload.id !== req.params.userId) {
+      return res.status(403).json({ error: 'You can only access your own autosave data' });
+    }
+
     const rows = await sql`SELECT quiz_data, updated_at FROM quiz_autosave WHERE user_id = ${req.params.userId}`;
     if (!rows || rows.length === 0) return res.json({ data: null });
     const row = rows[0];
@@ -50,6 +65,14 @@ router.get('/autosave/:userId', async (req, res) => {
 // delete autosave
 router.delete('/autosave/:userId', async (req, res) => {
   try {
+    const payload = authFromHeader(req);
+    if (!payload || !payload.id) return res.status(401).json({ error: 'Unauthorized' });
+
+    // Verify user can only delete their own autosave
+    if (payload.id !== req.params.userId) {
+      return res.status(403).json({ error: 'You can only delete your own autosave data' });
+    }
+
     await sql`DELETE FROM quiz_autosave WHERE user_id = ${req.params.userId}`;
     res.json({ success: true });
   } catch (err) {
@@ -58,11 +81,15 @@ router.delete('/autosave/:userId', async (req, res) => {
   }
 });
 
-// save attempt
+// save attempt - NOW PROTECTED
 router.post('/attempts', async (req, res) => {
   try {
-    const { userId, quiz_data, results, has_image_analysis } = req.body;
-    if (!userId || !quiz_data) return res.status(400).json({ error: 'userId and quiz_data required' });
+    const payload = authFromHeader(req);
+    if (!payload || !payload.id) return res.status(401).json({ error: 'Unauthorized' });
+
+    const userId = payload.id; // Use userId from JWT, not from body
+    const { quiz_data, results, has_image_analysis } = req.body;
+    if (!quiz_data) return res.status(400).json({ error: 'quiz_data required' });
     const id = uuidv4();
 
     await sql`
@@ -83,8 +110,21 @@ router.post('/attempts', async (req, res) => {
 
 router.get('/history/:userId', async (req, res) => {
   try {
-    const rows = await sql`SELECT id, attempt_date, quiz_data, results, has_image_analysis FROM quiz_attempts WHERE user_id = ${req.params.userId} ORDER BY attempt_date DESC`;
-    const attempts = rows.map(r => ({ ...r, quiz_data: JSON.parse(r.quiz_data), results: JSON.parse(r.results || '{}') }));
+    const payload = authFromHeader(req);
+    if (!payload || !payload.id) return res.status(401).json({ error: 'Unauthorized' });
+
+    // Verify user can only access their own history
+    if (payload.id !== req.params.userId) {
+      return res.status(403).json({ error: 'You can only access your own quiz history' });
+    }
+
+    const rows = await sql`SELECT id, attempt_date, quiz_data, results, has_image_analysis, analysis FROM quiz_attempts WHERE user_id = ${req.params.userId} ORDER BY attempt_date DESC`;
+    const attempts = rows.map(r => ({
+      ...r,
+      quiz_data: JSON.parse(r.quiz_data),
+      results: JSON.parse(r.results || '{}'),
+      analysis: r.analysis ? JSON.parse(r.analysis) : null
+    }));
     res.json({ data: attempts });
   } catch (err) {
     console.error(err);
@@ -94,11 +134,25 @@ router.get('/history/:userId', async (req, res) => {
 
 router.get('/attempts/:id', async (req, res) => {
   try {
+    // Require authentication
+    const payload = authFromHeader(req);
+    if (!payload || !payload.id) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
     const rows = await sql`SELECT * FROM quiz_attempts WHERE id = ${req.params.id}`;
     if (!rows || rows.length === 0) return res.status(404).json({ error: 'Not found' });
+
     const row = rows[0];
+
+    // Verify user can only view their own attempts
+    if (row.user_id !== payload.id) {
+      return res.status(403).json({ error: 'You can only view your own quiz attempts' });
+    }
+
     row.quiz_data = JSON.parse(row.quiz_data);
     row.results = JSON.parse(row.results || '{}');
+    row.analysis = row.analysis ? JSON.parse(row.analysis) : null;
     res.json({ data: row });
   } catch (err) {
     console.error(err);
@@ -177,6 +231,46 @@ router.delete('/history/:userId', async (req, res) => {
   } catch (err) {
     console.error('Failed to delete quiz history:', err);
     res.status(500).json({ error: 'Failed to delete quiz history' });
+  }
+});
+
+// PUT /api/quiz/attempts/:id/analysis - Save complete analysis data to quiz attempt
+router.put('/attempts/:id/analysis', async (req, res) => {
+  try {
+    const payload = authFromHeader(req);
+    if (!payload || !payload.id) return res.status(401).json({ error: 'Unauthorized' });
+
+    const { id } = req.params;
+    const { analysis } = req.body;
+
+    if (!analysis) {
+      return res.status(400).json({ error: 'analysis required in body' });
+    }
+
+    // Verify ownership
+    const attempt = await sql`SELECT id, user_id FROM quiz_attempts WHERE id = ${id}`;
+    if (!attempt || attempt.length === 0) {
+      return res.status(404).json({ error: 'Quiz attempt not found' });
+    }
+
+    if (attempt[0].user_id !== payload.id) {
+      return res.status(403).json({ error: 'You can only update your own quiz attempts' });
+    }
+
+    // Update the analysis field with complete AI-generated data
+    await sql`UPDATE quiz_attempts SET analysis = ${JSON.stringify(analysis)} WHERE id = ${id}`;
+
+    const updated = await sql`SELECT * FROM quiz_attempts WHERE id = ${id}`;
+    if (updated && updated.length > 0) {
+      updated[0].quiz_data = JSON.parse(updated[0].quiz_data || '{}');
+      updated[0].results = JSON.parse(updated[0].results || '{}');
+      updated[0].analysis = JSON.parse(updated[0].analysis || '{}');
+    }
+
+    res.json({ success: true, data: updated[0] });
+  } catch (err) {
+    console.error('Failed to update quiz attempt analysis:', err);
+    res.status(500).json({ error: 'Failed to update quiz attempt analysis' });
   }
 });
 

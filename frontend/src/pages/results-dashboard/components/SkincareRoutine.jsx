@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import Icon from '../../../components/AppIcon';
 
-const SkincareRoutine = ({ skinType, routineSteps }) => {
+const SkincareRoutine = ({ skinType, routineSteps, isLoading, error }) => {
   const [activeRoutine, setActiveRoutine] = useState('morning');
   const [expandedStep, setExpandedStep] = useState(null);
 
@@ -42,8 +42,8 @@ const SkincareRoutine = ({ skinType, routineSteps }) => {
         <button
           onClick={() => setActiveRoutine('morning')}
           className={`flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-sm font-medium transition-all ${activeRoutine === 'morning'
-              ? 'bg-background shadow-sm text-foreground'
-              : 'text-muted-foreground hover:text-foreground'
+            ? 'bg-background shadow-sm text-foreground'
+            : 'text-muted-foreground hover:text-foreground'
             }`}
         >
           <Icon name="Sun" size={18} />
@@ -52,8 +52,8 @@ const SkincareRoutine = ({ skinType, routineSteps }) => {
         <button
           onClick={() => setActiveRoutine('evening')}
           className={`flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-sm font-medium transition-all ${activeRoutine === 'evening'
-              ? 'bg-background shadow-sm text-foreground'
-              : 'text-muted-foreground hover:text-foreground'
+            ? 'bg-background shadow-sm text-foreground'
+            : 'text-muted-foreground hover:text-foreground'
             }`}
         >
           <Icon name="Moon" size={18} />
@@ -67,55 +67,77 @@ const SkincareRoutine = ({ skinType, routineSteps }) => {
         <div className="absolute left-6 top-0 bottom-0 w-0.5 bg-gradient-to-b from-accent via-accent/50 to-transparent" />
 
         {/* Steps */}
-        <div className="space-y-4 stagger-children">
-          {currentRoutine?.map((step, index) => (
-            <div key={index} className="relative pl-14">
-              {/* Step Number Circle */}
-              <div className={`absolute left-0 w-12 h-12 rounded-full ${getStepColor(step?.type)} flex items-center justify-center shadow-lg`}>
-                <Icon name={getStepIcon(step?.type)} size={20} className="text-white" />
-              </div>
-
-              {/* Step Card */}
-              <div
-                className="glass rounded-2xl overflow-hidden cursor-pointer card-hover"
-                onClick={() => toggleStep(index)}
-              >
-                <div className="p-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <span className="text-xs font-medium text-accent bg-accent/10 px-2 py-1 rounded-full">
-                        Step {index + 1}
-                      </span>
-                      <span className="text-xs text-muted-foreground">
-                        {step?.timing}
-                      </span>
-                    </div>
-                    <Icon
-                      name={expandedStep === index ? 'ChevronUp' : 'ChevronDown'}
-                      size={18}
-                      className="text-muted-foreground"
-                    />
-                  </div>
-
-                  <h4 className="font-semibold text-foreground mt-2">{step?.name}</h4>
-                  <p className="text-sm text-muted-foreground mt-1 line-clamp-2">{step?.description}</p>
+        {isLoading ? (
+          <div className="text-center py-12 ml-14">
+            <Icon name="Loader2" size={32} className="mx-auto text-accent mb-3 animate-spin" />
+            <p className="text-sm text-muted-foreground">
+              Generating your personalized {activeRoutine} routine...
+            </p>
+          </div>
+        ) : error ? (
+          <div className="text-center py-12 ml-14">
+            <Icon name="AlertCircle" size={32} className="mx-auto text-amber-500 mb-3" />
+            <p className="text-sm text-foreground font-medium mb-1">Unable to generate routine</p>
+            <p className="text-xs text-muted-foreground">{error}</p>
+          </div>
+        ) : currentRoutine.length === 0 ? (
+          <div className="text-center py-12 ml-14">
+            <Icon name="Sparkles" size={32} className="mx-auto text-muted-foreground/50 mb-3" />
+            <p className="text-sm text-muted-foreground">
+              No routine available yet. Complete a skin analysis to get personalized recommendations.
+            </p>
+          </div>
+        ) : (
+          <div className="space-y-4 stagger-children">
+            {currentRoutine?.map((step, index) => (
+              <div key={index} className="relative pl-14">
+                {/* Step Number Circle */}
+                <div className={`absolute left-0 w-12 h-12 rounded-full ${getStepColor(step?.type)} flex items-center justify-center shadow-lg`}>
+                  <Icon name={getStepIcon(step?.type)} size={20} className="text-white" />
                 </div>
 
-                {/* Expanded Content */}
-                {expandedStep === index && step?.tips && (
-                  <div className="px-4 pb-4 animate-fade-in">
-                    <div className="p-3 bg-accent/5 rounded-xl border border-accent/10">
-                      <div className="flex items-start gap-2">
-                        <Icon name="Lightbulb" size={14} className="text-accent mt-0.5 flex-shrink-0" />
-                        <p className="text-xs text-foreground leading-relaxed">{step.tips}</p>
+                {/* Step Card */}
+                <div
+                  className="glass rounded-2xl overflow-hidden cursor-pointer card-hover"
+                  onClick={() => toggleStep(index)}
+                >
+                  <div className="p-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <span className="text-xs font-medium text-accent bg-accent/10 px-2 py-1 rounded-full">
+                          Step {index + 1}
+                        </span>
+                        <span className="text-xs text-muted-foreground">
+                          {step?.timing}
+                        </span>
+                      </div>
+                      <Icon
+                        name={expandedStep === index ? 'ChevronUp' : 'ChevronDown'}
+                        size={18}
+                        className="text-muted-foreground"
+                      />
+                    </div>
+
+                    <h4 className="font-semibold text-foreground mt-2">{step?.name}</h4>
+                    <p className="text-sm text-muted-foreground mt-1 line-clamp-2">{step?.description}</p>
+                  </div>
+
+                  {/* Expanded Content */}
+                  {expandedStep === index && step?.tips && (
+                    <div className="px-4 pb-4 animate-fade-in">
+                      <div className="p-3 bg-accent/5 rounded-xl border border-accent/10">
+                        <div className="flex items-start gap-2">
+                          <Icon name="Lightbulb" size={14} className="text-accent mt-0.5 flex-shrink-0" />
+                          <p className="text-xs text-foreground leading-relaxed">{step.tips}</p>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                )}
+                  )}
+                </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Pro Tip */}

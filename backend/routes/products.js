@@ -1,16 +1,39 @@
 const express = require('express');
 const router = express.Router();
+const jwt = require('jsonwebtoken');
 const { sql } = require('../db');
 const { voteOnProducts } = require('../lib/aiProviders');
 
+const JWT_SECRET = process.env.GLOWMATCH_JWT_SECRET;
+if (!JWT_SECRET) {
+    console.error('[SECURITY] CRITICAL: GLOWMATCH_JWT_SECRET environment variable is not set!');
+    process.exit(1);
+}
+
+// Auth helper
+function authFromHeader(req) {
+    try {
+        const auth = req.headers.authorization;
+        if (!auth) return null;
+        const token = auth.replace('Bearer ', '');
+        return jwt.verify(token, JWT_SECRET);
+    } catch (e) { return null; }
+}
+
 /**
- * POST /api/products/ai-recommend
+ * POST /api/products/ai-recommend - NOW PROTECTED
  * AI-powered product recommendation using multi-model voting
  * Body:
  *   - analysis: object with skinType, concerns, confidence, explanation
  */
 router.post('/ai-recommend', async (req, res) => {
     try {
+        // Require authentication (prevents AI API abuse)
+        const payload = authFromHeader(req);
+        if (!payload || !payload.id) {
+            return res.status(401).json({ error: 'Unauthorized - authentication required for AI recommendations' });
+        }
+
         const { analysis } = req.body;
 
         if (!analysis || !analysis.skinType) {
@@ -215,6 +238,7 @@ router.get('/recommended', async (req, res) => {
 /**
  * POST /api/products/:id/view
  * Track product view (for analytics)
+ * SECURITY: userId extracted from JWT token to prevent IDOR attacks
  * Rules:
  * - Count views per user per quiz attempt
  * - Same product viewed multiple times in one quiz = 1 view
@@ -223,7 +247,11 @@ router.get('/recommended', async (req, res) => {
 router.post('/:id/view', async (req, res) => {
     try {
         const { id } = req.params;
-        const { userId, quizAttemptId } = req.body;
+        const { quizAttemptId } = req.body;
+
+        // SECURITY: Get userId from JWT token, not from body (prevents IDOR)
+        const payload = authFromHeader(req);
+        const userId = payload?.id || null;
 
         // If we have userId and quizAttemptId, check for duplicate views
         if (userId && quizAttemptId) {
@@ -329,7 +357,7 @@ const getUserFromToken = (req) => {
         if (!authHeader || !authHeader.startsWith('Bearer ')) return null;
         const token = authHeader.split(' ')[1];
         const jwt = require('jsonwebtoken');
-        const JWT_SECRET = process.env.GLOWMATCH_JWT_SECRET || 'dev_secret_change_me';
+        // JWT_SECRET is already defined at module level
         return jwt.verify(token, JWT_SECRET);
     } catch (e) {
         return null;

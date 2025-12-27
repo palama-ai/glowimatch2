@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Icon from '../../components/AppIcon';
+import { useI18n } from '../../contexts/I18nContext';
 
 const API_BASE = import.meta.env?.VITE_BACKEND_URL || 'https://backend-three-sigma-81.vercel.app/api';
 
 const NotificationsPage = () => {
+  const { t } = useI18n();
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
@@ -83,8 +85,8 @@ const NotificationsPage = () => {
           <Icon name="Bell" size={20} className="text-accent" />
         </div>
         <div>
-          <h2 className="text-2xl font-semibold">Notifications</h2>
-          <p className="text-sm text-muted-foreground">All your recent notifications</p>
+          <h2 className="text-2xl font-semibold">{t('notifications_title')}</h2>
+          <p className="text-sm text-muted-foreground">{t('notifications_sub')}</p>
         </div>
       </div>
 
@@ -93,7 +95,7 @@ const NotificationsPage = () => {
       ) : (
         <div className="space-y-4">
           {notifications.length === 0 && (
-            <div className="text-muted-foreground">No notifications found.</div>
+            <div className="text-muted-foreground">{t('no_notifications')}</div>
           )}
 
           {notifications.map((n) => {
@@ -102,18 +104,18 @@ const NotificationsPage = () => {
               <div key={n.link_id || n.notification_id || Math.random()} className={`p-4 border rounded-lg ${unread ? 'bg-accent/5' : 'bg-background'}`}>
                 <div className="flex justify-between items-start">
                   <div>
-                    <div className="font-semibold">{n.title || 'Notice'}</div>
+                    <div className="font-semibold">{n.title || t('notification_default_title')}</div>
                     <div className="text-sm text-muted-foreground mt-1">{n.body}</div>
                     {n.link && (
                       <div className="mt-2">
-                        <button onClick={() => navigate(n.link)} className="text-sm text-accent underline">Open link</button>
+                        <button onClick={() => navigate(n.link)} className="text-sm text-accent underline">{t('open_link')}</button>
                       </div>
                     )}
                   </div>
                   <div className="text-right">
                     <div className="text-xs text-muted-foreground">{new Date(n.created_at).toLocaleString()}</div>
                     {unread && (
-                      <button onClick={() => markRead(n.link_id)} className="mt-2 inline-flex items-center px-2 py-1 text-xs bg-accent text-white rounded">Mark read</button>
+                      <button onClick={() => markRead(n.link_id)} className="mt-2 inline-flex items-center px-2 py-1 text-xs bg-accent text-white rounded">{t('mark_read')}</button>
                     )}
                   </div>
                 </div>

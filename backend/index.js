@@ -21,6 +21,7 @@ try {
 
 const express = require('express');
 const cors = require('cors');
+const helmet = require('helmet');
 const bodyParser = require('express').json;
 const { init } = require('./db');
 const authRoutes = require('./routes/auth');
@@ -37,42 +38,151 @@ const referralsRoutes = require('./routes/referrals');
 const notificationsRoutes = require('./routes/notifications');
 const sellerRoutes = require('./routes/seller');
 const productsRoutes = require('./routes/products');
+const uploadRoutes = require('./routes/upload');
+const violationsRoutes = require('./routes/violations');
+
+// 🛡️ SECURITY: Import defense system middleware
+const { securityMiddleware, getSecurityStats, getSecurityLogs } = require('./middleware/security');
+
+// 📊 PERFORMANCE: Import logger and cache
+const { logger, httpLogger } = require('./utils/logger');
+const { cache, CACHE_KEYS } = require('./utils/cache');
 
 const PORT = process.env.PORT || 4000;
 
 const app = express();
 
+// ⚡ PERFORMANCE: Enable Gzip compression
+const zlib = require('zlib');
+app.use((req, res, next) => {
+  // Check if client accepts gzip
+  const acceptEncoding = req.headers['accept-encoding'] || '';
+  if (acceptEncoding.includes('gzip')) {
+    const originalSend = res.send.bind(res);
+    res.send = function (body) {
+      // Only compress if body is string or buffer and large enough
+      if ((typeof body === 'string' || Buffer.isBuffer(body)) && body.length > 1024) {
+        zlib.gzip(body, (err, compressed) => {
+          if (err) return originalSend(body);
+          res.setHeader('Content-Encoding', 'gzip');
+          res.setHeader('Content-Length', compressed.length);
+          originalSend(compressed);
+        });
+      } else {
+        originalSend(body);
+      }
+    };
+  }
+  next();
+});
+
 // Configure CORS properly
 const allowedOrigins = [
-  'http://localhost:4028',
-  'http://localhost:3000',
-  'http://localhost:5173',
   process.env.FRONTEND_URL || 'https://glowimatch.vercel.app',
   'https://glowimatch.vercel.app',
-  'https://glowimatch-ebon.vercel.app'
 ];
+
+// SECURITY: Log requests with null origin but don't block (mobile apps, health checks need this)
+const IS_PRODUCTION = process.env.NODE_ENV === 'production';
 
 app.use(cors({
   origin: function (origin, callback) {
-    // Allow requests with no origin (like mobile apps or curl requests)
-    if (!origin) return callback(null, true);
+    // Allow null origin (from mobile apps, server-to-server, Postman, health checks)
+    if (!origin) {
+      if (IS_PRODUCTION) {
+        // Just log for monitoring, don't block
+        console.log('[CORS] Request with null origin (mobile/server/health check)');
+      }
+      return callback(null, true);
+    }
 
+    // Allow listed origins
     if (allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
+      // Log blocked origins for debugging
+      console.warn('[CORS] Blocked origin:', origin);
       callback(new Error('CORS not allowed'));
     }
   },
   credentials: true
 }));
 
-// simple request logger to aid debugging
-app.use((req, res, next) => {
-  try { console.log('[backend] incoming request', req.method, req.originalUrl); } catch (e) { }
+// SECURITY: HTTPS enforcement in production (redirect HTTP to HTTPS)
+if (process.env.NODE_ENV === 'production') {
+  app.use((req, res, next) => {
+    if (req.headers['x-forwarded-proto'] !== 'https') {
+      return res.redirect(301, `https://${req.headers.host}${req.url}`);
+    }
+    next();
+  });
+}
+
+// SECURITY: Helmet.js for comprehensive security headers
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'", "https://apis.google.com", "https://accounts.google.com"],
+      styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+      imgSrc: ["'self'", "data:", "https:", "blob:"],
+      fontSrc: ["'self'", "https://fonts.gstatic.com"],
+      connectSrc: ["'self'", "https://apis.google.com", "https://oauth2.googleapis.com", "https://*.cloudinary.com"],
+      frameSrc: ["https://accounts.google.com"],
+      objectSrc: ["'none'"],
+      baseUri: ["'self'"]
+    }
+  },
+  crossOriginEmbedderPolicy: false, // Allow images from external sources
+  hsts: process.env.NODE_ENV === 'production' ? {
+    maxAge: 31536000,
+    includeSubDomains: true
+  } : false
+}));
+
+// SECURITY: Basic rate limiting for auth endpoints
+const rateLimitMap = new Map();
+const RATE_LIMIT_WINDOW_MS = 15 * 60 * 1000; // 15 minutes
+const MAX_AUTH_ATTEMPTS = 10; // Max attempts per window
+
+function checkRateLimit(key, maxAttempts = MAX_AUTH_ATTEMPTS) {
+  const now = Date.now();
+  const record = rateLimitMap.get(key);
+
+  if (!record || now - record.startTime > RATE_LIMIT_WINDOW_MS) {
+    rateLimitMap.set(key, { startTime: now, count: 1 });
+    return true;
+  }
+
+  if (record.count >= maxAttempts) {
+    return false;
+  }
+
+  record.count++;
+  return true;
+}
+
+// Rate limit middleware for auth endpoints
+app.use('/api/auth', (req, res, next) => {
+  const ip = req.ip || req.connection.remoteAddress || 'unknown';
+  const key = `auth:${ip}`;
+
+  if (!checkRateLimit(key)) {
+    return res.status(429).json({
+      error: 'Too many requests. Please try again later.',
+      retryAfter: Math.ceil(RATE_LIMIT_WINDOW_MS / 1000 / 60) + ' minutes'
+    });
+  }
   next();
 });
+
+// 📊 PERFORMANCE: HTTP request logger
+app.use(httpLogger);
 // Increase JSON body limit to allow base64 image uploads from the frontend
 app.use(bodyParser({ limit: '12mb' }));
+
+// 🛡️ SECURITY: Apply global security middleware (IP filter, rate limit, validation)
+app.use(securityMiddleware);
 
 // Debug: show whether critical API keys are present (do NOT log their values)
 try {
@@ -162,6 +272,8 @@ app.use('/api/referrals', referralsRoutes);
 app.use('/api/notifications', notificationsRoutes);
 app.use('/api/seller', sellerRoutes);
 app.use('/api/products', productsRoutes);
+app.use('/api/upload', uploadRoutes);
+app.use('/api/admin/violations', violationsRoutes);
 
 // Basic API root - helpful for health checks and to avoid "Cannot GET /api" responses
 app.get('/api', (req, res) => {
@@ -198,23 +310,23 @@ app.get('/__routes', (req, res) => {
   }
 });
 
-// Health check with detailed database status
+// Health check with database status (SECURITY: no sensitive info exposed)
 app.get('/api/health', (req, res) => {
   try {
-    const dbUrl = process.env.DATABASE_URL;
-    const hasDbUrl = !!dbUrl;
-    const dbUrlMasked = hasDbUrl ? dbUrl.substring(0, 20) + '...' : 'NOT SET';
+    const hasDbUrl = !!process.env.DATABASE_URL;
 
     res.json({
       status: dbReady ? 'healthy' : 'initializing',
       db_ready: dbReady,
       db_initializing: dbInitializing,
       database_url_present: hasDbUrl,
-      database_url_preview: dbUrlMasked,
+      // SECURITY: database_url_preview removed to prevent information leakage
       timestamp: new Date().toISOString()
     });
   } catch (e) {
-    res.status(500).json({ status: 'error', error: String(e) });
+    // SECURITY: Hide error details in production
+    const errorMsg = process.env.NODE_ENV === 'production' ? 'Health check failed' : String(e);
+    res.status(500).json({ status: 'error', error: errorMsg });
   }
 });
 
@@ -246,6 +358,25 @@ if (fs.existsSync(buildPath)) {
 } else {
   app.get('/', (req, res) => res.json({ ok: true, msg: 'GlowMatch backend running' }));
 }
+
+// SECURITY: Global error handler - hide error details in production
+app.use((err, req, res, next) => {
+  console.error('[error]', err.stack || err);
+
+  if (process.env.NODE_ENV === 'production') {
+    // In production, don't expose error details
+    res.status(err.status || 500).json({
+      error: 'An error occurred. Please try again.',
+      requestId: req.headers['x-request-id'] || null
+    });
+  } else {
+    // In development, show full error for debugging
+    res.status(err.status || 500).json({
+      error: err.message,
+      stack: err.stack
+    });
+  }
+});
 
 // Only start the server if running directly (not imported)
 if (require.main === module) {

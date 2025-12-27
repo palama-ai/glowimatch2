@@ -18,7 +18,10 @@ CREATE TABLE IF NOT EXISTS users (
   disabled INT DEFAULT 0,
   deleted INT DEFAULT 0,
   status_message TEXT,
+  google_id VARCHAR(255),
+  avatar_url VARCHAR(500),
   created_at TIMESTAMP DEFAULT NOW(),
+  updated_at TIMESTAMP DEFAULT NOW(),
   CONSTRAINT fk_referrer FOREIGN KEY (referrer_id) REFERENCES users(id) ON DELETE SET NULL
 );
 

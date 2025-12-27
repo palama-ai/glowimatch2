@@ -1,0 +1,1 @@
+import{c as n,j as e,N as r}from"./index-_ibJpO5e.js";const l=({children:t})=>{const{user:s,userProfile:o,loading:u,isAdmin:i}=n();return u?null:i()?t:s?e.jsx(r,{to:"/",replace:!0}):e.jsx(r,{to:"/login",replace:!0})};export{l as default};

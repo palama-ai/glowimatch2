@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase, quizService } from '../../lib/supabase';
+import { useI18n } from '../../contexts/I18nContext';
 import { debugLogger } from '../../lib/debugLogger';
 import { generateAndUploadReportAndAttach } from '../../lib/reportService';
 import Header from '../../components/ui/Header';
@@ -25,6 +26,7 @@ const InteractiveSkinQuiz = () => {
     getNextResetDate,
     purchaseQuizAttempts
   } = useAuth();
+  const { t } = useI18n();
   const [referralLink, setReferralLink] = useState(null);
   const [fetchingReferral, setFetchingReferral] = useState(false);
   const remainingAttempts = getRemainingAttempts?.();
@@ -39,246 +41,239 @@ const InteractiveSkinQuiz = () => {
   const questions = [
     {
       id: 1,
-      title: "What\'s your primary skin type?",
-      subtitle: "Choose the option that best describes your skin most of the time",
+      title: t('q1_title'),
+      subtitle: t('q1_subtitle'),
       type: "multiple-choice",
       options: [
         {
           id: "oily",
-          label: "Oily",
-          description: "Shiny, greasy appearance with enlarged pores"
+          label: t('q1_opt_oily_label'),
+          description: t('q1_opt_oily_desc')
         },
         {
           id: "dry",
-          label: "Dry",
-          description: "Tight, flaky, or rough texture with fine lines"
+          label: t('q1_opt_dry_label'),
+          description: t('q1_opt_dry_desc')
         },
         {
           id: "combination",
-          label: "Combination",
-          description: "Oily T-zone with dry or normal cheeks"
+          label: t('q1_opt_comb_label'),
+          description: t('q1_opt_comb_desc')
         },
         {
           id: "sensitive",
-          label: "Sensitive",
-          description: "Easily irritated, red, or reactive to products"
+          label: t('q1_opt_sens_label'),
+          description: t('q1_opt_sens_desc')
         },
         {
           id: "normal",
-          label: "Normal",
-          description: "Balanced, neither too oily nor too dry"
+          label: t('q1_opt_norm_label'),
+          description: t('q1_opt_norm_desc')
         }]
-
     },
     {
       id: 2,
-      title: "How often do you experience breakouts?",
-      subtitle: "Think about your skin over the past 3 months",
+      title: t('q2_title'),
+      subtitle: t('q2_subtitle'),
       type: "multiple-choice",
       options: [
         {
           id: "never",
-          label: "Never",
-          description: "I rarely get pimples or blemishes"
+          label: t('q2_opt_never_label'),
+          description: t('q2_opt_never_desc')
         },
         {
           id: "rarely",
-          label: "Rarely",
-          description: "Occasional breakout, maybe once a month"
+          label: t('q2_opt_rarely_label'),
+          description: t('q2_opt_rarely_desc')
         },
         {
           id: "sometimes",
-          label: "Sometimes",
-          description: "A few breakouts per month"
+          label: t('q2_opt_sometimes_label'),
+          description: t('q2_opt_sometimes_desc')
         },
         {
           id: "often",
-          label: "Often",
-          description: "Weekly breakouts or persistent acne"
+          label: t('q2_opt_often_label'),
+          description: t('q2_opt_often_desc')
         },
         {
           id: "constantly",
-          label: "Constantly",
-          description: "Daily breakouts or severe acne"
+          label: t('q2_opt_constantly_label'),
+          description: t('q2_opt_constantly_desc')
         }]
-
     },
     {
       id: 3,
-      title: "How does your skin feel by midday?",
-      subtitle: "After your morning skincare routine",
+      title: t('q3_title'),
+      subtitle: t('q3_subtitle'),
       type: "multiple-choice",
       options: [
         {
           id: "tight-dry",
-          label: "Tight & Dry",
-          description: "Feels stretched and needs moisturizer"
+          label: t('q3_opt_tight_label'),
+          description: t('q3_opt_tight_desc')
         },
         {
           id: "comfortable",
-          label: "Comfortable",
-          description: "Feels balanced and normal"
+          label: t('q3_opt_comfortable_label'),
+          description: t('q3_opt_comfortable_desc')
         },
         {
           id: "slightly-oily",
-          label: "Slightly Oily",
-          description: "Some shine in T-zone area"
+          label: t('q3_opt_slightly_label'),
+          description: t('q3_opt_slightly_desc')
         },
         {
           id: "very-oily",
-          label: "Very Oily",
-          description: "Noticeable shine and greasiness"
+          label: t('q3_opt_very_label'),
+          description: t('q3_opt_very_desc')
         },
         {
           id: "irritated",
-          label: "Irritated",
-          description: "Red, itchy, or uncomfortable"
+          label: t('q3_opt_irritated_label'),
+          description: t('q3_opt_irritated_desc')
         }]
-
     },
     {
       id: 4,
-      title: "What\'s your biggest skin concern?",
-      subtitle: "Select your primary concern",
+      title: t('q4_title'),
+      subtitle: t('q4_subtitle'),
       type: "image-selection",
       options: [
         {
           id: "acne",
-          label: "Acne & Breakouts",
+          label: t('q4_opt_acne_label'),
           image: "https://images.unsplash.com/photo-1452223355713-db7fc5eed0b9",
-          imageAlt: "Close-up of skin with acne breakouts and blemishes"
+          imageAlt: t('q4_opt_acne_label')
         },
         {
           id: "aging",
-          label: "Fine Lines & Aging",
+          label: t('q4_opt_aging_label'),
           image: "https://images.unsplash.com/photo-1531067332586-ffe9e4d49477",
-          imageAlt: "Mature skin showing fine lines and wrinkles around eyes"
+          imageAlt: t('q4_opt_aging_label')
         },
         {
           id: "dryness",
-          label: "Dryness & Flaking",
+          label: t('q4_opt_dryness_label'),
           image: "https://images.unsplash.com/photo-1729617086451-70a40832030b",
-          imageAlt: "Dry flaky skin texture with visible peeling"
+          imageAlt: t('q4_opt_dryness_label')
         },
         {
           id: "pigmentation",
-          label: "Dark Spots & Pigmentation",
+          label: t('q4_opt_pigmentation_label'),
           image: "https://images.unsplash.com/photo-1702354408183-1d7a58afaf5f",
-          imageAlt: "Skin with dark spots and uneven pigmentation"
+          imageAlt: t('q4_opt_pigmentation_label')
         },
         {
           id: "sensitivity",
-          label: "Redness & Sensitivity",
+          label: t('q4_opt_sensitivity_label'),
           image: "https://images.unsplash.com/photo-1694226016585-d4a261afee7c",
-          imageAlt: "Sensitive red irritated skin with inflammation"
+          imageAlt: t('q4_opt_sensitivity_label')
         },
         {
           id: "pores",
-          label: "Large Pores",
+          label: t('q4_opt_pores_label'),
           image: "https://images.unsplash.com/photo-1567854143419-b38292f838c5",
-          imageAlt: "Close-up of skin showing enlarged visible pores"
+          imageAlt: t('q4_opt_pores_label')
         }]
-
     },
     {
       id: 5,
-      title: "How sensitive is your skin to new products?",
-      subtitle: "Rate your skin\'s reaction to new skincare products",
+      title: t('q5_title'),
+      subtitle: t('q5_subtitle'),
       type: "slider",
       min: 1,
       max: 5,
       step: 1,
       labels: {
-        1: "Not Sensitive",
-        2: "Slightly Sensitive",
-        3: "Moderately Sensitive",
-        4: "Very Sensitive",
-        5: "Extremely Sensitive"
+        1: t('q5_label_1'),
+        2: t('q5_label_2'),
+        3: t('q5_label_3'),
+        4: t('q5_label_4'),
+        5: t('q5_label_5')
       }
     },
     {
       id: 6,
-      title: "What\'s your current skincare routine?",
-      subtitle: "How many steps do you typically follow?",
+      title: t('q6_title'),
+      subtitle: t('q6_subtitle'),
       type: "multiple-choice",
       options: [
         {
           id: "minimal",
-          label: "Minimal (1-3 steps)",
-          description: "Cleanser and moisturizer, maybe sunscreen"
+          label: t('q6_opt_minimal_label'),
+          description: t('q6_opt_minimal_desc')
         },
         {
           id: "basic",
-          label: "Basic (4-6 steps)",
-          description: "Cleanser, toner, moisturizer, sunscreen, occasional mask"
+          label: t('q6_opt_basic_label'),
+          description: t('q6_opt_basic_desc')
         },
         {
           id: "comprehensive",
-          label: "Comprehensive (7-10 steps)",
-          description: "Full routine with serums, treatments, and targeted products"
+          label: t('q6_opt_comprehensive_label'),
+          description: t('q6_opt_comprehensive_desc')
         },
         {
           id: "extensive",
-          label: "Extensive (10+ steps)",
-          description: "Multi-step routine with multiple serums and treatments"
+          label: t('q6_opt_extensive_label'),
+          description: t('q6_opt_extensive_desc')
         }]
-
     },
     {
       id: 7,
-      title: "How much time do you spend on skincare daily?",
-      subtitle: "Include both morning and evening routines",
+      title: t('q7_title'),
+      subtitle: t('q7_subtitle'),
       type: "multiple-choice",
       options: [
         {
           id: "under-5",
-          label: "Under 5 minutes",
-          description: "Quick and simple routine"
+          label: t('q7_opt_under5_label'),
+          description: t('q7_opt_under5_desc')
         },
         {
           id: "5-10",
-          label: "5-10 minutes",
-          description: "Basic but thorough routine"
+          label: t('q7_opt_5to10_label'),
+          description: t('q7_opt_5to10_desc')
         },
         {
           id: "10-20",
-          label: "10-20 minutes",
-          description: "Detailed routine with multiple products"
+          label: t('q7_opt_10to20_label'),
+          description: t('q7_opt_10to20_desc')
         },
         {
           id: "over-20",
-          label: "Over 20 minutes",
-          description: "Extensive routine with treatments and massage"
+          label: t('q7_opt_over20_label'),
+          description: t('q7_opt_over20_desc')
         }]
-
     },
     {
       id: 8,
-      title: "What\'s your budget for skincare products?",
-      subtitle: "Monthly spending on skincare products",
+      title: t('q8_title'),
+      subtitle: t('q8_subtitle'),
       type: "multiple-choice",
       options: [
         {
           id: "budget",
-          label: "Budget-Friendly ($0-$50)",
-          description: "Drugstore and affordable options"
+          label: t('q8_opt_budget_label'),
+          description: t('q8_opt_budget_desc')
         },
         {
           id: "moderate",
-          label: "Moderate ($50-$150)",
-          description: "Mix of drugstore and mid-range products"
+          label: t('q8_opt_moderate_label'),
+          description: t('q8_opt_moderate_desc')
         },
         {
           id: "premium",
-          label: "Premium ($150-$300)",
-          description: "High-end and professional products"
+          label: t('q8_opt_premium_label'),
+          description: t('q8_opt_premium_desc')
         },
         {
           id: "luxury",
-          label: "Luxury ($300+)",
-          description: "Top-tier and luxury skincare brands"
+          label: t('q8_opt_luxury_label'),
+          description: t('q8_opt_luxury_desc')
         }]
-
     }];
 
   // compute values inline to avoid initialization order issues
@@ -335,13 +330,9 @@ const InteractiveSkinQuiz = () => {
       // If user has zero remaining attempts, prompt sharing referral
       const remaining = getRemainingAttempts?.();
       if (typeof remaining === 'number' && remaining <= 0) {
-        // Ensure referral link is available for sharing
-        try {
-          await fetchReferralLink();
-        } catch (e) {
-          console.debug('fetchReferralLink failed', e);
-        }
-        alert('You have no quiz attempts left. Share your referral link to get more attempts.');
+        // Fetch referral link in background, show message immediately
+        fetchReferralLink().catch(e => console.debug('fetchReferralLink failed', e));
+        alert(t('quiz_no_attempts_alert'));
         return;
       }
 
@@ -355,27 +346,28 @@ const InteractiveSkinQuiz = () => {
         const { data, error } = await quizService.startQuiz();
         if (error || !data) {
           console.error('startQuiz failed', error);
-          // Surface server raw body if available so the developer can inspect HTML/error pages
           const details = error?.raw || error?.details || null;
           setLastSaveError({ code: 'START_ATTEMPT_ERROR', message: error?.message || 'Unable to start quiz', details });
           return;
         }
-        // refresh profile/subscription in context
-        try { await refreshProfile(); } catch (e) { console.debug('profile reload failed', e); }
+
+        // Start quiz IMMEDIATELY - refresh profile in background
+        setQuizStarted(true);
+        setCurrentQuestionIndex(0);
+        setResponses([]);
+        setCurrentAnswer(null);
+
+        // Refresh profile in background (non-blocking)
+        refreshProfile().catch(e => console.debug('profile reload failed', e));
+
       } catch (e) {
         console.error('startQuiz request failed', e);
         setLastSaveError({ code: e?.status || 'NETWORK_ERROR', message: e?.message || 'Unable to start quiz at this time', details: e?.raw || null });
         return;
       }
-
-      setQuizStarted(true);
-      setCurrentQuestionIndex(0);
-      setResponses([]);
-      setCurrentAnswer(null);
     } catch (error) {
       console.error('Error starting quiz:', error);
-      // عرض رسالة خطأ أكثر وضوحاً للمستخدم
-      alert('Unable to start the quiz at this moment. Please try again in a few moments.');
+      alert(t('quiz_start_error_alert'));
     }
   };
 
@@ -603,10 +595,9 @@ const InteractiveSkinQuiz = () => {
 
       console.log('Saving quiz attempt...', { quizData, results });
 
-      // Try RPC save first (preferred). If it fails (permissions / RPC error), fall back to direct insert.
+      // Save quiz attempt (this is required, must wait)
       let attemptData = null;
       try {
-        // Try saving using quizService (centralized backend call)
         const { data: serviceData, error: serviceError } = await quizService.saveQuizAttempt(
           user.id,
           quizData,
@@ -629,39 +620,6 @@ const InteractiveSkinQuiz = () => {
         throw new Error('No attempt data returned after save');
       }
 
-      // Try to run AI analysis (best-effort). This analyzes quiz answers (images will be uploaded on next page).
-      const API_BASE = import.meta.env?.VITE_BACKEND_URL || 'https://backend-three-sigma-81.vercel.app/api';
-      const getAuthHeader = () => {
-        try {
-          const raw = localStorage.getItem('gm_auth');
-          if (!raw) return {};
-          const parsed = JSON.parse(raw);
-          return { Authorization: `Bearer ${parsed.token}` };
-        } catch {
-          return {};
-        }
-      };
-
-      let analysisText = null;
-      try {
-        const resp = await fetch(`${API_BASE}/analysis`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', ...getAuthHeader() },
-          body: JSON.stringify({ quizData, images: [], model })
-        });
-        const json = await resp.json();
-        if (resp.ok && json?.data) {
-          analysisText = json.data.analysis || json.data.result || json.data;
-        } else {
-          console.warn('Analysis failed or returned no data', json);
-        }
-      } catch (e) {
-        console.warn('Analysis request failed (non-blocking):', e);
-      }
-
-      // Attach analysis to attempt data so report generation can include it
-      if (analysisText) attemptData.analysis = analysisText;
-
       // Save backup to localStorage (include attempt id)
       localStorage.setItem('glowmatch-quiz-data', JSON.stringify({
         ...quizData,
@@ -679,44 +637,62 @@ const InteractiveSkinQuiz = () => {
       setCurrentAnswer(null);
       setQuizComplete(false);
 
+      // Navigate IMMEDIATELY - don't wait for analysis or report
       console.log('Navigating to image analysis...');
-
-      // Generate PDF report and attach (best-effort). If report generation/upload fails, we still navigate.
-      try {
-        const reportResult = await generateAndUploadReportAndAttach(attemptData);
-        if (reportResult?.success) {
-          // update local backup with report url
-          const existing = JSON.parse(localStorage.getItem('glowmatch-quiz-data') || '{}');
-          localStorage.setItem('glowmatch-quiz-data', JSON.stringify({ ...existing, reportUrl: reportResult.publicUrl }));
-        } else {
-          console.warn('Report generation/upload returned failure', reportResult.error);
-        }
-      } catch (reportError) {
-        console.error('Report generation/upload failed:', reportError);
-        // show non-blocking banner
-        setLastSaveError({ code: reportError?.code || 'report_error', message: reportError?.message || String(reportError), details: reportError?.details || null });
-      }
-
-      // Navigate to image analysis and pass chosen model so the next page can run image+quiz analysis
       navigate('/image-upload-analysis', {
         replace: true,
         state: { quizAttemptId: attemptData.id, model }
       });
 
+      // Run AI analysis + report generation in BACKGROUND (non-blocking)
+      const API_BASE = import.meta.env?.VITE_BACKEND_URL || 'https://backend-three-sigma-81.vercel.app/api';
+      const getAuthHeader = () => {
+        try {
+          const raw = localStorage.getItem('gm_auth');
+          if (!raw) return {};
+          const parsed = JSON.parse(raw);
+          return { Authorization: `Bearer ${parsed.token}` };
+        } catch {
+          return {};
+        }
+      };
+
+      // Background: AI analysis (non-blocking)
+      fetch(`${API_BASE}/analysis`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', ...getAuthHeader() },
+        body: JSON.stringify({ quizData, images: [], model })
+      }).then(resp => resp.json()).then(json => {
+        if (json?.data) {
+          console.log('Background AI analysis completed');
+          const existing = JSON.parse(localStorage.getItem('glowmatch-quiz-data') || '{}');
+          localStorage.setItem('glowmatch-quiz-data', JSON.stringify({
+            ...existing,
+            analysis: json.data.analysis || json.data.result || json.data
+          }));
+        }
+      }).catch(e => console.warn('Background analysis failed:', e));
+
+      // Background: Generate PDF report (non-blocking)
+      generateAndUploadReportAndAttach(attemptData).then(reportResult => {
+        if (reportResult?.success) {
+          console.log('Background report generation completed');
+          const existing = JSON.parse(localStorage.getItem('glowmatch-quiz-data') || '{}');
+          localStorage.setItem('glowmatch-quiz-data', JSON.stringify({ ...existing, reportUrl: reportResult.publicUrl }));
+        }
+      }).catch(e => console.warn('Background report failed:', e));
+
     } catch (error) {
-      // More detailed logging for the user and developer
       console.error('Error in handleContinueToAnalysis:', error);
       debugLogger.error('handleContinueToAnalysis', error);
 
-      // Prepare user-friendly error details and persist them to state so user can copy
       const code = error?.code || error?.status || error?.name || 'unknown';
       const message = error?.message || JSON.stringify(error);
       const details = error?.details || error?.fallback || null;
       const errorPayload = { code, message, details };
       setLastSaveError(errorPayload);
 
-      // Show a helpful alert and keep banner visible
-      alert(`Failed to save quiz attempt (code: ${code}). Please try again. More details are shown on the page. If this continues, open the browser console and share the error details.`);
+      alert(`Failed to save quiz attempt (code: ${code}). Please try again.`);
       return;
     }
   };
@@ -764,7 +740,7 @@ const InteractiveSkinQuiz = () => {
 
         if (savedProgress?.quiz_data) {
           const confirmation = window.confirm(
-            'We found a saved quiz in progress. Would you like to continue where you left off?'
+            t('quiz_restore_confirm')
           );
 
           if (confirmation) {
@@ -780,7 +756,7 @@ const InteractiveSkinQuiz = () => {
         if (localProgress) {
           const parsedProgress = JSON.parse(localProgress);
           const confirmation = window.confirm(
-            'We found a locally saved quiz. Would you like to continue where you left off?'
+            t('quiz_restore_local_confirm')
           );
 
           if (confirmation) {
@@ -814,10 +790,10 @@ const InteractiveSkinQuiz = () => {
           <div className="max-w-2xl mx-auto px-5 lg:px-8 py-16 text-center">
             <Icon name="Lock" size={64} className="mx-auto text-accent mb-6" />
             <h2 className="text-2xl font-bold text-foreground mb-4">
-              Sign In Required
+              {t('auth_required_title')}
             </h2>
             <p className="text-muted-foreground mb-8">
-              Please sign in to your account to take the skin quiz and track your results.
+              {t('auth_required_desc')}
             </p>
             <div className="space-y-4">
               <Button
@@ -825,7 +801,7 @@ const InteractiveSkinQuiz = () => {
                 iconName="LogIn"
                 className="w-full max-w-xs"
               >
-                Sign In
+                {t('sign_in')}
               </Button>
               <Button
                 variant="outline"
@@ -833,14 +809,14 @@ const InteractiveSkinQuiz = () => {
                 iconName="UserPlus"
                 className="w-full max-w-xs"
               >
-                Create Account
+                {t('sign_up')}
               </Button>
               <Button
                 variant="ghost"
                 onClick={() => setShowAuthPrompt(false)}
                 className="w-full max-w-xs"
               >
-                Back to Quiz
+                {t('cancel')}
               </Button>
             </div>
           </div>

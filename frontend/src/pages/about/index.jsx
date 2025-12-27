@@ -16,11 +16,11 @@ const About = () => {
           <div className="relative max-w-6xl mx-auto px-5 lg:px-8 w-full">
             <div className="max-w-3xl">
               <div className="inline-block px-4 py-2 bg-accent/20 border border-accent/40 rounded-full mb-4">
-                <span className="text-accent text-sm font-semibold">About Glowimatch</span>
+                <span className="text-accent text-sm font-semibold">{t('about_hero_badge')}</span>
               </div>
-              <h1 className="text-5xl md:text-6xl font-bold text-foreground mb-4">Skincare, Personalized</h1>
+              <h1 className="text-5xl md:text-6xl font-bold text-foreground mb-4">{t('about_hero_title')}</h1>
               <p className="text-xl text-muted-foreground leading-relaxed">
-                Glowimatch combines a quick, friendly skin quiz with optional AI-powered image analysis to give clear, actionable skincare advice tailored to you.
+                {t('about_hero_desc')}
               </p>
             </div>
           </div>
@@ -46,19 +46,19 @@ const About = () => {
                     <div className="flex-shrink-0 w-8 h-8 rounded-full bg-accent/20 flex items-center justify-center">
                       <Icon name="Check" size={20} className="text-accent" />
                     </div>
-                    <p className="text-muted-foreground">Combine quiz answers with AI-powered image analysis</p>
+                    <p className="text-muted-foreground">{t('about_value_1')}</p>
                   </div>
                   <div className="flex gap-4">
                     <div className="flex-shrink-0 w-8 h-8 rounded-full bg-accent/20 flex items-center justify-center">
                       <Icon name="Check" size={20} className="text-accent" />
                     </div>
-                    <p className="text-muted-foreground">Provide personalized recommendations</p>
+                    <p className="text-muted-foreground">{t('about_value_2')}</p>
                   </div>
                   <div className="flex gap-4">
                     <div className="flex-shrink-0 w-8 h-8 rounded-full bg-accent/20 flex items-center justify-center">
                       <Icon name="Check" size={20} className="text-accent" />
                     </div>
-                    <p className="text-muted-foreground">Make skincare accessible to everyone</p>
+                    <p className="text-muted-foreground">{t('about_value_3')}</p>
                   </div>
                 </div>
               </div>
@@ -71,13 +71,13 @@ const About = () => {
                 <div className="grid grid-cols-2 gap-6">
                   <div className="p-6 bg-accent/5 rounded-xl border border-accent/20">
                     <Icon name="Lock" size={32} className="text-accent mb-3" />
-                    <p className="font-semibold text-foreground">Secure & Private</p>
-                    <p className="text-sm text-muted-foreground mt-2">End-to-end encryption</p>
+                    <p className="font-semibold text-foreground">{t('secure_private')}</p>
+                    <p className="text-sm text-muted-foreground mt-2">{t('e2e_encryption')}</p>
                   </div>
                   <div className="p-6 bg-accent/5 rounded-xl border border-accent/20">
                     <Icon name="Shield" size={32} className="text-accent mb-3" />
-                    <p className="font-semibold text-foreground">GDPR Compliant</p>
-                    <p className="text-sm text-muted-foreground mt-2">Full data protection</p>
+                    <p className="font-semibold text-foreground">{t('gdpr_compliant')}</p>
+                    <p className="text-sm text-muted-foreground mt-2">{t('full_data_protection')}</p>
                   </div>
                 </div>
               </div>
@@ -98,7 +98,7 @@ const About = () => {
           <div className="max-w-6xl mx-auto">
             <div className="text-center mb-16">
               <h2 className="text-4xl font-bold text-foreground mb-4">{t('how_it_works')}</h2>
-              <p className="text-lg text-muted-foreground">A simple 3-step process to better skin</p>
+              <p className="text-lg text-muted-foreground">{t('how_it_works_sub')}</p>
             </div>
             <div className="grid md:grid-cols-3 gap-8">
               <div className="relative">
@@ -108,8 +108,8 @@ const About = () => {
                     <Icon name="Lightbulb" size={32} className="text-accent" />
                   </div>
                   <div className="text-3xl font-bold text-accent mb-3">1</div>
-                  <h3 className="text-xl font-semibold text-foreground mb-3">Complete Quiz</h3>
-                  <p className="text-muted-foreground">Answer a quick survey about your skin type, concerns, and goals.</p>
+                  <h3 className="text-xl font-semibold text-foreground mb-3">{t('step_1')}</h3>
+                  <p className="text-muted-foreground">{t('step_1_desc')}</p>
                 </div>
               </div>
               <div className="relative">
@@ -119,8 +119,8 @@ const About = () => {
                     <Icon name="Camera" size={32} className="text-accent" />
                   </div>
                   <div className="text-3xl font-bold text-accent mb-3">2</div>
-                  <h3 className="text-xl font-semibold text-foreground mb-3">Upload Photo (Optional)</h3>
-                  <p className="text-muted-foreground">Get advanced AI analysis with a clear photo of your skin.</p>
+                  <h3 className="text-xl font-semibold text-foreground mb-3">{t('step_2')}</h3>
+                  <p className="text-muted-foreground">{t('step_2_desc')}</p>
                 </div>
               </div>
               <div className="relative">
@@ -130,8 +130,8 @@ const About = () => {
                     <Icon name="Sparkles" size={32} className="text-accent" />
                   </div>
                   <div className="text-3xl font-bold text-accent mb-3">3</div>
-                  <h3 className="text-xl font-semibold text-foreground mb-3">Get Results</h3>
-                  <p className="text-muted-foreground">Receive personalized routine and product recommendations.</p>
+                  <h3 className="text-xl font-semibold text-foreground mb-3">{t('step_3')}</h3>
+                  <p className="text-muted-foreground">{t('step_3_desc')}</p>
                 </div>
               </div>
             </div>
@@ -143,7 +143,7 @@ const About = () => {
           <div className="max-w-6xl mx-auto">
             <div className="text-center mb-16">
               <h2 className="text-4xl font-bold text-foreground mb-4">{t('team')}</h2>
-              <p className="text-lg text-muted-foreground">Meet the team behind Glowimatch</p>
+              <p className="text-lg text-muted-foreground">{t('team_sub')}</p>
             </div>
             <div className="grid md:grid-cols-3 gap-8">
               <div className="group bg-card border border-border rounded-xl overflow-hidden hover:border-accent hover:shadow-lg transition-all">
@@ -152,8 +152,8 @@ const About = () => {
                 </div>
                 <div className="p-6 text-center">
                   <div className="text-lg font-semibold text-foreground">Aicha</div>
-                  <div className="text-sm text-accent font-medium">Founder & Product Lead</div>
-                  <p className="text-sm text-muted-foreground mt-3">Passionate about making skincare accessible and personalized for everyone.</p>
+                  <div className="text-sm text-accent font-medium">{t('team_aicha_role')}</div>
+                  <p className="text-sm text-muted-foreground mt-3">{t('team_aicha_desc')}</p>
                 </div>
               </div>
               <div className="group bg-card border border-border rounded-xl overflow-hidden hover:border-accent hover:shadow-lg transition-all">
@@ -162,8 +162,8 @@ const About = () => {
                 </div>
                 <div className="p-6 text-center">
                   <div className="text-lg font-semibold text-foreground">Dev Team</div>
-                  <div className="text-sm text-accent font-medium">Engineering & AI</div>
-                  <p className="text-sm text-muted-foreground mt-3">Building cutting-edge AI models and scalable infrastructure.</p>
+                  <div className="text-sm text-accent font-medium">{t('team_dev_role')}</div>
+                  <p className="text-sm text-muted-foreground mt-3">{t('team_dev_desc')}</p>
                 </div>
               </div>
               <div className="group bg-card border border-border rounded-xl overflow-hidden hover:border-accent hover:shadow-lg transition-all">
@@ -172,8 +172,8 @@ const About = () => {
                 </div>
                 <div className="p-6 text-center">
                   <div className="text-lg font-semibold text-foreground">Support Team</div>
-                  <div className="text-sm text-accent font-medium">Customer Success</div>
-                  <p className="text-sm text-muted-foreground mt-3">Dedicated to helping you achieve your best skin ever.</p>
+                  <div className="text-sm text-accent font-medium">{t('team_support_role')}</div>
+                  <p className="text-sm text-muted-foreground mt-3">{t('team_support_desc')}</p>
                 </div>
               </div>
             </div>

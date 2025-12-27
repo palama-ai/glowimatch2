@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
+import { useI18n } from '../../contexts/I18nContext';
 import Header from '../../components/ui/Header';
 import Icon from '../../components/AppIcon';
 
@@ -7,6 +8,7 @@ const API_BASE = import.meta.env?.VITE_BACKEND_URL || 'https://backend-three-sig
 
 const BlogPost = () => {
   const { slug } = useParams();
+  const { t } = useI18n();
   const [post, setPost] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -50,11 +52,11 @@ const BlogPost = () => {
         <main className="max-w-3xl mx-auto px-5 lg:px-8 py-16">
           <div className="text-center py-20 bg-card border border-border rounded-xl">
             <Icon name="FileText" size={48} className="mx-auto text-muted-foreground mb-4" />
-            <h3 className="text-xl font-semibold text-foreground mb-2">Blog Post Not Found</h3>
-            <p className="text-muted-foreground mb-6">The blog post you're looking for doesn't exist.</p>
+            <h3 className="text-xl font-semibold text-foreground mb-2">{t('blog_not_found')}</h3>
+            <p className="text-muted-foreground mb-6">{t('blog_not_found_desc')}</p>
             <Link to="/blog" className="inline-flex items-center text-accent font-semibold hover:gap-2 transition-all gap-1">
               <Icon name="ArrowLeft" size={16} />
-              Back to Blogs
+              {t('back_to_blog')}
             </Link>
           </div>
         </main>
@@ -69,7 +71,7 @@ const BlogPost = () => {
         {/* Back Link */}
         <Link to="/blog" className="inline-flex items-center text-accent font-semibold hover:gap-2 transition-all gap-1 mb-8">
           <Icon name="ArrowLeft" size={16} />
-          Back to Blogs
+          {t('back_to_blog')}
         </Link>
 
         {/* Featured Image */}
@@ -91,7 +93,7 @@ const BlogPost = () => {
             </span>
             <span className="flex items-center gap-2">
               <Icon name="Clock" size={16} />
-              {Math.ceil((post.content?.length || 0) / 200)} min read
+              {Math.ceil((post.content?.length || 0) / 200)} {t('min_read')}
             </span>
           </div>
         </div>

@@ -2,22 +2,25 @@ import React from 'react';
 import Button from '../../../components/ui/Button';
 import Icon from '../../../components/AppIcon';
 
+import { useI18n } from '../../../contexts/I18nContext';
+
 const QuizIntro = ({ onStart }) => {
+  const { t } = useI18n();
   const features = [
     {
       icon: "Brain",
-      title: "Smart Analysis",
-      description: "AI-powered questions adapt to your responses"
+      title: t('quiz_feature_smart_title'),
+      description: t('quiz_feature_smart_desc')
     },
     {
       icon: "Clock",
-      title: "Quick & Easy",
-      description: "Takes only 3-5 minutes to complete"
+      title: t('quiz_feature_quick_title'),
+      description: t('quiz_feature_quick_desc')
     },
     {
       icon: "Shield",
-      title: "Personalized Results",
-      description: "Get recommendations tailored to your skin type"
+      title: t('quiz_feature_personalized_title'),
+      description: t('quiz_feature_personalized_desc')
     }
   ];
 
@@ -29,11 +32,11 @@ const QuizIntro = ({ onStart }) => {
         </div>
 
         <h1 className="text-2xl md:text-3xl font-bold text-card-foreground mb-4">
-          Discover Your Perfect Skin Match
+          {t('quiz_intro_title')}
         </h1>
-        
+
         <p className="text-muted-foreground text-lg mb-8">
-          Answer a few quick questions about your skin to get personalized product recommendations that work for you.
+          {t('quiz_intro_desc')}
         </p>
 
         <div className="grid md:grid-cols-3 gap-6 mb-8">
@@ -57,11 +60,11 @@ const QuizIntro = ({ onStart }) => {
             iconPosition="right"
             className="w-full md:w-auto animate-scale-hover"
           >
-            Start Skin Quiz
+            {t('quiz_start_button')}
           </Button>
-          
+
           <p className="text-xs text-muted-foreground">
-            Your responses are private and used only for personalized recommendations
+            {t('quiz_privacy_note')}
           </p>
         </div>
       </div>

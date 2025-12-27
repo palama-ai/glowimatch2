@@ -32,7 +32,7 @@ const Contact = () => {
         {/* Hero Section */}
         <div className="max-w-4xl mx-auto text-center mb-16">
           <div className="inline-block px-4 py-2 bg-accent/20 border border-accent/40 rounded-full mb-4">
-            <span className="text-accent text-sm font-semibold">Get in Touch</span>
+            <span className="text-accent text-sm font-semibold">{t('contact_hero_badge')}</span>
           </div>
           <h1 className="text-5xl md:text-6xl font-bold text-foreground mb-4">{t('contact_title')}</h1>
           <p className="text-xl text-muted-foreground">{t('contact_sub')}</p>
@@ -47,7 +47,7 @@ const Contact = () => {
                   <Icon name="Mail" size={24} className="text-accent" />
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Email</p>
+                  <p className="text-sm text-muted-foreground">{t('email')}</p>
                   <p className="font-semibold text-foreground">support@glowmatch.com</p>
                 </div>
               </div>
@@ -59,8 +59,8 @@ const Contact = () => {
                   <Icon name="MessageSquare" size={24} className="text-accent" />
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Live Chat</p>
-                  <p className="font-semibold text-foreground">Available 24/7</p>
+                  <p className="text-sm text-muted-foreground">{t('contact_live_chat')}</p>
+                  <p className="font-semibold text-foreground">{t('contact_available_247')}</p>
                 </div>
               </div>
             </div>
@@ -68,9 +68,9 @@ const Contact = () => {
             <div className="bg-accent/5 border border-accent/20 rounded-xl p-6">
               <h3 className="font-semibold text-foreground mb-3 flex items-center gap-2">
                 <Icon name="Clock" size={20} className="text-accent" />
-                Response Time
+                {t('contact_response_time')}
               </h3>
-              <p className="text-sm text-muted-foreground">We typically respond within 24 hours</p>
+              <p className="text-sm text-muted-foreground">{t('contact_response_desc')}</p>
             </div>
           </div>
 
@@ -84,7 +84,7 @@ const Contact = () => {
                     name="name"
                     type="text"
                     required
-                    placeholder="Your full name"
+                    placeholder={t('contact_placeholder_name')}
                     className="w-full px-4 py-3 bg-background border border-border rounded-lg focus:border-accent focus:ring-2 focus:ring-accent/20 transition-all"
                   />
                 </div>
@@ -94,7 +94,7 @@ const Contact = () => {
                     name="email"
                     type="email"
                     required
-                    placeholder="your@email.com"
+                    placeholder={t('contact_placeholder_email')}
                     className="w-full px-4 py-3 bg-background border border-border rounded-lg focus:border-accent focus:ring-2 focus:ring-accent/20 transition-all"
                   />
                 </div>
@@ -103,7 +103,7 @@ const Contact = () => {
                   <textarea
                     name="message"
                     required
-                    placeholder="Tell us how we can help..."
+                    placeholder={t('contact_placeholder_message')}
                     className="w-full px-4 py-3 bg-background border border-border rounded-lg focus:border-accent focus:ring-2 focus:ring-accent/20 transition-all resize-none h-40"
                   />
                 </div>
@@ -146,28 +146,28 @@ const Contact = () => {
 
         {/* FAQ Section */}
         <section className="max-w-4xl mx-auto bg-accent/5 border border-accent/20 rounded-2xl p-8 lg:p-12">
-          <h2 className="text-3xl font-bold text-foreground mb-8 text-center">Frequently Asked Questions</h2>
+          <h2 className="text-3xl font-bold text-foreground mb-8 text-center">{t('faq_title')}</h2>
           <div className="space-y-6">
             <details className="group border-b border-border pb-6">
               <summary className="flex items-center justify-between cursor-pointer">
-                <span className="font-semibold text-foreground text-lg">How long does a skin analysis take?</span>
+                <span className="font-semibold text-foreground text-lg">{t('faq_1_q')}</span>
                 <Icon name="ChevronDown" size={20} className="text-muted-foreground group-open:rotate-180 transition-transform" />
               </summary>
-              <p className="text-muted-foreground mt-4 leading-relaxed">Our skin quiz takes about 2-3 minutes to complete. If you upload a photo for image analysis, results are generated within seconds using our AI technology.</p>
+              <p className="text-muted-foreground mt-4 leading-relaxed">{t('faq_1_a')}</p>
             </details>
             <details className="group border-b border-border pb-6">
               <summary className="flex items-center justify-between cursor-pointer">
-                <span className="font-semibold text-foreground text-lg">Is my data safe and private?</span>
+                <span className="font-semibold text-foreground text-lg">{t('faq_2_q')}</span>
                 <Icon name="ChevronDown" size={20} className="text-muted-foreground group-open:rotate-180 transition-transform" />
               </summary>
-              <p className="text-muted-foreground mt-4 leading-relaxed">Yes! Your data is encrypted end-to-end and we comply with GDPR, CCPA, and other privacy regulations. We never share your data with third parties without consent.</p>
+              <p className="text-muted-foreground mt-4 leading-relaxed">{t('faq_2_a')}</p>
             </details>
             <details className="group">
               <summary className="flex items-center justify-between cursor-pointer">
-                <span className="font-semibold text-foreground text-lg">What devices do you support?</span>
+                <span className="font-semibold text-foreground text-lg">{t('faq_3_q')}</span>
                 <Icon name="ChevronDown" size={20} className="text-muted-foreground group-open:rotate-180 transition-transform" />
               </summary>
-              <p className="text-muted-foreground mt-4 leading-relaxed">Glowimatch works on all devices - desktop, tablet, and mobile. Our responsive design ensures a great experience across all screen sizes.</p>
+              <p className="text-muted-foreground mt-4 leading-relaxed">{t('faq_3_a')}</p>
             </details>
           </div>
         </section>

@@ -1,8 +1,10 @@
 import React from 'react';
 import Button from '../../../components/ui/Button';
 import Icon from '../../../components/AppIcon';
+import { useI18n } from '../../../contexts/I18nContext';
 
 const QuizComplete = ({ responses, onContinue }) => {
+  const { t } = useI18n();
   const getResponseSummary = () => {
     const skinConcerns = responses?.filter(r => r?.question?.includes('concern'))?.map(r => r?.answer?.label);
     const skinType = responses?.find(r => r?.question?.includes('skin type'))?.answer?.label || 'Mixed';
@@ -24,27 +26,27 @@ const QuizComplete = ({ responses, onContinue }) => {
         </div>
 
         <h1 className="text-2xl md:text-3xl font-bold text-card-foreground mb-4">
-          Quiz Complete!
+          {t('quiz_complete_title')}
         </h1>
 
         <p className="text-muted-foreground text-lg mb-8">
-          Great job! We've gathered all the information we need to analyze your skin and provide personalized recommendations.
+          {t('quiz_complete_desc')}
         </p>
 
         <div className="bg-muted rounded-lg p-6 mb-8">
-          <h3 className="font-semibold text-card-foreground mb-4">Quick Summary</h3>
+          <h3 className="font-semibold text-card-foreground mb-4">{t('quiz_summary_title')}</h3>
           <div className="space-y-3 text-left">
             <div className="flex items-center justify-between">
-              <span className="text-muted-foreground">Responses Collected:</span>
+              <span className="text-muted-foreground">{t('quiz_summary_responses')}:</span>
               <span className="font-medium text-card-foreground">{summary?.totalResponses}</span>
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-muted-foreground">Primary Skin Type:</span>
+              <span className="text-muted-foreground">{t('quiz_summary_skin_type')}:</span>
               <span className="font-medium text-accent">{summary?.skinType}</span>
             </div>
             {summary?.concerns?.length > 0 && (
               <div className="flex items-start justify-between">
-                <span className="text-muted-foreground">Key Concerns:</span>
+                <span className="text-muted-foreground">{t('quiz_summary_concerns')}:</span>
                 <div className="text-right">
                   {summary?.concerns?.map((concern, index) => (
                     <div key={index} className="text-sm text-card-foreground">{concern}</div>
@@ -64,11 +66,11 @@ const QuizComplete = ({ responses, onContinue }) => {
             iconPosition="right"
             className="w-full md:w-auto animate-scale-hover"
           >
-            Continue to Image Analysis
+            {t('quiz_continue_image')}
           </Button>
 
           <p className="text-xs text-muted-foreground">
-            Next: Upload a photo for AI-powered skin analysis
+            {t('quiz_next_step')}
           </p>
         </div>
       </div>

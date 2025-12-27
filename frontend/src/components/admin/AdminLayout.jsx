@@ -6,10 +6,12 @@ export default function AdminLayout({ children }) {
   const links = [
     { to: '/admin', label: 'Dashboard' },
     { to: '/admin/users', label: 'Users' },
+    { to: '/admin/products', label: 'Products' },
     { to: '/admin/blogs', label: 'Blogs' },
     { to: '/admin/messages', label: 'Messages' },
     { to: '/admin/notifications', label: 'Notifications' },
     { to: '/admin/sessions', label: 'Sessions' },
+    { to: '/admin/safety', label: '🛡️ Safety' },
   ];
 
   return (

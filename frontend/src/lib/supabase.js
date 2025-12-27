@@ -25,6 +25,10 @@ const supabase = {
       if (json?.data?.token) {
         localStorage.setItem(authStorageKey, JSON.stringify({ token: json.data.token, user: json.data.user }));
       }
+      // Return requiresVerification flag if present
+      if (json?.data?.requiresVerification) {
+        return makeResp(r.ok, { ...json.data, requiresVerification: true }, null);
+      }
       return makeResp(r.ok, json.data ?? null, json.error ?? null);
     },
 
@@ -32,13 +36,50 @@ const supabase = {
       try {
         const r = await fetch(`${API_BASE}/auth/login`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, password }) });
         const json = await r.json().catch(() => null);
+
+        // Check for remaining attempts warning
+        const attemptsRemaining = r.headers.get('X-Attempts-Remaining');
+
         if (json?.data?.token) {
           localStorage.setItem(authStorageKey, JSON.stringify({ token: json.data.token, user: json.data.user }));
         }
+
         let err = null;
         if (!r.ok) {
-          const msg = (json && (json.message || json.error)) || 'Login failed';
-          err = { message: msg, raw: json };
+          // Handle email not verified (requires verification)
+          if (r.status === 403 && json?.requiresVerification) {
+            err = {
+              message: json?.message || 'Please verify your email before logging in.',
+              type: 'requires_verification',
+              requiresVerification: true,
+              email: json?.email || email,
+              raw: json
+            };
+          }
+          // 🛡️ SECURITY: Handle different error types
+          else if (r.status === 423) {
+            // Account locked - brute force protection
+            err = {
+              message: json?.message || 'Account temporarily locked. Please try again later.',
+              type: 'locked',
+              raw: json
+            };
+          } else if (r.status === 429) {
+            // Too many requests
+            err = {
+              message: json?.message || 'Too many requests. Please try again later.',
+              type: 'rate_limited',
+              raw: json
+            };
+          } else {
+            const msg = (json && (json.message || json.error)) || 'Login failed';
+            err = { message: msg, raw: json };
+          }
+
+          // Add warning about remaining attempts
+          if (attemptsRemaining && parseInt(attemptsRemaining) <= 2) {
+            err.message += ` (${attemptsRemaining} attempts remaining)`;
+          }
         }
         return makeResp(r.ok, json?.data ?? null, err);
       } catch (err) {
@@ -101,7 +142,9 @@ export const quizService = {
 
   async getQuizHistory(userId) {
     try {
-      const r = await fetch(`${API_BASE}/quiz/history/${encodeURIComponent(userId)}`);
+      const r = await fetch(`${API_BASE}/quiz/history/${encodeURIComponent(userId)}`, {
+        headers: { ...getAuthHeader() }
+      });
       const json = await r.json();
       if (!r.ok) throw json.error || new Error('Failed to load');
       return { data: json.data, error: null };
@@ -123,7 +166,9 @@ export const quizService = {
 
   async getQuizAutosave(userId) {
     try {
-      const r = await fetch(`${API_BASE}/quiz/autosave/${encodeURIComponent(userId)}`);
+      const r = await fetch(`${API_BASE}/quiz/autosave/${encodeURIComponent(userId)}`, {
+        headers: { ...getAuthHeader() }
+      });
       const json = await r.json();
       if (!r.ok) throw json.error || new Error('Failed to fetch autosave');
       return { data: json.data, error: null };
@@ -182,13 +227,46 @@ export const quizService = {
     } catch (error) {
       return { success: false, error };
     }
+  },
+
+  // Save complete analysis data (metrics, routine, tips, products) to existing quiz attempt
+  async saveQuizAnalysis(attemptId, analysisData) {
+    try {
+      const r = await fetch(`${API_BASE}/quiz/attempts/${attemptId}/analysis`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', ...getAuthHeader() },
+        body: JSON.stringify({ analysis: analysisData })
+      });
+      const json = await r.json();
+      if (!r.ok) throw json.error || new Error('Failed to save analysis');
+      return { success: true, data: json.data, error: null };
+    } catch (error) {
+      console.error('saveQuizAnalysis error:', error);
+      return { success: false, data: null, error };
+    }
+  },
+
+  // Get a specific quiz attempt with full analysis data
+  async getQuizAttempt(attemptId) {
+    try {
+      const r = await fetch(`${API_BASE}/quiz/attempts/${attemptId}`, {
+        headers: { ...getAuthHeader() }
+      });
+      const json = await r.json();
+      if (!r.ok) throw json.error || new Error('Failed to load attempt');
+      return { data: json.data, error: null };
+    } catch (error) {
+      return { data: null, error };
+    }
   }
 };
 
 export const subscriptionService = {
   async getCurrentSubscription(userId) {
     try {
-      const r = await fetch(`${API_BASE}/subscription/${encodeURIComponent(userId)}`);
+      const r = await fetch(`${API_BASE}/subscription/${encodeURIComponent(userId)}`, {
+        headers: { ...getAuthHeader() }
+      });
       const json = await r.json();
       if (!r.ok) throw json.error || new Error('Failed to load subscription');
       return { data: json.data, error: null };

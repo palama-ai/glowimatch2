@@ -4,13 +4,74 @@ const jwt = require('jsonwebtoken');
 const { v4: uuidv4 } = require('uuid');
 const { sql } = require('../db');
 
-const JWT_SECRET = process.env.GLOWMATCH_JWT_SECRET || 'dev_secret_change_me';
+const JWT_SECRET = process.env.GLOWMATCH_JWT_SECRET;
+if (!JWT_SECRET) {
+  console.error('[SECURITY] CRITICAL: GLOWMATCH_JWT_SECRET environment variable is not set!');
+  process.exit(1);
+}
 
 console.log('[backend/routes/admin] admin routes loaded');
 
-// Unprotected debug endpoints (dev only) to help diagnose issues from the frontend
+// Initialize site_settings table if not exists
+(async () => {
+  try {
+    await sql`
+      CREATE TABLE IF NOT EXISTS site_settings (
+        key VARCHAR(100) PRIMARY KEY,
+        value TEXT,
+        updated_at TIMESTAMP DEFAULT NOW()
+      )
+    `;
+    // Initialize default signup block settings if not exist
+    await sql`
+      INSERT INTO site_settings (key, value, updated_at)
+      VALUES ('block_user_signup', 'false', NOW())
+      ON CONFLICT (key) DO NOTHING
+    `;
+    await sql`
+      INSERT INTO site_settings (key, value, updated_at)
+      VALUES ('block_seller_signup', 'false', NOW())
+      ON CONFLICT (key) DO NOTHING
+    `;
+    console.log('[backend/routes/admin] site_settings table ready');
+  } catch (e) {
+    console.warn('[backend/routes/admin] site_settings init warning:', e?.message);
+  }
+})();
+
+// Public endpoint: Get signup block status (no auth required)
+router.get('/signup-status', async (req, res) => {
+  try {
+    const rows = await sql`SELECT key, value FROM site_settings WHERE key IN ('block_user_signup', 'block_seller_signup')`;
+    const result = { blockUserSignup: false, blockSellerSignup: false };
+    for (const row of rows) {
+      if (row.key === 'block_user_signup') result.blockUserSignup = row.value === 'true';
+      if (row.key === 'block_seller_signup') result.blockSellerSignup = row.value === 'true';
+    }
+    res.json({ data: result });
+  } catch (e) {
+    console.error('[admin] signup-status error:', e?.message);
+    res.json({ data: { blockUserSignup: false, blockSellerSignup: false } });
+  }
+});
+
+// Helper to check admin auth (used before requireAdmin middleware is defined)
+function checkAdminAuth(req) {
+  try {
+    const auth = req.headers.authorization;
+    if (!auth) return null;
+    const token = auth.replace('Bearer ', '');
+    const payload = jwt.verify(token, JWT_SECRET);
+    return payload?.role === 'admin' ? payload : null;
+  } catch (e) { return null; }
+}
+
+// Debug endpoints - NOW PROTECTED (require admin auth)
 router.get('/debug/users', async (req, res) => {
   try {
+    const admin = checkAdminAuth(req);
+    if (!admin) return res.status(403).json({ error: 'Admin access required' });
+
     const users = await sql`SELECT u.id, u.email, u.full_name, u.role, u.disabled FROM users u ORDER BY u.created_at DESC`;
 
     const enriched = [];
@@ -21,12 +82,15 @@ router.get('/debug/users', async (req, res) => {
     res.json({ data: enriched });
   } catch (e) {
     console.error('[backend/routes/admin] debug/users error', e && e.stack ? e.stack : e);
-    res.status(500).json({ error: 'Failed to list users (debug)' });
+    res.status(500).json({ error: 'Failed to list users' });
   }
 });
 
 router.get('/debug/stats', async (req, res) => {
   try {
+    const admin = checkAdminAuth(req);
+    if (!admin) return res.status(403).json({ error: 'Admin access required' });
+
     const totalRow = await sql`SELECT COUNT(*) as total FROM users`;
     const total = totalRow && totalRow.length > 0 ? parseInt(totalRow[0].total) : 0;
 
@@ -46,26 +110,49 @@ router.get('/debug/stats', async (req, res) => {
     res.json({ data: { total, active, disabled, subscribed, planBreakdown } });
   } catch (e) {
     console.error('[backend/routes/admin] debug/stats error', e && e.stack ? e.stack : e);
-    res.status(500).json({ error: 'Failed to compute stats (debug)' });
+    res.status(500).json({ error: 'Failed to compute stats' });
   }
 });
 
-// Simple endpoint to fix URL columns - no auth required for one-time migration
+// Migration endpoint - NOW PROTECTED (admin only)
 router.post('/fix-url-columns', async (req, res) => {
   try {
+    const admin = checkAdminAuth(req);
+    if (!admin) return res.status(403).json({ error: 'Admin access required' });
+
     console.log('[admin] Running URL columns fix...');
-    await sql`ALTER TABLE seller_products ALTER COLUMN image_url TYPE TEXT`;
-    await sql`ALTER TABLE seller_products ALTER COLUMN purchase_url TYPE TEXT`;
-    console.log('[admin] URL columns fixed successfully!');
-    res.json({ success: true, message: 'URL columns updated to TEXT' });
+    const results = [];
+
+    // Fix seller_products URLs
+    try {
+      await sql`ALTER TABLE seller_products ALTER COLUMN image_url TYPE TEXT`;
+      await sql`ALTER TABLE seller_products ALTER COLUMN purchase_url TYPE TEXT`;
+      results.push('seller_products: fixed');
+    } catch (e) {
+      results.push('seller_products: ' + (e.message?.substring(0, 50) || 'already TEXT'));
+    }
+
+    // Fix blogs image_url
+    try {
+      await sql`ALTER TABLE blogs ALTER COLUMN image_url TYPE TEXT`;
+      results.push('blogs.image_url: fixed');
+    } catch (e) {
+      results.push('blogs.image_url: ' + (e.message?.substring(0, 50) || 'already TEXT'));
+    }
+
+    console.log('[admin] URL columns fix results:', results);
+    res.json({ success: true, message: 'URL columns updated to TEXT', results });
   } catch (e) {
     console.error('[admin] URL fix error:', e);
-    res.json({ success: false, error: e.message, note: 'Columns may already be TEXT' });
+    res.json({ success: false, error: e.message, note: 'Migration failed' });
   }
 });
 
-// Simple endpoint to create ONLY the product reviews tables - no auth required
+// Migration endpoint - NOW PROTECTED (admin only)
 router.post('/create-reviews-tables', async (req, res) => {
+  const admin = checkAdminAuth(req);
+  if (!admin) return res.status(403).json({ error: 'Admin access required' });
+
   const results = [];
   try {
     console.log('[admin] Creating product reviews tables...');
@@ -129,9 +216,12 @@ router.post('/create-reviews-tables', async (req, res) => {
   }
 });
 
-// Database migration endpoint - creates missing tables
+// Database migration endpoint - creates missing tables - NOW PROTECTED
 router.post('/db-migrate', async (req, res) => {
   try {
+    const admin = checkAdminAuth(req);
+    if (!admin) return res.status(403).json({ error: 'Admin access required' });
+
     console.log('[admin] Running database migration...');
 
     // Add seller columns to user_profiles if not exist
@@ -273,6 +363,81 @@ function requireAdmin(req, res, next) {
     return res.status(401).json({ error: 'Invalid token' });
   }
 }
+
+// Get signup block settings (admin only)
+router.get('/settings/signup-block', requireAdmin, async (req, res) => {
+  try {
+    const rows = await sql`SELECT key, value FROM site_settings WHERE key IN ('block_user_signup', 'block_seller_signup')`;
+    const result = { blockUserSignup: false, blockSellerSignup: false };
+    for (const row of rows) {
+      if (row.key === 'block_user_signup') result.blockUserSignup = row.value === 'true';
+      if (row.key === 'block_seller_signup') result.blockSellerSignup = row.value === 'true';
+    }
+    res.json({ data: result });
+  } catch (e) {
+    console.error('[admin] get signup-block error:', e?.message);
+    res.status(500).json({ error: 'Failed to get signup block settings' });
+  }
+});
+
+// Update signup block settings (admin only)
+router.post('/settings/signup-block', requireAdmin, async (req, res) => {
+  try {
+    const { blockUserSignup, blockSellerSignup } = req.body;
+    console.log('[admin] Updating signup block settings:', { blockUserSignup, blockSellerSignup });
+
+    if (typeof blockUserSignup !== 'undefined') {
+      await sql`
+        INSERT INTO site_settings (key, value, updated_at)
+        VALUES ('block_user_signup', ${blockUserSignup ? 'true' : 'false'}, NOW())
+        ON CONFLICT (key) DO UPDATE SET value = ${blockUserSignup ? 'true' : 'false'}, updated_at = NOW()
+      `;
+    }
+
+    if (typeof blockSellerSignup !== 'undefined') {
+      await sql`
+        INSERT INTO site_settings (key, value, updated_at)
+        VALUES ('block_seller_signup', ${blockSellerSignup ? 'true' : 'false'}, NOW())
+        ON CONFLICT (key) DO UPDATE SET value = ${blockSellerSignup ? 'true' : 'false'}, updated_at = NOW()
+      `;
+    }
+
+    // Return updated values
+    const rows = await sql`SELECT key, value FROM site_settings WHERE key IN ('block_user_signup', 'block_seller_signup')`;
+    const result = { blockUserSignup: false, blockSellerSignup: false };
+    for (const row of rows) {
+      if (row.key === 'block_user_signup') result.blockUserSignup = row.value === 'true';
+      if (row.key === 'block_seller_signup') result.blockSellerSignup = row.value === 'true';
+    }
+
+    console.log('[admin] Signup block settings updated:', result);
+    res.json({ data: result });
+  } catch (e) {
+    console.error('[admin] update signup-block error:', e);
+    res.status(500).json({ error: 'Failed to update signup block settings' });
+  }
+});
+
+// List all products (admin only)
+router.get('/products', requireAdmin, async (req, res) => {
+  try {
+    console.log('[admin] GET /products called');
+    const products = await sql`
+      SELECT 
+        sp.*,
+        u.email as seller_email,
+        u.full_name as seller_name
+      FROM seller_products sp
+      LEFT JOIN users u ON sp.seller_id = u.id
+      ORDER BY sp.created_at DESC
+    `;
+    console.log('[admin] Found', products.length, 'products');
+    res.json({ data: products });
+  } catch (e) {
+    console.error('[admin] products error:', e);
+    res.status(500).json({ error: 'Failed to list products' });
+  }
+});
 
 // List users (with profile and subscription)
 router.get('/users', requireAdmin, async (req, res) => {
@@ -697,6 +862,15 @@ router.post('/blogs', requireAdmin, async (req, res) => {
     res.json({ data: blog });
   } catch (e) {
     console.error('[backend/admin] POST /blogs error:', e);
+
+    // Check for duplicate slug error
+    if (e.code === '23505' && e.constraint === 'blogs_slug_key') {
+      return res.status(400).json({
+        error: 'A blog with this slug already exists. Please use a different slug or edit the existing blog.',
+        field: 'slug'
+      });
+    }
+
     res.status(500).json({ error: 'Failed to create blog' });
   }
 });

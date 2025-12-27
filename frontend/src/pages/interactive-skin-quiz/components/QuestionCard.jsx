@@ -1,8 +1,10 @@
 import React from 'react';
 import Button from '../../../components/ui/Button';
 import Icon from '../../../components/AppIcon';
+import { useI18n } from '../../../contexts/I18nContext';
 
 const QuestionCard = ({ question, onAnswer, selectedAnswer, onNext, onPrevious, isFirstQuestion, isLastQuestion }) => {
+  const { t } = useI18n();
   // استخدام useCallback لمنع إعادة إنشاء الدالة
   const handleAnswerSelect = React.useCallback((answer) => {
     console.debug('QuestionCard: handleAnswerSelect called with', answer);
@@ -20,10 +22,9 @@ const QuestionCard = ({ question, onAnswer, selectedAnswer, onNext, onPrevious, 
                 type="button"
                 onClick={() => { console.debug('QuestionCard: option clicked', option?.id); handleAnswerSelect(option); }}
                 aria-pressed={selectedAnswer?.id === option?.id}
-                className={`w-full p-4 text-left rounded-lg border-2 transition-all duration-300 animate-scale-hover ${
-                  (selectedAnswer && selectedAnswer.id === option.id)
-                    ? 'border-accent bg-accent/10 text-accent' :'border-border bg-card hover:border-accent/50 hover:bg-accent/5'
-                }`}
+                className={`w-full p-4 text-left rounded-lg border-2 transition-all duration-300 animate-scale-hover ${(selectedAnswer && selectedAnswer.id === option.id)
+                  ? 'border-accent bg-accent/10 text-accent' : 'border-border bg-card hover:border-accent/50 hover:bg-accent/5'
+                  }`}
               >
                 <div className="flex items-center justify-between">
                   <div>
@@ -32,10 +33,9 @@ const QuestionCard = ({ question, onAnswer, selectedAnswer, onNext, onPrevious, 
                       <p className="text-sm text-muted-foreground mt-1">{option?.description}</p>
                     )}
                   </div>
-                  <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
-                    selectedAnswer?.id === option?.id
-                      ? 'border-accent bg-accent' :'border-muted-foreground'
-                  }`}>
+                  <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${selectedAnswer?.id === option?.id
+                    ? 'border-accent bg-accent' : 'border-muted-foreground'
+                    }`}>
                     {selectedAnswer?.id === option?.id && (
                       <div className="w-2 h-2 rounded-full bg-white"></div>
                     )}
@@ -81,10 +81,9 @@ const QuestionCard = ({ question, onAnswer, selectedAnswer, onNext, onPrevious, 
                 type="button"
                 onClick={() => { console.debug('QuestionCard: image option clicked', option?.id); handleAnswerSelect(option); }}
                 aria-pressed={selectedAnswer?.id === option?.id}
-                className={`relative p-3 rounded-lg border-2 transition-all duration-300 animate-scale-hover ${
-                  (selectedAnswer && selectedAnswer.id === option.id)
-                    ? 'border-accent bg-accent/10' :'border-border hover:border-accent/50'
-                }`}
+                className={`relative p-3 rounded-lg border-2 transition-all duration-300 animate-scale-hover ${(selectedAnswer && selectedAnswer.id === option.id)
+                  ? 'border-accent bg-accent/10' : 'border-border hover:border-accent/50'
+                  }`}
               >
                 <div className="aspect-square rounded-lg overflow-hidden mb-3">
                   <img
@@ -131,7 +130,7 @@ const QuestionCard = ({ question, onAnswer, selectedAnswer, onNext, onPrevious, 
           iconPosition="left"
           className="animate-scale-hover"
         >
-          Previous
+          {t('quiz_prev')}
         </Button>
 
         <Button
@@ -142,7 +141,7 @@ const QuestionCard = ({ question, onAnswer, selectedAnswer, onNext, onPrevious, 
           iconPosition="right"
           className="animate-scale-hover"
         >
-          {isLastQuestion ? "Continue to Analysis" : "Next"}
+          {isLastQuestion ? t('quiz_continue_analysis') : t('quiz_next')}
         </Button>
       </div>
     </div>

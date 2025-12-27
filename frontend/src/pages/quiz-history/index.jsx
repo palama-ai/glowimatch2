@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
+import { useI18n } from '../../contexts/I18nContext';
 import Header from '../../components/ui/Header';
 import Button from '../../components/ui/Button';
 import Icon from '../../components/AppIcon';
@@ -9,6 +10,7 @@ import { quizService } from '../../lib/supabase';
 const QuizHistory = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { t } = useI18n();
   const [quizAttempts, setQuizAttempts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [deleting, setDeleting] = useState(null);
@@ -55,17 +57,37 @@ const QuizHistory = () => {
     return colors[skinType?.toLowerCase()] || 'text-foreground';
   };
 
-  // Extract metrics from results - handle different data structures
+  // Extract metrics from results - handle quiz-based and AI-based data
   const getMetrics = (results) => {
-    if (!results) return { confidence: null, moisture: null, texture: null, health: null };
+    if (!results) return { sensitivity: null, routine: null, concerns_count: null, analysis: null };
 
-    // Try different possible field names
+    // Quiz-based metrics (always available)
+    const sensitivityMap = { 1: 20, 2: 40, 3: 60, 4: 80, 5: 100 };
+    const sensitivity = results.sensitivity_level
+      ? sensitivityMap[results.sensitivity_level] || (results.sensitivity_level * 20)
+      : null;
+
+    // Map routine complexity to a percentage
+    const routineMap = { 'minimal': 25, 'basic': 50, 'comprehensive': 75, 'extensive': 100 };
+    const routine = results.routine_complexity
+      ? routineMap[results.routine_complexity] || 50
+      : null;
+
+    // Count concerns
+    const concernsArr = results.concerns || results.skinConcerns || [];
+    const concerns_count = Array.isArray(concernsArr) ? concernsArr.length : null;
+
+    // AI-based metrics (only available if AI analysis was done)
     const confidence = results.confidence || results.confidenceScore || results.overall_confidence;
-    const moisture = results.moisture_score || results.moistureScore || results.moisture || results.hydration;
-    const texture = results.texture_score || results.textureScore || results.texture;
-    const health = results.overall_health || results.overallHealth || results.skinHealth || results.health_score;
+    const hasAIMetrics = confidence != null;
 
-    return { confidence, moisture, texture, health };
+    return {
+      sensitivity,
+      routine,
+      concerns_count,
+      // AI metrics if available
+      analysis: hasAIMetrics ? confidence : null
+    };
   };
 
   // Get skin type from results
@@ -82,7 +104,7 @@ const QuizHistory = () => {
 
   // Delete single quiz attempt
   const handleDeleteAttempt = async (attemptId) => {
-    if (!confirm('Are you sure you want to delete this quiz result?')) return;
+    if (!confirm(t('delete_attempt_confirm'))) return;
 
     setDeleting(attemptId);
     try {
@@ -102,7 +124,7 @@ const QuizHistory = () => {
 
   // Delete all quiz history
   const handleDeleteAll = async () => {
-    if (!confirm('Are you sure you want to delete ALL quiz history? This cannot be undone.')) return;
+    if (!confirm(t('delete_all_confirm'))) return;
 
     setDeleting('all');
     try {
@@ -110,11 +132,11 @@ const QuizHistory = () => {
       if (success) {
         setQuizAttempts([]);
       } else {
-        alert('Failed to delete quiz history');
+        alert(t('delete_failed'));
       }
     } catch (error) {
       console.error('Error deleting all history:', error);
-      alert('Failed to delete quiz history');
+      alert(t('delete_failed'));
     } finally {
       setDeleting(null);
     }
@@ -141,9 +163,9 @@ const QuizHistory = () => {
         <div className="flex items-start justify-between mb-8">
           <div>
             <Icon name="History" size={40} className="mb-4 text-accent" />
-            <h1 className="text-4xl font-bold text-foreground mb-2">Quiz History</h1>
+            <h1 className="text-4xl font-bold text-foreground mb-2">{t('quiz_history_title')}</h1>
             <p className="text-lg text-muted-foreground">
-              Track your skin's progress and see how your results have changed over time.
+              {t('quiz_history_subtitle')}
             </p>
           </div>
           {quizAttempts.length > 0 && (
@@ -153,7 +175,7 @@ const QuizHistory = () => {
               className="flex items-center gap-2 px-4 py-2 text-destructive border border-destructive/30 rounded-lg hover:bg-destructive/10 transition-colors disabled:opacity-50"
             >
               <Icon name="Trash2" size={16} />
-              {deleting === 'all' ? 'Deleting...' : 'Delete All'}
+              {deleting === 'all' ? t('deleting') : t('delete_all')}
             </button>
           )}
         </div>
@@ -162,9 +184,9 @@ const QuizHistory = () => {
         {quizAttempts.length === 0 ? (
           <div className="text-center py-16 bg-accent/5 border border-accent/10 rounded-xl">
             <Icon name="BookOpen" size={64} className="mx-auto mb-4 text-muted-foreground" />
-            <h3 className="text-2xl font-semibold text-foreground mb-2">No Quiz Attempts Yet</h3>
+            <h3 className="text-2xl font-semibold text-foreground mb-2">{t('no_attempts')}</h3>
             <p className="text-muted-foreground mb-2 max-w-md mx-auto">
-              Start your first skin quiz to begin tracking your skin health journey.
+              {t('start_first_quiz')}
             </p>
             <Button
               onClick={() => navigate('/interactive-skin-quiz')}
@@ -172,7 +194,7 @@ const QuizHistory = () => {
               iconPosition="right"
               className="mt-4"
             >
-              Take Your First Quiz
+              {t('take_first_quiz')}
             </Button>
           </div>
         ) : (
@@ -180,17 +202,17 @@ const QuizHistory = () => {
             {/* Summary Stats */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
               <div className="bg-card border border-border rounded-lg p-4">
-                <div className="text-sm text-muted-foreground">Total Quizzes</div>
+                <div className="text-sm text-muted-foreground">{t('total_quizzes')}</div>
                 <div className="text-3xl font-bold text-accent mt-1">{quizAttempts.length}</div>
               </div>
               <div className="bg-card border border-border rounded-lg p-4">
-                <div className="text-sm text-muted-foreground">Latest Result</div>
+                <div className="text-sm text-muted-foreground">{t('latest_result')}</div>
                 <div className="text-lg font-semibold text-foreground mt-1 capitalize">
-                  {getSkinType(quizAttempts[0]?.results)} Skin
+                  {getSkinType(quizAttempts[0]?.results)}{t('skin_type_suffix')}
                 </div>
               </div>
               <div className="bg-card border border-border rounded-lg p-4">
-                <div className="text-sm text-muted-foreground">Last Taken</div>
+                <div className="text-sm text-muted-foreground">{t('last_taken')}</div>
                 <div className="text-sm font-medium text-foreground mt-1">
                   {formatDate(quizAttempts[0]?.attempt_date || quizAttempts[0]?.created_at)}
                 </div>
@@ -222,7 +244,7 @@ const QuizHistory = () => {
                           {attempt.has_image_analysis && (
                             <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
                               <Icon name="Image" size={12} className="mr-1" />
-                              With Image
+                              {t('with_image')}
                             </span>
                           )}
                         </div>
@@ -230,7 +252,7 @@ const QuizHistory = () => {
                         <div className="space-y-2 mb-4">
                           <div className="flex items-center space-x-2">
                             <div className={`text-2xl font-bold capitalize ${getSkinTypeColor(skinType)}`}>
-                              {skinType} Skin
+                              {skinType}{t('skin_type_suffix')}
                             </div>
                           </div>
 
@@ -256,14 +278,14 @@ const QuizHistory = () => {
                       <div className="flex-shrink-0 md:w-64">
                         <div className="grid grid-cols-2 gap-3 mb-4">
                           {[
-                            { label: 'Confidence', value: metrics.confidence },
-                            { label: 'Moisture', value: metrics.moisture },
-                            { label: 'Texture', value: metrics.texture },
-                            { label: 'Health', value: metrics.health }
+                            { label: t('sensitivity'), value: metrics.sensitivity, suffix: '%' },
+                            { label: t('routine'), value: metrics.routine, suffix: '%' },
+                            { label: t('concerns'), value: metrics.concerns_count, suffix: '' },
+                            { label: t('ai_analysis'), value: metrics.analysis, suffix: '%' }
                           ].map((metric, i) => (
                             <div key={i} className="text-center">
                               <div className="text-lg font-bold text-accent">
-                                {metric.value ? `${Math.round(metric.value)}%` : '—'}
+                                {metric.value != null ? `${Math.round(metric.value)}${metric.suffix}` : '—'}
                               </div>
                               <div className="text-xs text-muted-foreground">{metric.label}</div>
                             </div>
@@ -275,14 +297,25 @@ const QuizHistory = () => {
                             variant="outline"
                             size="sm"
                             onClick={() => {
-                              localStorage.setItem('glowmatch-quiz-data', JSON.stringify(attempt.quiz_data));
-                              localStorage.setItem('glowmatch-analysis', JSON.stringify(attempt.results));
+                              // Include attempt ID in quiz data so results can be saved
+                              const quizDataWithId = {
+                                ...attempt.quiz_data,
+                                attemptId: attempt.id
+                              };
+                              localStorage.setItem('glowmatch-quiz-data', JSON.stringify(quizDataWithId));
+
+                              // Include saved analysis data if available
+                              const analysisWithSaved = {
+                                ...attempt.results,
+                                savedAnalysis: attempt.analysis || null
+                              };
+                              localStorage.setItem('glowmatch-analysis', JSON.stringify(analysisWithSaved));
                               navigate('/results-dashboard');
                             }}
                             iconName="Eye"
                             className="flex-1"
                           >
-                            View Results
+                            {t('view_results')}
                           </Button>
                           <button
                             onClick={() => handleDeleteAttempt(attempt.id)}
@@ -303,26 +336,29 @@ const QuizHistory = () => {
               );
             })}
           </div>
-        )}
+        )
+        }
 
         {/* Take New Quiz CTA */}
-        {quizAttempts.length > 0 && (
-          <div className="mt-12 bg-gradient-to-r from-accent/10 to-secondary/10 border border-accent/20 rounded-lg p-6 text-center">
-            <p className="text-muted-foreground mb-3">
-              Ready for a fresh analysis? Your skin changes over time.
-            </p>
-            <Button
-              onClick={() => navigate('/interactive-skin-quiz')}
-              iconName="RotateCcw"
-              iconPosition="left"
-              className="mt-4"
-            >
-              Take Another Quiz
-            </Button>
-          </div>
-        )}
-      </main>
-    </div>
+        {
+          quizAttempts.length > 0 && (
+            <div className="mt-12 bg-gradient-to-r from-accent/10 to-secondary/10 border border-accent/20 rounded-lg p-6 text-center">
+              <p className="text-muted-foreground mb-3">
+                {t('fresh_analysis_desc')}
+              </p>
+              <Button
+                onClick={() => navigate('/interactive-skin-quiz')}
+                iconName="RotateCcw"
+                iconPosition="left"
+                className="mt-4"
+              >
+                {t('take_another_quiz')}
+              </Button>
+            </div>
+          )
+        }
+      </main >
+    </div >
   );
 };
 

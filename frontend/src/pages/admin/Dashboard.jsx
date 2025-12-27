@@ -29,6 +29,11 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  // Signup block settings state
+  const [signupBlock, setSignupBlock] = useState({ blockUserSignup: false, blockSellerSignup: false });
+  const [signupBlockLoading, setSignupBlockLoading] = useState(false);
+  const [signupBlockSuccess, setSignupBlockSuccess] = useState(null);
+
   const fetchDebugStats = async () => {
     try {
       const r = await fetch(`${API_BASE}/admin/debug/stats`);
@@ -36,6 +41,55 @@ const Dashboard = () => {
       const j = await r.json();
       return j.data || null;
     } catch (e) { return null; }
+  };
+
+  const fetchSignupBlockSettings = async () => {
+    try {
+      const raw = localStorage.getItem('gm_auth');
+      const headers = raw ? { Authorization: `Bearer ${JSON.parse(raw).token}` } : {};
+      const r = await fetch(`${API_BASE}/admin/settings/signup-block`, { headers });
+      if (r.ok) {
+        const j = await r.json();
+        setSignupBlock(j.data || { blockUserSignup: false, blockSellerSignup: false });
+      }
+    } catch (e) {
+      console.warn('[admin] Could not fetch signup block settings:', e);
+    }
+  };
+
+  const updateSignupBlock = async (key, value) => {
+    setSignupBlockLoading(true);
+    setSignupBlockSuccess(null);
+    try {
+      const raw = localStorage.getItem('gm_auth');
+      const headers = raw ? {
+        Authorization: `Bearer ${JSON.parse(raw).token}`,
+        'Content-Type': 'application/json'
+      } : { 'Content-Type': 'application/json' };
+
+      const body = key === 'user'
+        ? { blockUserSignup: value }
+        : { blockSellerSignup: value };
+
+      const r = await fetch(`${API_BASE}/admin/settings/signup-block`, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify(body)
+      });
+
+      if (r.ok) {
+        const j = await r.json();
+        setSignupBlock(j.data || signupBlock);
+        setSignupBlockSuccess(key === 'user'
+          ? (value ? 'User signup blocked' : 'User signup enabled')
+          : (value ? 'Seller signup blocked' : 'Seller signup enabled'));
+        setTimeout(() => setSignupBlockSuccess(null), 3000);
+      }
+    } catch (e) {
+      console.error('[admin] Failed to update signup block:', e);
+    } finally {
+      setSignupBlockLoading(false);
+    }
   };
 
   const fetchStats = async () => {
@@ -68,7 +122,10 @@ const Dashboard = () => {
     }
   };
 
-  useEffect(() => { fetchStats(); }, []);
+  useEffect(() => {
+    fetchStats();
+    fetchSignupBlockSettings();
+  }, []);
 
   const getActivePercentage = () => {
     if (!stats) return 0;
@@ -104,6 +161,73 @@ const Dashboard = () => {
               Messages
             </Button>
           </Link>
+        </div>
+      </div>
+
+      {/* Signup Settings Section */}
+      <div className="bg-card border border-border rounded-lg p-6 mb-8">
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <h3 className="text-lg font-semibold text-foreground flex items-center gap-2">
+              <Icon name="ShieldAlert" size={20} className="text-accent" />
+              Signup Control
+            </h3>
+            <p className="text-sm text-muted-foreground mt-1">Block new account registrations during maintenance</p>
+          </div>
+          {signupBlockSuccess && (
+            <div className="px-3 py-1.5 bg-green-100 border border-green-300 text-green-700 rounded-lg text-sm font-medium flex items-center gap-2">
+              <Icon name="CheckCircle2" size={16} />
+              {signupBlockSuccess}
+            </div>
+          )}
+        </div>
+
+        <div className="flex flex-col sm:flex-row gap-4">
+          {/* Block User Signup Button */}
+          <button
+            onClick={() => updateSignupBlock('user', !signupBlock.blockUserSignup)}
+            disabled={signupBlockLoading}
+            className={`flex-1 flex items-center justify-center gap-3 px-4 py-3 rounded-lg border-2 transition-all font-medium ${signupBlock.blockUserSignup
+                ? 'bg-red-50 border-red-300 text-red-700 hover:bg-red-100'
+                : 'bg-green-50 border-green-300 text-green-700 hover:bg-green-100'
+              } ${signupBlockLoading ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+          >
+            <Icon
+              name={signupBlock.blockUserSignup ? "UserX" : "UserCheck"}
+              size={20}
+              className={signupBlock.blockUserSignup ? 'text-red-600' : 'text-green-600'}
+            />
+            <div className="text-left">
+              <div className="text-sm">User Signup</div>
+              <div className={`text-xs ${signupBlock.blockUserSignup ? 'text-red-500' : 'text-green-500'}`}>
+                {signupBlock.blockUserSignup ? 'Blocked' : 'Enabled'}
+              </div>
+            </div>
+            {signupBlockLoading && <Icon name="Loader2" size={16} className="animate-spin ml-2" />}
+          </button>
+
+          {/* Block Seller Signup Button */}
+          <button
+            onClick={() => updateSignupBlock('seller', !signupBlock.blockSellerSignup)}
+            disabled={signupBlockLoading}
+            className={`flex-1 flex items-center justify-center gap-3 px-4 py-3 rounded-lg border-2 transition-all font-medium ${signupBlock.blockSellerSignup
+                ? 'bg-red-50 border-red-300 text-red-700 hover:bg-red-100'
+                : 'bg-green-50 border-green-300 text-green-700 hover:bg-green-100'
+              } ${signupBlockLoading ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+          >
+            <Icon
+              name={signupBlock.blockSellerSignup ? "StoreOff" : "Store"}
+              size={20}
+              className={signupBlock.blockSellerSignup ? 'text-red-600' : 'text-green-600'}
+            />
+            <div className="text-left">
+              <div className="text-sm">Seller Signup</div>
+              <div className={`text-xs ${signupBlock.blockSellerSignup ? 'text-red-500' : 'text-green-500'}`}>
+                {signupBlock.blockSellerSignup ? 'Blocked' : 'Enabled'}
+              </div>
+            </div>
+            {signupBlockLoading && <Icon name="Loader2" size={16} className="animate-spin ml-2" />}
+          </button>
         </div>
       </div>
 
