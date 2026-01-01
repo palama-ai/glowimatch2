@@ -6,7 +6,12 @@ const ProductCard = ({ product }) => {
   const [isHovered, setIsHovered] = useState(false);
 
   const handlePurchaseClick = (url) => {
-    window.open(url, '_blank', 'noopener,noreferrer');
+    // Normalize URL: add https:// if no protocol is specified
+    let normalizedUrl = url;
+    if (url && !url.startsWith('http://') && !url.startsWith('https://')) {
+      normalizedUrl = `https://${url}`;
+    }
+    window.open(normalizedUrl, '_blank', 'noopener,noreferrer');
   };
 
   const formatPrice = (price) => {
