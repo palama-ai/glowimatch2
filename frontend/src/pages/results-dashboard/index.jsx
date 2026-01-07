@@ -168,6 +168,7 @@ const ResultsDashboard = () => {
 
   // Fetch AI-recommended products using voting system
   const fetchRecommendedProducts = async (analysis) => {
+    console.log('🚀 [fetchRecommendedProducts] STARTING - skinType:', analysis?.skinType);
     setProductsLoading(true);
     setProductsError(null);
     try {
@@ -195,6 +196,10 @@ const ResultsDashboard = () => {
 
       const json = await resp.json();
       const products = json?.data || [];
+
+      // DEBUG: Log full product data to check AI fields
+      console.log('[AI-Recommend] Full response:', json);
+      console.log('[AI-Recommend] First product aiScore:', products[0]?.aiScore, 'aiReasons:', products[0]?.aiReasons);
 
       // Store voting info for display
       if (json?.votingInfo) {
