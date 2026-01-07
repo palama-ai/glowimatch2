@@ -4,12 +4,12 @@ import Header from '../../../components/ui/Header';
 import { useI18n } from '../../../contexts/I18nContext';
 import { quizService } from '../../../lib/supabase';
 import SkinTypeSummary from '../components/SkinTypeSummary';
-import ProductCard from './components/ProductCard';
-import ProductFilters from './components/ProductFilters';
-import SkinAnalysisBreakdown from './components/SkinAnalysisBreakdown';
-import SkincareRoutine from './components/SkincareRoutine';
-import ProductModal from './components/ProductModal';
-import Icon from '../../components/AppIcon';
+import ProductCard from '../components/ProductCard';
+import ProductFilters from '../components/ProductFilters';
+import SkinAnalysisBreakdown from '../components/SkinAnalysisBreakdown';
+import SkincareRoutine from '../components/SkincareRoutine';
+import ProductModal from '../components/ProductModal';
+import Icon from '../../../components/AppIcon';
 
 // Generate a fallback routine based on skin type when AI fails
 const generateFallbackRoutine = (skinType) => {
