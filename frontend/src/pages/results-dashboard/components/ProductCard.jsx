@@ -101,11 +101,37 @@ const ProductCard = ({ product }) => {
         </h3>
 
         {/* AI Recommendation Reason */}
-        {product?.aiVoting?.reasons?.length > 0 && (
-          <p className="text-xs text-purple-600 mb-2 line-clamp-1 italic">
-            ✨ {product.aiVoting.reasons[0]}
-          </p>
-        )}
+        {(() => {
+          // Support both formats: aiReasons (new) and aiVoting.reasons (legacy)
+          const reasons = product?.aiReasons || product?.aiVoting?.reasons || [];
+          const aiScore = product?.aiScore || product?.aiVoting?.avgScore;
+          const firstReason = reasons?.[0];
+
+          if (firstReason) {
+            return (
+              <div className="mb-2 p-2 bg-gradient-to-r from-purple-50 to-pink-50 border border-purple-100 rounded-lg">
+                <div className="flex items-start gap-1.5">
+                  <Icon name="Sparkles" size={12} className="text-purple-500 mt-0.5 flex-shrink-0" />
+                  <p className="text-xs text-purple-700 leading-relaxed">
+                    {firstReason}
+                  </p>
+                </div>
+                {aiScore && (
+                  <div className="mt-1.5 flex items-center gap-1">
+                    <div className="h-1 flex-1 bg-purple-100 rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-gradient-to-r from-purple-500 to-pink-500 rounded-full"
+                        style={{ width: `${Math.min(aiScore * 10, 100)}%` }}
+                      />
+                    </div>
+                    <span className="text-[10px] text-purple-600 font-medium">{Math.round(aiScore * 10)}%</span>
+                  </div>
+                )}
+              </div>
+            );
+          }
+          return null;
+        })()}
 
         {/* Rating */}
         <div className="flex items-center gap-1.5 mb-3">
