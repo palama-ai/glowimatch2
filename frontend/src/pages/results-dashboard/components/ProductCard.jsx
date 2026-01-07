@@ -5,6 +5,9 @@ import Icon from '../../../components/AppIcon';
 const ProductCard = ({ product }) => {
   const [isHovered, setIsHovered] = useState(false);
 
+  // Debug: log AI data
+  console.log('[ProductCard] product:', product?.name, 'aiScore:', product?.aiScore, 'aiReasons:', product?.aiReasons);
+
   const handlePurchaseClick = (url) => {
     // Normalize URL: add https:// if no protocol is specified
     let normalizedUrl = url;
