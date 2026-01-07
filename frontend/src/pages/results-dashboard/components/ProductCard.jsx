@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Header from '../../components/ui/Header';
+import Header from '../../../components/ui/Header';
 import { useI18n } from '../../contexts/I18nContext';
 import { quizService } from '../../lib/supabase';
 import SkinTypeSummary from './components/SkinTypeSummary';
