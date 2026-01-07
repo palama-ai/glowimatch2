@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Header from '../../../components/ui/Header';
 import { useI18n } from '../../../contexts/I18nContext';
-import { quizService } from '../../lib/supabase';
+import { quizService } from '../../../lib/supabase';
 import SkinTypeSummary from './components/SkinTypeSummary';
 import ProductCard from './components/ProductCard';
 import ProductFilters from './components/ProductFilters';
