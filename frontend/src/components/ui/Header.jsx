@@ -6,6 +6,7 @@ import { useTheme } from '../../contexts/ThemeContext';
 import { useModal } from '../../contexts/ModalContext';
 import Button from './Button';
 import Icon from '../AppIcon';
+import ChristmasLogo from '../ChristmasLogo';
 
 const API_BASE = import.meta.env?.VITE_BACKEND_URL || 'https://backend-three-sigma-81.vercel.app/api';
 
@@ -142,7 +143,7 @@ const Header = () => {
 
           {/* Logo - Left */}
           <Link to="/" className="flex items-center space-x-2 group flex-shrink-0">
-            <span className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-pink-500 to-rose-500 bg-clip-text text-transparent">Glowimatch</span>
+            <ChristmasLogo />
           </Link>
 
           {/* Navigation - Center */}
