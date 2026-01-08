@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo, useRef, useCallback } from 'react';
 import AdminLayout from '../../components/admin/AdminLayout';
 import AdminAnalytics from './AdminAnalytics';
 import { Link, useNavigate } from 'react-router-dom';
@@ -112,6 +112,10 @@ const Dashboard = () => {
   const [searchLoading, setSearchLoading] = useState(false);
   const [showSearchResults, setShowSearchResults] = useState(false);
 
+  // Cache for search data - fetch once, search locally
+  const searchCache = useRef({ users: null, products: null, lastFetch: 0 });
+  const debounceTimer = useRef(null);
+
   // Signup block settings state
   const [signupBlock, setSignupBlock] = useState({ blockUserSignup: false, blockSellerSignup: false });
   const [signupBlockLoading, setSignupBlockLoading] = useState(false);
@@ -129,9 +133,95 @@ const Dashboard = () => {
     { name: 'Safety', subtitle: 'Safety & security settings', type: 'page', path: '/admin/safety' },
   ], []);
 
-  // Search function
-  const handleSearch = async (query) => {
+  // Fetch and cache search data (users & products) - only once per session or every 5 minutes
+  const fetchSearchData = useCallback(async () => {
+    const now = Date.now();
+    const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+
+    // Return cached data if fresh
+    if (searchCache.current.users && searchCache.current.products && (now - searchCache.current.lastFetch) < CACHE_DURATION) {
+      return searchCache.current;
+    }
+
+    const raw = localStorage.getItem('gm_auth');
+    const headers = raw ? { Authorization: `Bearer ${JSON.parse(raw).token}` } : {};
+
+    // Fetch both in parallel
+    const [usersRes, productsRes] = await Promise.all([
+      fetch(`${API_BASE}/admin/users`, { headers }).catch(() => null),
+      fetch(`${API_BASE}/admin/products`, { headers }).catch(() => null)
+    ]);
+
+    let users = [];
+    let products = [];
+
+    if (usersRes?.ok) {
+      const data = await usersRes.json();
+      users = data.data || data || [];
+    }
+
+    if (productsRes?.ok) {
+      const data = await productsRes.json();
+      products = data.data || data || [];
+    }
+
+    // Update cache
+    searchCache.current = { users, products, lastFetch: now };
+    return searchCache.current;
+  }, []);
+
+  // Fast local search function
+  const performLocalSearch = useCallback((query, cache) => {
+    const queryLower = query.toLowerCase();
+
+    // Search pages (instant)
+    const matchedPages = adminPages.filter(page =>
+      page.name.toLowerCase().includes(queryLower) ||
+      page.subtitle.toLowerCase().includes(queryLower)
+    );
+
+    // Search users from cache
+    const userResults = (cache.users || [])
+      .filter(user =>
+        (user.full_name && user.full_name.toLowerCase().includes(queryLower)) ||
+        (user.email && user.email.toLowerCase().includes(queryLower))
+      )
+      .slice(0, 5)
+      .map(user => ({
+        name: user.full_name || user.email,
+        subtitle: user.email,
+        type: 'user',
+        path: '/admin/users',
+        id: user.id,
+      }));
+
+    // Search products from cache
+    const productResults = (cache.products || [])
+      .filter(product =>
+        (product.name && product.name.toLowerCase().includes(queryLower)) ||
+        (product.brand && product.brand.toLowerCase().includes(queryLower)) ||
+        (product.category && product.category.toLowerCase().includes(queryLower))
+      )
+      .slice(0, 5)
+      .map(product => ({
+        name: product.name,
+        subtitle: product.brand || product.category || 'Product',
+        type: 'product',
+        path: '/admin/products',
+        id: product.id,
+      }));
+
+    return [...matchedPages, ...userResults, ...productResults];
+  }, [adminPages]);
+
+  // Search function with debouncing and caching
+  const handleSearch = useCallback((query) => {
     setSearchQuery(query);
+
+    // Clear previous debounce timer
+    if (debounceTimer.current) {
+      clearTimeout(debounceTimer.current);
+    }
 
     if (!query.trim()) {
       setSearchResults([]);
@@ -140,80 +230,33 @@ const Dashboard = () => {
     }
 
     setShowSearchResults(true);
-    setSearchLoading(true);
 
-    try {
-      const raw = localStorage.getItem('gm_auth');
-      const headers = raw ? { Authorization: `Bearer ${JSON.parse(raw).token}` } : {};
-      const queryLower = query.toLowerCase();
+    // If we have cached data, show instant results from pages
+    const queryLower = query.toLowerCase();
+    const instantPageResults = adminPages.filter(page =>
+      page.name.toLowerCase().includes(queryLower) ||
+      page.subtitle.toLowerCase().includes(queryLower)
+    );
 
-      // Search pages locally
-      const matchedPages = adminPages.filter(page =>
-        page.name.toLowerCase().includes(queryLower) ||
-        page.subtitle.toLowerCase().includes(queryLower)
-      );
-
-      // Search users - fetch all and filter locally
-      let userResults = [];
-      try {
-        const usersRes = await fetch(`${API_BASE}/admin/users`, { headers });
-        if (usersRes.ok) {
-          const usersData = await usersRes.json();
-          const allUsers = usersData.data || usersData || [];
-          // Filter users by name or email
-          userResults = allUsers
-            .filter(user =>
-              (user.full_name && user.full_name.toLowerCase().includes(queryLower)) ||
-              (user.email && user.email.toLowerCase().includes(queryLower))
-            )
-            .slice(0, 5)
-            .map(user => ({
-              name: user.full_name || user.email,
-              subtitle: user.email,
-              type: 'user',
-              path: '/admin/users',
-              id: user.id,
-            }));
-        }
-      } catch (e) {
-        console.warn('User search failed:', e);
-      }
-
-      // Search products - fetch all and filter locally
-      let productResults = [];
-      try {
-        const productsRes = await fetch(`${API_BASE}/admin/products`, { headers });
-        if (productsRes.ok) {
-          const productsData = await productsRes.json();
-          const allProducts = productsData.data || productsData || [];
-          // Filter products by name or brand
-          productResults = allProducts
-            .filter(product =>
-              (product.name && product.name.toLowerCase().includes(queryLower)) ||
-              (product.brand && product.brand.toLowerCase().includes(queryLower)) ||
-              (product.category && product.category.toLowerCase().includes(queryLower))
-            )
-            .slice(0, 5)
-            .map(product => ({
-              name: product.name,
-              subtitle: product.brand || product.category || 'Product',
-              type: 'product',
-              path: '/admin/products',
-              id: product.id,
-            }));
-        }
-      } catch (e) {
-        console.warn('Product search failed:', e);
-      }
-
-      // Combine results - pages first, then users, then products
-      setSearchResults([...matchedPages, ...userResults, ...productResults]);
-    } catch (e) {
-      console.error('Search failed:', e);
-    } finally {
-      setSearchLoading(false);
+    // Show page results immediately
+    if (instantPageResults.length > 0) {
+      setSearchResults(instantPageResults);
     }
-  };
+
+    // Debounce the API search for users/products (300ms)
+    debounceTimer.current = setTimeout(async () => {
+      setSearchLoading(true);
+      try {
+        const cache = await fetchSearchData();
+        const results = performLocalSearch(query, cache);
+        setSearchResults(results);
+      } catch (e) {
+        console.error('Search failed:', e);
+      } finally {
+        setSearchLoading(false);
+      }
+    }, 300);
+  }, [adminPages, fetchSearchData, performLocalSearch]);
 
   const handleSearchResultClick = (item) => {
     setShowSearchResults(false);
