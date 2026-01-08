@@ -1,7 +1,5 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import AdminLayout from '../../components/admin/AdminLayout';
-import Button from '../../components/ui/Button';
-import Input from '../../components/ui/Input';
 import Icon from '../../components/AppIcon';
 
 const API_BASE = import.meta.env?.VITE_BACKEND_URL || 'https://backend-three-sigma-81.vercel.app/api';
@@ -29,24 +27,17 @@ const Notifications = () => {
     setLoading(true);
     try {
       const headers = getAuthHeaders();
-      console.log('[Notifications] Fetching notifications with headers:', !!headers.Authorization);
       const r = await fetch(`${API_BASE}/notifications/admin`, { headers });
-      console.log('[Notifications] Response status:', r.status);
-
-      if (!r.ok) {
-        const errorText = await r.text();
-        console.error('[Notifications] Error response:', errorText);
-        throw new Error(`HTTP ${r.status}: ${errorText}`);
-      }
-
+      if (!r.ok) throw new Error(`HTTP ${r.status}`);
       const j = await r.json();
-      console.log('[Notifications] Fetched data:', j);
       setList(j.data || []);
     } catch (e) {
       console.error('[Notifications] Failed to load notifications', e);
       setError('Failed to load notifications');
       setList([]);
-    } finally { setLoading(false); }
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => { fetchList(); }, []);
@@ -63,8 +54,6 @@ const Notifications = () => {
     setSending(true);
     try {
       const headers = { 'Content-Type': 'application/json', ...getAuthHeaders() };
-      console.log('[Notifications] Sending notification:', { title, body });
-
       const r = await fetch(`${API_BASE}/notifications/admin`, {
         method: 'POST',
         headers,
@@ -73,70 +62,102 @@ const Notifications = () => {
 
       if (!r.ok) {
         const txt = await r.text().catch(() => '');
-        console.error('[Notifications] Send error:', txt);
         throw new Error(txt || 'Failed to send notification');
       }
 
-      const response = await r.json();
-      console.log('[Notifications] Send response:', response);
-
       setTitle('');
       setBody('');
-      setSuccess('✓ Notification sent to all users successfully!');
-
-      // Refresh list
+      setSuccess('Notification sent to all users successfully!');
       await fetchList();
-
-      // Clear success message after 3 seconds
       setTimeout(() => setSuccess(''), 3000);
     } catch (e) {
       console.error('[Notifications] sendAll error', e);
       setError(`Failed to send notification: ${e.message}`);
-    } finally { setSending(false); }
+    } finally {
+      setSending(false);
+    }
   };
+
+  const stats = useMemo(() => ({
+    total: list.length,
+    allUsers: list.filter(n => n.target_all === 1).length,
+  }), [list]);
 
   return (
     <AdminLayout>
-      <div className="space-y-6">
-        {/* Header */}
-        <div>
-          <h1 className="text-3xl font-bold text-foreground mb-2">Send Notifications</h1>
-          <p className="text-muted-foreground">Broadcast announcements and updates to all users</p>
-        </div>
+      {/* Header */}
+      <div style={{ marginBottom: '32px' }}>
+        <h1 style={{ fontSize: '28px', fontWeight: '700', color: 'var(--admin-text-primary)', margin: 0 }}>
+          Notifications
+        </h1>
+        <p style={{ fontSize: '14px', color: 'var(--admin-text-secondary)', marginTop: '4px' }}>
+          Broadcast announcements and updates to all users
+        </p>
+      </div>
 
+      {/* Stats Cards */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '16px', marginBottom: '32px' }}>
+        <div className="admin-stat-card blue" style={{ padding: '20px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <div>
+              <div className="admin-stat-card-title" style={{ fontSize: '12px' }}>Total Sent</div>
+              <div className="admin-stat-card-value" style={{ fontSize: '28px' }}>{stats.total}</div>
+            </div>
+            <div className="admin-stat-card-icon"><Icon name="Bell" size={24} /></div>
+          </div>
+        </div>
+        <div className="admin-stat-card purple" style={{ padding: '20px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <div>
+              <div className="admin-stat-card-title" style={{ fontSize: '12px' }}>To All Users</div>
+              <div className="admin-stat-card-value" style={{ fontSize: '28px' }}>{stats.allUsers}</div>
+            </div>
+            <div className="admin-stat-card-icon"><Icon name="Users" size={24} /></div>
+          </div>
+        </div>
+      </div>
+
+      {/* Two Column Layout */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
         {/* Compose Section */}
-        <div className="bg-card border border-border/50 rounded-2xl shadow-lg p-8 space-y-6">
-          <div className="flex items-center gap-3 pb-4 border-b border-border/50">
-            <div className="w-10 h-10 rounded-lg bg-accent/10 flex items-center justify-center">
-              <Icon name="Mail" size={20} className="text-accent" />
+        <div className="admin-content-card" style={{ padding: '24px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '24px', paddingBottom: '16px', borderBottom: '1px solid var(--admin-border)' }}>
+            <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: 'rgba(59, 130, 246, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <Icon name="Send" size={20} style={{ color: 'var(--admin-accent)' }} />
             </div>
             <div>
-              <h2 className="text-xl font-bold text-foreground">Compose Message</h2>
-              <p className="text-sm text-muted-foreground">Send to all users</p>
+              <h2 style={{ fontSize: '18px', fontWeight: '600', color: 'var(--admin-text-primary)', margin: 0 }}>Compose Message</h2>
+              <p style={{ fontSize: '12px', color: 'var(--admin-text-muted)', margin: 0 }}>Send to all users</p>
             </div>
           </div>
 
-          <div className="space-y-5">
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
             {/* Title Input */}
             <div>
-              <label className="block text-sm font-medium text-foreground mb-2">
+              <label style={{ display: 'block', fontSize: '13px', fontWeight: '500', color: 'var(--admin-text-primary)', marginBottom: '8px' }}>
                 Notification Title *
               </label>
-              <Input
+              <input
                 type="text"
                 value={title}
                 onChange={e => setTitle(e.target.value)}
                 placeholder="e.g., New Feature Available"
-                className="w-full"
+                style={{
+                  width: '100%',
+                  padding: '12px 16px',
+                  borderRadius: '10px',
+                  border: '1px solid var(--admin-border)',
+                  background: 'var(--admin-bg-primary)',
+                  color: 'var(--admin-text-primary)',
+                  fontSize: '14px',
+                  outline: 'none',
+                }}
               />
-              <p className="text-xs text-muted-foreground mt-1">
-                This will appear as the headline of the notification
-              </p>
             </div>
 
             {/* Body Input */}
             <div>
-              <label className="block text-sm font-medium text-foreground mb-2">
+              <label style={{ display: 'block', fontSize: '13px', fontWeight: '500', color: 'var(--admin-text-primary)', marginBottom: '8px' }}>
                 Message Body *
               </label>
               <textarea
@@ -144,81 +165,107 @@ const Notifications = () => {
                 onChange={e => setBody(e.target.value)}
                 placeholder="Write your message here. Be clear and concise."
                 rows={6}
-                className="w-full px-4 py-3 border border-border rounded-lg bg-background text-foreground focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/20 transition-all resize-none"
+                style={{
+                  width: '100%',
+                  padding: '12px 16px',
+                  borderRadius: '10px',
+                  border: '1px solid var(--admin-border)',
+                  background: 'var(--admin-bg-primary)',
+                  color: 'var(--admin-text-primary)',
+                  fontSize: '14px',
+                  resize: 'none',
+                  outline: 'none',
+                }}
               />
-              <p className="text-xs text-muted-foreground mt-1">
+              <div style={{ fontSize: '12px', color: 'var(--admin-text-muted)', marginTop: '6px' }}>
                 {body.length} characters
-              </p>
+              </div>
             </div>
 
             {/* Messages */}
             {error && (
-              <div className="bg-destructive/10 border border-destructive/30 text-destructive px-4 py-3 rounded-lg flex items-start gap-3">
-                <Icon name="AlertTriangle" size={18} className="flex-shrink-0 mt-0.5" />
-                <span className="text-sm">{error}</span>
+              <div className="admin-error">
+                <div className="admin-error-content">
+                  <Icon name="AlertTriangle" size={16} />
+                  <span className="admin-error-text">{error}</span>
+                </div>
               </div>
             )}
 
             {success && (
-              <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg flex items-start gap-3">
-                <Icon name="CheckCircle2" size={18} className="flex-shrink-0 mt-0.5" />
-                <span className="text-sm">{success}</span>
+              <div className="admin-success-alert">
+                <Icon name="CheckCircle2" size={16} />
+                {success}
               </div>
             )}
 
             {/* Send Button */}
-            <div className="flex gap-3 pt-2">
-              <Button
-                onClick={sendAll}
-                disabled={sending || !title.trim() || !body.trim()}
-                className="bg-gradient-to-r from-pink-500 to-rose-500 hover:shadow-lg hover:shadow-pink-500/40 transition-all"
-              >
-                <Icon name={sending ? "Loader2" : "Send"} size={18} className={`mr-2 ${sending ? 'animate-spin' : ''}`} />
-                {sending ? 'Sending...' : 'Send to All Users'}
-              </Button>
-            </div>
+            <button
+              onClick={sendAll}
+              disabled={sending || !title.trim() || !body.trim()}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '8px',
+                padding: '14px 24px',
+                borderRadius: '10px',
+                border: 'none',
+                background: (!title.trim() || !body.trim())
+                  ? 'var(--admin-bg-primary)'
+                  : 'linear-gradient(135deg, var(--admin-accent) 0%, var(--admin-purple) 100%)',
+                color: (!title.trim() || !body.trim()) ? 'var(--admin-text-muted)' : 'white',
+                fontWeight: '600',
+                fontSize: '14px',
+                cursor: (!title.trim() || !body.trim()) ? 'not-allowed' : 'pointer',
+                boxShadow: (!title.trim() || !body.trim()) ? 'none' : '0 4px 15px rgba(59, 130, 246, 0.3)',
+              }}
+            >
+              <Icon name={sending ? "Loader2" : "Send"} size={18} className={sending ? 'animate-spin' : ''} />
+              {sending ? 'Sending...' : 'Send to All Users'}
+            </button>
           </div>
         </div>
 
         {/* Recent Notifications */}
-        <div className="bg-card border border-border/50 rounded-2xl shadow-lg p-8 space-y-6">
-          <div className="flex items-center gap-3 pb-4 border-b border-border/50">
-            <div className="w-10 h-10 rounded-lg bg-accent/10 flex items-center justify-center">
-              <Icon name="History" size={20} className="text-accent" />
+        <div className="admin-content-card" style={{ padding: 0, overflow: 'hidden' }}>
+          <div style={{ padding: '20px 24px', borderBottom: '1px solid var(--admin-border)', background: 'var(--admin-bg-primary)', display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: 'rgba(139, 92, 246, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <Icon name="History" size={20} style={{ color: 'var(--admin-purple)' }} />
             </div>
             <div>
-              <h2 className="text-xl font-bold text-foreground">Recent Notifications</h2>
-              <p className="text-sm text-muted-foreground">
+              <h2 style={{ fontSize: '18px', fontWeight: '600', color: 'var(--admin-text-primary)', margin: 0 }}>Recent Notifications</h2>
+              <p style={{ fontSize: '12px', color: 'var(--admin-text-muted)', margin: 0 }}>
                 {loading ? 'Loading...' : `${list.length} notification${list.length !== 1 ? 's' : ''}`}
               </p>
             </div>
           </div>
 
           {loading ? (
-            <div className="flex justify-center items-center py-12">
-              <Icon name="Loader2" size={32} className="animate-spin text-accent" />
+            <div className="admin-loading" style={{ padding: '40px' }}>
+              <div className="admin-loading-spinner"></div>
             </div>
           ) : list.length === 0 ? (
-            <div className="text-center py-8">
-              <Icon name="Inbox" size={48} className="mx-auto text-muted-foreground mb-3 opacity-50" />
-              <p className="text-muted-foreground">No notifications sent yet</p>
+            <div style={{ padding: '60px', textAlign: 'center', color: 'var(--admin-text-muted)' }}>
+              <Icon name="Inbox" size={48} style={{ marginBottom: '16px', opacity: 0.3 }} />
+              <p style={{ margin: 0, fontSize: '14px' }}>No notifications sent yet</p>
             </div>
           ) : (
-            <div className="space-y-3 max-h-96 overflow-y-auto">
+            <div style={{ maxHeight: '400px', overflowY: 'auto' }}>
               {list.map(n => (
-                <div key={n.id} className="p-4 border border-border/50 rounded-lg bg-background hover:border-accent/30 transition-colors">
-                  <div className="flex items-start justify-between mb-2">
-                    <div className="flex-1">
-                      <h4 className="font-semibold text-foreground">{n.title}</h4>
-                      <p className="text-sm text-muted-foreground mt-1 line-clamp-2">{n.body}</p>
-                    </div>
+                <div key={n.id} style={{ padding: '16px 24px', borderBottom: '1px solid var(--admin-border)' }}>
+                  <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '8px' }}>
+                    <h4 style={{ fontSize: '14px', fontWeight: '600', color: 'var(--admin-text-primary)', margin: 0 }}>
+                      {n.title}
+                    </h4>
                     {n.target_all === 1 && (
-                      <span className="ml-2 px-2 py-1 bg-accent/10 text-accent text-xs font-medium rounded-full flex-shrink-0">
-                        All Users
-                      </span>
+                      <span className="admin-badge info">All Users</span>
                     )}
                   </div>
-                  <div className="text-xs text-muted-foreground">
+                  <p style={{ fontSize: '13px', color: 'var(--admin-text-secondary)', margin: '0 0 8px', lineHeight: '1.5' }}>
+                    {n.body}
+                  </p>
+                  <div style={{ fontSize: '11px', color: 'var(--admin-text-muted)' }}>
                     {new Date(n.created_at).toLocaleString('en-US', {
                       year: 'numeric',
                       month: 'short',
