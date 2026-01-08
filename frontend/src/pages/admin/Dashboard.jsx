@@ -145,50 +145,68 @@ const Dashboard = () => {
     try {
       const raw = localStorage.getItem('gm_auth');
       const headers = raw ? { Authorization: `Bearer ${JSON.parse(raw).token}` } : {};
+      const queryLower = query.toLowerCase();
 
       // Search pages locally
       const matchedPages = adminPages.filter(page =>
-        page.name.toLowerCase().includes(query.toLowerCase()) ||
-        page.subtitle.toLowerCase().includes(query.toLowerCase())
+        page.name.toLowerCase().includes(queryLower) ||
+        page.subtitle.toLowerCase().includes(queryLower)
       );
 
-      // Search users from API
+      // Search users - fetch all and filter locally
       let userResults = [];
       try {
-        const usersRes = await fetch(`${API_BASE}/admin/users?search=${encodeURIComponent(query)}&limit=5`, { headers });
+        const usersRes = await fetch(`${API_BASE}/admin/users`, { headers });
         if (usersRes.ok) {
           const usersData = await usersRes.json();
-          userResults = (usersData.data?.users || usersData.users || []).slice(0, 5).map(user => ({
-            name: user.name || user.email,
-            subtitle: user.email,
-            type: 'user',
-            path: '/admin/users',
-            id: user._id || user.id,
-          }));
+          const allUsers = usersData.data || usersData || [];
+          // Filter users by name or email
+          userResults = allUsers
+            .filter(user =>
+              (user.full_name && user.full_name.toLowerCase().includes(queryLower)) ||
+              (user.email && user.email.toLowerCase().includes(queryLower))
+            )
+            .slice(0, 5)
+            .map(user => ({
+              name: user.full_name || user.email,
+              subtitle: user.email,
+              type: 'user',
+              path: '/admin/users',
+              id: user.id,
+            }));
         }
       } catch (e) {
         console.warn('User search failed:', e);
       }
 
-      // Search products from API
+      // Search products - fetch all and filter locally
       let productResults = [];
       try {
-        const productsRes = await fetch(`${API_BASE}/admin/products?search=${encodeURIComponent(query)}&limit=5`, { headers });
+        const productsRes = await fetch(`${API_BASE}/admin/products`, { headers });
         if (productsRes.ok) {
           const productsData = await productsRes.json();
-          productResults = (productsData.data?.products || productsData.products || []).slice(0, 5).map(product => ({
-            name: product.name || product.title,
-            subtitle: product.brand || product.category || 'Product',
-            type: 'product',
-            path: '/admin/products',
-            id: product._id || product.id,
-          }));
+          const allProducts = productsData.data || productsData || [];
+          // Filter products by name or brand
+          productResults = allProducts
+            .filter(product =>
+              (product.name && product.name.toLowerCase().includes(queryLower)) ||
+              (product.brand && product.brand.toLowerCase().includes(queryLower)) ||
+              (product.category && product.category.toLowerCase().includes(queryLower))
+            )
+            .slice(0, 5)
+            .map(product => ({
+              name: product.name,
+              subtitle: product.brand || product.category || 'Product',
+              type: 'product',
+              path: '/admin/products',
+              id: product.id,
+            }));
         }
       } catch (e) {
         console.warn('Product search failed:', e);
       }
 
-      // Combine results
+      // Combine results - pages first, then users, then products
       setSearchResults([...matchedPages, ...userResults, ...productResults]);
     } catch (e) {
       console.error('Search failed:', e);
