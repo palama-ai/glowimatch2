@@ -1,7 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import AdminLayout from '../../components/admin/AdminLayout';
 import Icon from '../../components/AppIcon';
-import Button from '../../components/ui/Button';
 
 const API_BASE = import.meta.env?.VITE_BACKEND_URL || 'https://backend-three-sigma-81.vercel.app/api';
 
@@ -11,6 +10,7 @@ const Products = () => {
     const [error, setError] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
     const [filterCategory, setFilterCategory] = useState('all');
+    const [filterStatus, setFilterStatus] = useState('all');
 
     const fetchProducts = async () => {
         setLoading(true);
@@ -33,213 +33,248 @@ const Products = () => {
         }
     };
 
-    useEffect(() => {
-        fetchProducts();
-    }, []);
+    useEffect(() => { fetchProducts(); }, []);
 
-    // Get unique categories from products
-    const categories = ['all', ...new Set(products.map(p => p.category).filter(Boolean))];
+    const categories = useMemo(() => {
+        const cats = ['all', ...new Set(products.map(p => p.category).filter(Boolean))];
+        return cats;
+    }, [products]);
 
-    // Filter products based on search and category
-    const filteredProducts = products.filter(p => {
-        const matchesSearch = !searchTerm ||
-            p.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            p.brand?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            p.seller_email?.toLowerCase().includes(searchTerm.toLowerCase());
-        const matchesCategory = filterCategory === 'all' || p.category === filterCategory;
-        return matchesSearch && matchesCategory;
-    });
+    const filteredProducts = useMemo(() => {
+        return products.filter(p => {
+            const matchesSearch = !searchTerm ||
+                p.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                p.brand?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                p.seller_email?.toLowerCase().includes(searchTerm.toLowerCase());
+            const matchesCategory = filterCategory === 'all' || p.category === filterCategory;
+            const matchesStatus = filterStatus === 'all' ||
+                (filterStatus === 'published' && p.published) ||
+                (filterStatus === 'draft' && !p.published);
+            return matchesSearch && matchesCategory && matchesStatus;
+        });
+    }, [products, searchTerm, filterCategory, filterStatus]);
 
-    // Stats
-    const totalProducts = products.length;
-    const publishedProducts = products.filter(p => p.published).length;
-    const draftProducts = totalProducts - publishedProducts;
+    const stats = useMemo(() => ({
+        total: products.length,
+        published: products.filter(p => p.published).length,
+        draft: products.filter(p => !p.published).length,
+        totalViews: products.reduce((acc, p) => acc + (p.view_count || 0), 0),
+    }), [products]);
 
     return (
         <AdminLayout>
             {/* Header */}
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8">
-                <div>
-                    <h1 className="text-3xl font-bold text-foreground">Products</h1>
-                    <p className="text-muted-foreground mt-1">View all products in the database</p>
-                </div>
-                <div className="flex gap-2 mt-4 md:mt-0">
-                    <Button variant="outline" iconName="RefreshCw" iconPosition="left" onClick={fetchProducts}>
-                        Refresh
-                    </Button>
-                </div>
+            <div style={{ marginBottom: '32px' }}>
+                <h1 style={{ fontSize: '28px', fontWeight: '700', color: 'var(--admin-text-primary)', margin: 0 }}>
+                    Products Management
+                </h1>
+                <p style={{ fontSize: '14px', color: 'var(--admin-text-secondary)', marginTop: '4px' }}>
+                    View and manage all products in the marketplace
+                </p>
             </div>
 
             {/* Stats Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-                <div className="bg-gradient-to-br from-card to-card/50 border border-border rounded-lg p-6">
-                    <div className="flex items-center justify-between">
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px', marginBottom: '32px' }}>
+                <div className="admin-stat-card blue" style={{ padding: '20px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                         <div>
-                            <div className="text-sm font-medium text-muted-foreground">Total Products</div>
-                            <div className="text-4xl font-bold text-foreground mt-2">{totalProducts}</div>
+                            <div className="admin-stat-card-title" style={{ fontSize: '12px' }}>Total Products</div>
+                            <div className="admin-stat-card-value" style={{ fontSize: '28px' }}>{stats.total}</div>
                         </div>
-                        <div className="p-3 rounded-lg bg-blue-500/10">
-                            <Icon name="Package" size={24} className="text-blue-500" />
-                        </div>
+                        <div className="admin-stat-card-icon"><Icon name="Package" size={24} /></div>
                     </div>
                 </div>
-                <div className="bg-gradient-to-br from-card to-card/50 border border-border rounded-lg p-6">
-                    <div className="flex items-center justify-between">
+                <div className="admin-stat-card green" style={{ padding: '20px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                         <div>
-                            <div className="text-sm font-medium text-muted-foreground">Published</div>
-                            <div className="text-4xl font-bold text-green-600 mt-2">{publishedProducts}</div>
+                            <div className="admin-stat-card-title" style={{ fontSize: '12px' }}>Published</div>
+                            <div className="admin-stat-card-value" style={{ fontSize: '28px' }}>{stats.published}</div>
                         </div>
-                        <div className="p-3 rounded-lg bg-green-500/10">
-                            <Icon name="CheckCircle" size={24} className="text-green-500" />
-                        </div>
+                        <div className="admin-stat-card-icon"><Icon name="CheckCircle2" size={24} /></div>
                     </div>
                 </div>
-                <div className="bg-gradient-to-br from-card to-card/50 border border-border rounded-lg p-6">
-                    <div className="flex items-center justify-between">
+                <div className="admin-stat-card orange" style={{ padding: '20px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                         <div>
-                            <div className="text-sm font-medium text-muted-foreground">Drafts</div>
-                            <div className="text-4xl font-bold text-amber-600 mt-2">{draftProducts}</div>
+                            <div className="admin-stat-card-title" style={{ fontSize: '12px' }}>Drafts</div>
+                            <div className="admin-stat-card-value" style={{ fontSize: '28px' }}>{stats.draft}</div>
                         </div>
-                        <div className="p-3 rounded-lg bg-amber-500/10">
-                            <Icon name="FileEdit" size={24} className="text-amber-500" />
+                        <div className="admin-stat-card-icon"><Icon name="FileEdit" size={24} /></div>
+                    </div>
+                </div>
+                <div className="admin-stat-card purple" style={{ padding: '20px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                        <div>
+                            <div className="admin-stat-card-title" style={{ fontSize: '12px' }}>Total Views</div>
+                            <div className="admin-stat-card-value" style={{ fontSize: '28px' }}>{stats.totalViews.toLocaleString()}</div>
                         </div>
+                        <div className="admin-stat-card-icon"><Icon name="Eye" size={24} /></div>
                     </div>
                 </div>
             </div>
 
-            {/* Filters */}
-            <div className="bg-card border border-border rounded-lg p-4 mb-6">
-                <div className="flex flex-col md:flex-row gap-4">
-                    <div className="flex-1">
-                        <div className="relative">
-                            <Icon name="Search" size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-                            <input
-                                type="text"
-                                placeholder="Search products by name, brand, or seller..."
-                                value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
-                                className="w-full pl-10 pr-4 py-2 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-accent/50"
-                            />
-                        </div>
-                    </div>
-                    <select
-                        value={filterCategory}
-                        onChange={(e) => setFilterCategory(e.target.value)}
-                        className="px-4 py-2 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-accent/50"
-                    >
-                        {categories.map(cat => (
-                            <option key={cat} value={cat}>
-                                {cat === 'all' ? 'All Categories' : cat.charAt(0).toUpperCase() + cat.slice(1)}
-                            </option>
-                        ))}
-                    </select>
+            {/* Filters Bar */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '24px', flexWrap: 'wrap' }}>
+                <div className="admin-search" style={{ flex: 1, minWidth: '200px', maxWidth: '400px' }}>
+                    <Icon name="Search" size={18} style={{ color: 'var(--admin-text-muted)' }} />
+                    <input
+                        type="text"
+                        placeholder="Search by name, brand, or seller..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                    />
                 </div>
-            </div>
 
-            {/* Loading State */}
-            {loading && (
-                <div className="flex items-center justify-center py-12">
-                    <Icon name="Loader2" className="animate-spin text-accent mr-2" />
-                    <span className="text-muted-foreground">Loading products...</span>
+                <select
+                    value={filterCategory}
+                    onChange={(e) => setFilterCategory(e.target.value)}
+                    style={{
+                        padding: '10px 16px',
+                        borderRadius: '10px',
+                        border: '1px solid var(--admin-border)',
+                        background: 'var(--admin-bg-card)',
+                        color: 'var(--admin-text-primary)',
+                        fontSize: '14px',
+                        cursor: 'pointer',
+                        outline: 'none',
+                    }}
+                >
+                    {categories.map(cat => (
+                        <option key={cat} value={cat} style={{ background: 'var(--admin-bg-card)' }}>
+                            {cat === 'all' ? 'All Categories' : cat.charAt(0).toUpperCase() + cat.slice(1)}
+                        </option>
+                    ))}
+                </select>
+
+                <div className="admin-range-selector">
+                    {['all', 'published', 'draft'].map(status => (
+                        <button
+                            key={status}
+                            className={`admin-range-btn ${filterStatus === status ? 'active' : ''}`}
+                            onClick={() => setFilterStatus(status)}
+                        >
+                            {status === 'all' ? 'All' : status.charAt(0).toUpperCase() + status.slice(1)}
+                        </button>
+                    ))}
                 </div>
-            )}
+
+                <button onClick={fetchProducts} className="admin-quick-btn" style={{ padding: '10px 16px' }}>
+                    <Icon name="RefreshCw" size={16} />
+                    Refresh
+                </button>
+            </div>
 
             {/* Error State */}
-            {error && !loading && (
-                <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-4 flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                        <Icon name="AlertTriangle" className="text-destructive" />
-                        <span className="text-destructive">{error}</span>
+            {error && (
+                <div className="admin-error" style={{ marginBottom: '24px' }}>
+                    <div className="admin-error-content">
+                        <Icon name="AlertTriangle" size={18} style={{ color: 'var(--admin-danger)' }} />
+                        <span className="admin-error-text">{error}</span>
                     </div>
-                    <Button size="sm" variant="ghost" onClick={fetchProducts}>Retry</Button>
+                    <button onClick={fetchProducts} className="admin-quick-btn" style={{ padding: '8px 16px' }}>Retry</button>
                 </div>
             )}
 
-            {/* Products Table */}
-            {!loading && !error && (
-                <div className="bg-card border border-border rounded-lg overflow-hidden">
-                    <div className="overflow-x-auto">
-                        <table className="w-full">
-                            <thead className="bg-muted/50 border-b border-border">
+            {/* Loading State */}
+            {loading ? (
+                <div className="admin-loading">
+                    <div className="admin-loading-spinner"></div>
+                    <span className="admin-loading-text">Loading products...</span>
+                </div>
+            ) : (
+                /* Products Table */
+                <div className="admin-content-card" style={{ padding: 0, overflow: 'hidden' }}>
+                    <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                        <thead>
+                            <tr style={{ background: 'var(--admin-bg-primary)' }}>
+                                <th style={{ padding: '14px 20px', textAlign: 'left', fontSize: '12px', fontWeight: '600', color: 'var(--admin-text-muted)', textTransform: 'uppercase' }}>Product</th>
+                                <th style={{ padding: '14px 20px', textAlign: 'left', fontSize: '12px', fontWeight: '600', color: 'var(--admin-text-muted)', textTransform: 'uppercase' }}>Category</th>
+                                <th style={{ padding: '14px 20px', textAlign: 'left', fontSize: '12px', fontWeight: '600', color: 'var(--admin-text-muted)', textTransform: 'uppercase' }}>Price</th>
+                                <th style={{ padding: '14px 20px', textAlign: 'left', fontSize: '12px', fontWeight: '600', color: 'var(--admin-text-muted)', textTransform: 'uppercase' }}>Seller</th>
+                                <th style={{ padding: '14px 20px', textAlign: 'left', fontSize: '12px', fontWeight: '600', color: 'var(--admin-text-muted)', textTransform: 'uppercase' }}>Views</th>
+                                <th style={{ padding: '14px 20px', textAlign: 'left', fontSize: '12px', fontWeight: '600', color: 'var(--admin-text-muted)', textTransform: 'uppercase' }}>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {filteredProducts.length === 0 ? (
                                 <tr>
-                                    <th className="text-left px-4 py-3 text-sm font-medium text-muted-foreground">Product</th>
-                                    <th className="text-left px-4 py-3 text-sm font-medium text-muted-foreground">Category</th>
-                                    <th className="text-left px-4 py-3 text-sm font-medium text-muted-foreground">Price</th>
-                                    <th className="text-left px-4 py-3 text-sm font-medium text-muted-foreground">Seller</th>
-                                    <th className="text-left px-4 py-3 text-sm font-medium text-muted-foreground">Views</th>
-                                    <th className="text-left px-4 py-3 text-sm font-medium text-muted-foreground">Status</th>
+                                    <td colSpan="6" style={{ padding: '60px', textAlign: 'center', color: 'var(--admin-text-muted)' }}>
+                                        <Icon name="Package" size={48} style={{ marginBottom: '16px', opacity: 0.3 }} />
+                                        <p style={{ margin: 0, fontSize: '16px' }}>No products found</p>
+                                    </td>
                                 </tr>
-                            </thead>
-                            <tbody className="divide-y divide-border">
-                                {filteredProducts.length === 0 ? (
-                                    <tr>
-                                        <td colSpan={6} className="px-4 py-12 text-center text-muted-foreground">
-                                            <Icon name="Package" size={32} className="mx-auto mb-2 opacity-50" />
-                                            <p>No products found</p>
+                            ) : (
+                                filteredProducts.map(product => (
+                                    <tr
+                                        key={product.id}
+                                        style={{ borderTop: '1px solid var(--admin-border)' }}
+                                        onMouseEnter={(e) => e.currentTarget.style.background = 'var(--admin-bg-card-hover)'}
+                                        onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                                    >
+                                        <td style={{ padding: '14px 20px' }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                                {product.image_url ? (
+                                                    <img src={product.image_url} alt={product.name} style={{ width: '44px', height: '44px', borderRadius: '10px', objectFit: 'cover', border: '1px solid var(--admin-border)' }} />
+                                                ) : (
+                                                    <div style={{ width: '44px', height: '44px', borderRadius: '10px', background: 'var(--admin-bg-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                        <Icon name="Image" size={18} style={{ color: 'var(--admin-text-muted)' }} />
+                                                    </div>
+                                                )}
+                                                <div>
+                                                    <div style={{ fontSize: '14px', fontWeight: '500', color: 'var(--admin-text-primary)' }}>{product.name}</div>
+                                                    {product.brand && <div style={{ fontSize: '12px', color: 'var(--admin-text-muted)' }}>{product.brand}</div>}
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td style={{ padding: '14px 20px' }}>
+                                            <span style={{
+                                                padding: '4px 10px',
+                                                borderRadius: '6px',
+                                                fontSize: '12px',
+                                                fontWeight: '500',
+                                                background: 'var(--admin-bg-primary)',
+                                                color: 'var(--admin-text-secondary)',
+                                            }}>
+                                                {product.category || 'Uncategorized'}
+                                            </span>
+                                        </td>
+                                        <td style={{ padding: '14px 20px', color: 'var(--admin-text-primary)', fontWeight: '500' }}>
+                                            {product.price ? `$${parseFloat(product.price).toFixed(2)}` : '-'}
+                                        </td>
+                                        <td style={{ padding: '14px 20px' }}>
+                                            <div style={{ fontSize: '13px', color: 'var(--admin-text-primary)' }}>{product.seller_name || '-'}</div>
+                                            <div style={{ fontSize: '11px', color: 'var(--admin-text-muted)' }}>{product.seller_email || ''}</div>
+                                        </td>
+                                        <td style={{ padding: '14px 20px' }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--admin-text-muted)' }}>
+                                                <Icon name="Eye" size={14} />
+                                                {product.view_count || 0}
+                                            </div>
+                                        </td>
+                                        <td style={{ padding: '14px 20px' }}>
+                                            {product.published ? (
+                                                <span className="admin-badge success">
+                                                    <Icon name="CheckCircle2" size={12} />
+                                                    Published
+                                                </span>
+                                            ) : (
+                                                <span className="admin-badge warning">
+                                                    <Icon name="FileEdit" size={12} />
+                                                    Draft
+                                                </span>
+                                            )}
                                         </td>
                                     </tr>
-                                ) : (
-                                    filteredProducts.map(product => (
-                                        <tr key={product.id} className="hover:bg-muted/30 transition-colors">
-                                            <td className="px-4 py-3">
-                                                <div className="flex items-center gap-3">
-                                                    {product.image_url ? (
-                                                        <img
-                                                            src={product.image_url}
-                                                            alt={product.name}
-                                                            className="w-10 h-10 rounded-lg object-cover border border-border"
-                                                        />
-                                                    ) : (
-                                                        <div className="w-10 h-10 rounded-lg bg-muted flex items-center justify-center">
-                                                            <Icon name="Image" size={16} className="text-muted-foreground" />
-                                                        </div>
-                                                    )}
-                                                    <div>
-                                                        <div className="font-medium text-foreground">{product.name}</div>
-                                                        {product.brand && (
-                                                            <div className="text-xs text-muted-foreground">{product.brand}</div>
-                                                        )}
-                                                    </div>
-                                                </div>
-                                            </td>
-                                            <td className="px-4 py-3">
-                                                <span className="px-2 py-1 bg-muted rounded-md text-xs font-medium">
-                                                    {product.category || 'Uncategorized'}
-                                                </span>
-                                            </td>
-                                            <td className="px-4 py-3 text-foreground">
-                                                {product.price ? `$${parseFloat(product.price).toFixed(2)}` : '-'}
-                                            </td>
-                                            <td className="px-4 py-3">
-                                                <div className="text-sm text-foreground">{product.seller_name || '-'}</div>
-                                                <div className="text-xs text-muted-foreground">{product.seller_email || ''}</div>
-                                            </td>
-                                            <td className="px-4 py-3 text-muted-foreground">
-                                                {product.view_count || 0}
-                                            </td>
-                                            <td className="px-4 py-3">
-                                                {product.published ? (
-                                                    <span className="inline-flex items-center gap-1 px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs font-medium">
-                                                        <Icon name="CheckCircle" size={12} />
-                                                        Published
-                                                    </span>
-                                                ) : (
-                                                    <span className="inline-flex items-center gap-1 px-2 py-1 bg-amber-100 text-amber-700 rounded-full text-xs font-medium">
-                                                        <Icon name="FileEdit" size={12} />
-                                                        Draft
-                                                    </span>
-                                                )}
-                                            </td>
-                                        </tr>
-                                    ))
-                                )}
-                            </tbody>
-                        </table>
-                    </div>
+                                ))
+                            )}
+                        </tbody>
+                    </table>
 
                     {/* Footer */}
-                    <div className="px-4 py-3 border-t border-border bg-muted/30 text-sm text-muted-foreground">
-                        Showing {filteredProducts.length} of {totalProducts} products
+                    <div style={{ padding: '14px 20px', borderTop: '1px solid var(--admin-border)', background: 'var(--admin-bg-primary)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <span style={{ fontSize: '13px', color: 'var(--admin-text-muted)' }}>
+                            Showing {filteredProducts.length} of {stats.total} products
+                        </span>
                     </div>
                 </div>
             )}
