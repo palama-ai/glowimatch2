@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import AdminLayout from '../../components/admin/AdminLayout';
 import AdminAnalytics from './AdminAnalytics';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import Icon from '../../components/AppIcon';
 
 const API_BASE = import.meta.env?.VITE_BACKEND_URL || 'https://backend-three-sigma-81.vercel.app/api';
@@ -50,15 +50,158 @@ const StatCard = ({ title, value, note, icon, color = 'blue', percentage }) => {
   );
 };
 
+// Search Result Item Component
+const SearchResultItem = ({ item, onClick }) => (
+  <div
+    className="admin-search-result-item"
+    onClick={onClick}
+    style={{
+      display: 'flex',
+      alignItems: 'center',
+      gap: '12px',
+      padding: '10px 14px',
+      cursor: 'pointer',
+      borderRadius: '8px',
+      transition: 'background 0.2s',
+    }}
+    onMouseEnter={(e) => e.currentTarget.style.background = 'var(--admin-bg-card-hover)'}
+    onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+  >
+    <div style={{
+      width: '32px',
+      height: '32px',
+      borderRadius: '8px',
+      background: `rgba(${item.type === 'user' ? '59, 130, 246' : item.type === 'product' ? '139, 92, 246' : '34, 197, 94'}, 0.15)`,
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+    }}>
+      <Icon
+        name={item.type === 'user' ? 'User' : item.type === 'product' ? 'Package' : 'FileText'}
+        size={16}
+        style={{ color: item.type === 'user' ? 'var(--admin-accent)' : item.type === 'product' ? 'var(--admin-purple)' : 'var(--admin-success)' }}
+      />
+    </div>
+    <div style={{ flex: 1 }}>
+      <div style={{ fontSize: '14px', fontWeight: '500', color: 'var(--admin-text-primary)' }}>{item.name}</div>
+      <div style={{ fontSize: '12px', color: 'var(--admin-text-muted)' }}>{item.subtitle}</div>
+    </div>
+    <div style={{
+      padding: '3px 8px',
+      borderRadius: '6px',
+      fontSize: '11px',
+      fontWeight: '500',
+      background: 'var(--admin-bg-primary)',
+      color: 'var(--admin-text-muted)',
+      textTransform: 'capitalize',
+    }}>
+      {item.type}
+    </div>
+  </div>
+);
+
 const Dashboard = () => {
+  const navigate = useNavigate();
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  // Search state
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState([]);
+  const [searchLoading, setSearchLoading] = useState(false);
+  const [showSearchResults, setShowSearchResults] = useState(false);
 
   // Signup block settings state
   const [signupBlock, setSignupBlock] = useState({ blockUserSignup: false, blockSellerSignup: false });
   const [signupBlockLoading, setSignupBlockLoading] = useState(false);
   const [signupBlockSuccess, setSignupBlockSuccess] = useState(null);
+
+  // Admin pages for search
+  const adminPages = useMemo(() => [
+    { name: 'Dashboard', subtitle: 'Main admin overview', type: 'page', path: '/admin' },
+    { name: 'Users Management', subtitle: 'Manage all users', type: 'page', path: '/admin/users' },
+    { name: 'Products', subtitle: 'Manage products', type: 'page', path: '/admin/products' },
+    { name: 'Blogs', subtitle: 'Manage blog posts', type: 'page', path: '/admin/blogs' },
+    { name: 'Messages', subtitle: 'View contact messages', type: 'page', path: '/admin/messages' },
+    { name: 'Notifications', subtitle: 'Send notifications', type: 'page', path: '/admin/notifications' },
+    { name: 'Sessions', subtitle: 'View active sessions', type: 'page', path: '/admin/sessions' },
+    { name: 'Safety', subtitle: 'Safety & security settings', type: 'page', path: '/admin/safety' },
+  ], []);
+
+  // Search function
+  const handleSearch = async (query) => {
+    setSearchQuery(query);
+
+    if (!query.trim()) {
+      setSearchResults([]);
+      setShowSearchResults(false);
+      return;
+    }
+
+    setShowSearchResults(true);
+    setSearchLoading(true);
+
+    try {
+      const raw = localStorage.getItem('gm_auth');
+      const headers = raw ? { Authorization: `Bearer ${JSON.parse(raw).token}` } : {};
+
+      // Search pages locally
+      const matchedPages = adminPages.filter(page =>
+        page.name.toLowerCase().includes(query.toLowerCase()) ||
+        page.subtitle.toLowerCase().includes(query.toLowerCase())
+      );
+
+      // Search users from API
+      let userResults = [];
+      try {
+        const usersRes = await fetch(`${API_BASE}/admin/users?search=${encodeURIComponent(query)}&limit=5`, { headers });
+        if (usersRes.ok) {
+          const usersData = await usersRes.json();
+          userResults = (usersData.data?.users || usersData.users || []).slice(0, 5).map(user => ({
+            name: user.name || user.email,
+            subtitle: user.email,
+            type: 'user',
+            path: '/admin/users',
+            id: user._id || user.id,
+          }));
+        }
+      } catch (e) {
+        console.warn('User search failed:', e);
+      }
+
+      // Search products from API
+      let productResults = [];
+      try {
+        const productsRes = await fetch(`${API_BASE}/admin/products?search=${encodeURIComponent(query)}&limit=5`, { headers });
+        if (productsRes.ok) {
+          const productsData = await productsRes.json();
+          productResults = (productsData.data?.products || productsData.products || []).slice(0, 5).map(product => ({
+            name: product.name || product.title,
+            subtitle: product.brand || product.category || 'Product',
+            type: 'product',
+            path: '/admin/products',
+            id: product._id || product.id,
+          }));
+        }
+      } catch (e) {
+        console.warn('Product search failed:', e);
+      }
+
+      // Combine results
+      setSearchResults([...matchedPages, ...userResults, ...productResults]);
+    } catch (e) {
+      console.error('Search failed:', e);
+    } finally {
+      setSearchLoading(false);
+    }
+  };
+
+  const handleSearchResultClick = (item) => {
+    setShowSearchResults(false);
+    setSearchQuery('');
+    navigate(item.path);
+  };
 
   const fetchDebugStats = async () => {
     try {
@@ -153,6 +296,17 @@ const Dashboard = () => {
     fetchSignupBlockSettings();
   }, []);
 
+  // Close search results when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (!e.target.closest('.admin-search-container')) {
+        setShowSearchResults(false);
+      }
+    };
+    document.addEventListener('click', handleClickOutside);
+    return () => document.removeEventListener('click', handleClickOutside);
+  }, []);
+
   const getActivePercentage = () => {
     if (!stats) return 0;
     return stats.total > 0 ? Math.round((stats.active / stats.total) * 100) : 0;
@@ -174,14 +328,57 @@ const Dashboard = () => {
           <p className="admin-header-subtitle">Here's what's happening with your platform today.</p>
         </div>
         <div className="admin-header-actions">
-          <div className="admin-search">
-            <Icon name="Search" size={18} style={{ color: 'var(--admin-text-muted)' }} />
-            <input type="text" placeholder="Search..." />
+          {/* Search with Dropdown */}
+          <div className="admin-search-container" style={{ position: 'relative' }}>
+            <div className="admin-search">
+              <Icon name="Search" size={18} style={{ color: 'var(--admin-text-muted)' }} />
+              <input
+                type="text"
+                placeholder="Search users, products, pages..."
+                value={searchQuery}
+                onChange={(e) => handleSearch(e.target.value)}
+                onFocus={() => searchQuery && setShowSearchResults(true)}
+              />
+              {searchLoading && (
+                <Icon name="Loader2" size={16} style={{ color: 'var(--admin-text-muted)', animation: 'spin 1s linear infinite' }} />
+              )}
+            </div>
+
+            {/* Search Results Dropdown */}
+            {showSearchResults && (
+              <div style={{
+                position: 'absolute',
+                top: '100%',
+                left: 0,
+                right: 0,
+                marginTop: '8px',
+                background: 'var(--admin-bg-card)',
+                border: '1px solid var(--admin-border)',
+                borderRadius: '12px',
+                boxShadow: '0 10px 40px rgba(0,0,0,0.3)',
+                zIndex: 100,
+                maxHeight: '400px',
+                overflowY: 'auto',
+              }}>
+                {searchResults.length === 0 && !searchLoading ? (
+                  <div style={{ padding: '20px', textAlign: 'center', color: 'var(--admin-text-muted)' }}>
+                    <Icon name="Search" size={24} style={{ marginBottom: '8px', opacity: 0.5 }} />
+                    <p style={{ margin: 0, fontSize: '14px' }}>No results found for "{searchQuery}"</p>
+                  </div>
+                ) : (
+                  <div style={{ padding: '8px' }}>
+                    {searchResults.map((item, index) => (
+                      <SearchResultItem
+                        key={`${item.type}-${item.name}-${index}`}
+                        item={item}
+                        onClick={() => handleSearchResultClick(item)}
+                      />
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
           </div>
-          <button className="admin-notification-btn">
-            <Icon name="Bell" size={20} />
-            <span className="admin-notification-badge">3</span>
-          </button>
         </div>
       </div>
 
