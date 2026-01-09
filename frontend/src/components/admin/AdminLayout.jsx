@@ -54,13 +54,22 @@ export default function AdminLayout({ children }) {
       <aside className={`admin-sidebar ${mobileMenuOpen ? 'open' : ''}`}>
         {/* Logo Section */}
         <div className="admin-sidebar-logo">
-          <div className="admin-sidebar-logo-icon">
-            <Icon name="Sparkles" size={22} />
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <div className="admin-sidebar-logo-icon">
+              <Icon name="Sparkles" size={22} />
+            </div>
+            <div>
+              <div className="admin-sidebar-logo-text">GlowMatch</div>
+              <div className="admin-sidebar-logo-subtitle">Admin Panel</div>
+            </div>
           </div>
-          <div>
-            <div className="admin-sidebar-logo-text">GlowMatch</div>
-            <div className="admin-sidebar-logo-subtitle">Admin Panel</div>
-          </div>
+          {/* Close button for mobile */}
+          <button
+            className="admin-sidebar-close"
+            onClick={() => setMobileMenuOpen(false)}
+          >
+            <Icon name="X" size={20} />
+          </button>
         </div>
 
         {/* Navigation */}
