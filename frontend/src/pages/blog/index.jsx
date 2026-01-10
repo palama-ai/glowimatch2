@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { useI18n } from '../../contexts/I18nContext';
 import Icon from '../../components/AppIcon';
 import { IMAGES } from '../../utils/imageConstants';
+import SEO from '../../components/SEO';
 
 const API_BASE = import.meta.env?.VITE_BACKEND_URL || 'https://backend-three-sigma-81.vercel.app/api';
 
@@ -62,6 +63,12 @@ const Blog = () => {
   }, []);
   return (
     <div className="min-h-screen bg-background">
+      <SEO
+        title="Skincare Tips & Beauty Blog"
+        description="Explore expert skincare tips, beauty routines, and product guides. Learn about skin types, anti-aging secrets, and the latest trends in skincare and cosmetics."
+        keywords="skincare blog, beauty tips, skin care routine, skincare articles, beauty guide, نصائح العناية بالبشرة, مدونة الجمال, conseils beauté"
+        url="/blog"
+      />
       <Header />
       <main>
         {/* Hero Section */}

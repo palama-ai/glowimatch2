@@ -1,39 +1,268 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo, useRef, useCallback } from 'react';
 import AdminLayout from '../../components/admin/AdminLayout';
 import AdminAnalytics from './AdminAnalytics';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import Icon from '../../components/AppIcon';
-import Button from '../../components/ui/Button';
 
 const API_BASE = import.meta.env?.VITE_BACKEND_URL || 'https://backend-three-sigma-81.vercel.app/api';
 
-const StatCard = ({ title, value, note, icon, color = 'accent' }) => (
-  <div className="bg-gradient-to-br from-card to-card/50 border border-border rounded-lg p-4 sm:p-6 hover:border-accent/50 transition-colors">
-    <div className="flex items-start justify-between">
-      <div className="flex-1">
-        <div className="text-xs sm:text-sm font-medium text-muted-foreground">{title}</div>
-        <div className="text-2xl sm:text-4xl font-bold text-foreground mt-2 sm:mt-3">{value}</div>
-        {note && <div className="text-xs text-muted-foreground mt-1 sm:mt-2">{note}</div>}
-      </div>
-      {icon && (
-        <div className={`p-2 sm:p-3 rounded-lg bg-${color}/10`}>
-          <Icon name={icon} size={20} className={`text-${color} sm:hidden`} />
-          <Icon name={icon} size={24} className={`text-${color} hidden sm:block`} />
+// Modern Stat Card Component
+const StatCard = ({ title, value, note, icon, color = 'blue', percentage }) => {
+  const circumference = 2 * Math.PI * 24;
+  const offset = circumference - (percentage / 100) * circumference;
+
+  return (
+    <div className={`admin-stat-card ${color}`}>
+      <div className="admin-stat-card-header">
+        <div>
+          <div className="admin-stat-card-title">{title}</div>
+          <div className="admin-stat-card-value">{typeof value === 'number' ? value.toLocaleString() : value}</div>
+          {note && <div className="admin-stat-card-note">{note}</div>}
         </div>
-      )}
+        {percentage !== undefined ? (
+          <div className="admin-circular-progress">
+            <svg width="60" height="60" viewBox="0 0 60 60">
+              <circle
+                className="admin-circular-progress-bg"
+                cx="30"
+                cy="30"
+                r="24"
+              />
+              <circle
+                className="admin-circular-progress-bar"
+                cx="30"
+                cy="30"
+                r="24"
+                strokeDasharray={circumference}
+                strokeDashoffset={offset}
+                style={{ stroke: `var(--admin-${color === 'blue' ? 'accent' : color})` }}
+              />
+            </svg>
+            <span className="admin-circular-progress-text">{percentage}%</span>
+          </div>
+        ) : (
+          <div className="admin-stat-card-icon">
+            <Icon name={icon} size={24} />
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+// Search Result Item Component
+const SearchResultItem = ({ item, onClick }) => (
+  <div
+    className="admin-search-result-item"
+    onClick={onClick}
+    style={{
+      display: 'flex',
+      alignItems: 'center',
+      gap: '12px',
+      padding: '10px 14px',
+      cursor: 'pointer',
+      borderRadius: '8px',
+      transition: 'background 0.2s',
+    }}
+    onMouseEnter={(e) => e.currentTarget.style.background = 'var(--admin-bg-card-hover)'}
+    onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+  >
+    <div style={{
+      width: '32px',
+      height: '32px',
+      borderRadius: '8px',
+      background: `rgba(${item.type === 'user' ? '59, 130, 246' : item.type === 'product' ? '139, 92, 246' : '34, 197, 94'}, 0.15)`,
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+    }}>
+      <Icon
+        name={item.type === 'user' ? 'User' : item.type === 'product' ? 'Package' : 'FileText'}
+        size={16}
+        style={{ color: item.type === 'user' ? 'var(--admin-accent)' : item.type === 'product' ? 'var(--admin-purple)' : 'var(--admin-success)' }}
+      />
+    </div>
+    <div style={{ flex: 1 }}>
+      <div style={{ fontSize: '14px', fontWeight: '500', color: 'var(--admin-text-primary)' }}>{item.name}</div>
+      <div style={{ fontSize: '12px', color: 'var(--admin-text-muted)' }}>{item.subtitle}</div>
+    </div>
+    <div style={{
+      padding: '3px 8px',
+      borderRadius: '6px',
+      fontSize: '11px',
+      fontWeight: '500',
+      background: 'var(--admin-bg-primary)',
+      color: 'var(--admin-text-muted)',
+      textTransform: 'capitalize',
+    }}>
+      {item.type}
     </div>
   </div>
 );
 
 const Dashboard = () => {
+  const navigate = useNavigate();
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  // Search state
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState([]);
+  const [searchLoading, setSearchLoading] = useState(false);
+  const [showSearchResults, setShowSearchResults] = useState(false);
+
+  // Cache for search data - fetch once, search locally
+  const searchCache = useRef({ users: null, products: null, lastFetch: 0 });
+  const debounceTimer = useRef(null);
 
   // Signup block settings state
   const [signupBlock, setSignupBlock] = useState({ blockUserSignup: false, blockSellerSignup: false });
   const [signupBlockLoading, setSignupBlockLoading] = useState(false);
   const [signupBlockSuccess, setSignupBlockSuccess] = useState(null);
+
+  // Admin pages for search
+  const adminPages = useMemo(() => [
+    { name: 'Dashboard', subtitle: 'Main admin overview', type: 'page', path: '/admin' },
+    { name: 'Users Management', subtitle: 'Manage all users', type: 'page', path: '/admin/users' },
+    { name: 'Products', subtitle: 'Manage products', type: 'page', path: '/admin/products' },
+    { name: 'Blogs', subtitle: 'Manage blog posts', type: 'page', path: '/admin/blogs' },
+    { name: 'Messages', subtitle: 'View contact messages', type: 'page', path: '/admin/messages' },
+    { name: 'Notifications', subtitle: 'Send notifications', type: 'page', path: '/admin/notifications' },
+    { name: 'Sessions', subtitle: 'View active sessions', type: 'page', path: '/admin/sessions' },
+    { name: 'Safety', subtitle: 'Safety & security settings', type: 'page', path: '/admin/safety' },
+  ], []);
+
+  // Fetch and cache search data (users & products) - only once per session or every 5 minutes
+  const fetchSearchData = useCallback(async () => {
+    const now = Date.now();
+    const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+
+    // Return cached data if fresh
+    if (searchCache.current.users && searchCache.current.products && (now - searchCache.current.lastFetch) < CACHE_DURATION) {
+      return searchCache.current;
+    }
+
+    const raw = localStorage.getItem('gm_auth');
+    const headers = raw ? { Authorization: `Bearer ${JSON.parse(raw).token}` } : {};
+
+    // Fetch both in parallel
+    const [usersRes, productsRes] = await Promise.all([
+      fetch(`${API_BASE}/admin/users`, { headers }).catch(() => null),
+      fetch(`${API_BASE}/admin/products`, { headers }).catch(() => null)
+    ]);
+
+    let users = [];
+    let products = [];
+
+    if (usersRes?.ok) {
+      const data = await usersRes.json();
+      users = data.data || data || [];
+    }
+
+    if (productsRes?.ok) {
+      const data = await productsRes.json();
+      products = data.data || data || [];
+    }
+
+    // Update cache
+    searchCache.current = { users, products, lastFetch: now };
+    return searchCache.current;
+  }, []);
+
+  // Fast local search function
+  const performLocalSearch = useCallback((query, cache) => {
+    const queryLower = query.toLowerCase();
+
+    // Search pages (instant)
+    const matchedPages = adminPages.filter(page =>
+      page.name.toLowerCase().includes(queryLower) ||
+      page.subtitle.toLowerCase().includes(queryLower)
+    );
+
+    // Search users from cache
+    const userResults = (cache.users || [])
+      .filter(user =>
+        (user.full_name && user.full_name.toLowerCase().includes(queryLower)) ||
+        (user.email && user.email.toLowerCase().includes(queryLower))
+      )
+      .slice(0, 5)
+      .map(user => ({
+        name: user.full_name || user.email,
+        subtitle: user.email,
+        type: 'user',
+        path: '/admin/users',
+        id: user.id,
+      }));
+
+    // Search products from cache
+    const productResults = (cache.products || [])
+      .filter(product =>
+        (product.name && product.name.toLowerCase().includes(queryLower)) ||
+        (product.brand && product.brand.toLowerCase().includes(queryLower)) ||
+        (product.category && product.category.toLowerCase().includes(queryLower))
+      )
+      .slice(0, 5)
+      .map(product => ({
+        name: product.name,
+        subtitle: product.brand || product.category || 'Product',
+        type: 'product',
+        path: '/admin/products',
+        id: product.id,
+      }));
+
+    return [...matchedPages, ...userResults, ...productResults];
+  }, [adminPages]);
+
+  // Search function with debouncing and caching
+  const handleSearch = useCallback((query) => {
+    setSearchQuery(query);
+
+    // Clear previous debounce timer
+    if (debounceTimer.current) {
+      clearTimeout(debounceTimer.current);
+    }
+
+    if (!query.trim()) {
+      setSearchResults([]);
+      setShowSearchResults(false);
+      return;
+    }
+
+    setShowSearchResults(true);
+
+    // If we have cached data, show instant results from pages
+    const queryLower = query.toLowerCase();
+    const instantPageResults = adminPages.filter(page =>
+      page.name.toLowerCase().includes(queryLower) ||
+      page.subtitle.toLowerCase().includes(queryLower)
+    );
+
+    // Show page results immediately
+    if (instantPageResults.length > 0) {
+      setSearchResults(instantPageResults);
+    }
+
+    // Debounce the API search for users/products (300ms)
+    debounceTimer.current = setTimeout(async () => {
+      setSearchLoading(true);
+      try {
+        const cache = await fetchSearchData();
+        const results = performLocalSearch(query, cache);
+        setSearchResults(results);
+      } catch (e) {
+        console.error('Search failed:', e);
+      } finally {
+        setSearchLoading(false);
+      }
+    }, 300);
+  }, [adminPages, fetchSearchData, performLocalSearch]);
+
+  const handleSearchResultClick = (item) => {
+    setShowSearchResults(false);
+    setSearchQuery('');
+    navigate(item.path);
+  };
 
   const fetchDebugStats = async () => {
     try {
@@ -128,6 +357,17 @@ const Dashboard = () => {
     fetchSignupBlockSettings();
   }, []);
 
+  // Close search results when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (!e.target.closest('.admin-search-container')) {
+        setShowSearchResults(false);
+      }
+    };
+    document.addEventListener('click', handleClickOutside);
+    return () => document.removeEventListener('click', handleClickOutside);
+  }, []);
+
   const getActivePercentage = () => {
     if (!stats) return 0;
     return stats.total > 0 ? Math.round((stats.active / stats.total) * 100) : 0;
@@ -140,123 +380,114 @@ const Dashboard = () => {
 
   return (
     <AdminLayout>
-      {/* Header */}
-      <div className="flex flex-col gap-4 mb-6 sm:mb-8">
+      {/* Header Section */}
+      <div className="admin-header">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Dashboard</h1>
-          <p className="text-sm sm:text-base text-muted-foreground mt-1">Welcome back! Here's your platform overview.</p>
+          <h1 className="admin-header-welcome">
+            Welcome back, Admin! <span className="admin-header-welcome-emoji">👋</span>
+          </h1>
+          <p className="admin-header-subtitle">Here's what's happening with your platform today.</p>
         </div>
-        <div className="flex flex-wrap gap-2">
-          <Link to="/admin/users">
-            <Button variant="outline" iconName="Users" iconPosition="left" className="text-xs sm:text-sm">
-              Users
-            </Button>
-          </Link>
-          <Link to="/admin/blogs">
-            <Button variant="outline" iconName="BookOpen" iconPosition="left" className="text-xs sm:text-sm">
-              Blogs
-            </Button>
-          </Link>
-          <Link to="/admin/messages">
-            <Button variant="outline" iconName="Mail" iconPosition="left" className="text-xs sm:text-sm">
-              Messages
-            </Button>
-          </Link>
+        <div className="admin-header-actions">
+          {/* Search with Dropdown */}
+          <div className="admin-search-container" style={{ position: 'relative' }}>
+            <div className="admin-search">
+              <Icon name="Search" size={18} style={{ color: 'var(--admin-text-muted)' }} />
+              <input
+                type="text"
+                placeholder="Search users, products, pages..."
+                value={searchQuery}
+                onChange={(e) => handleSearch(e.target.value)}
+                onFocus={() => searchQuery && setShowSearchResults(true)}
+              />
+              {searchLoading && (
+                <Icon name="Loader2" size={16} style={{ color: 'var(--admin-text-muted)', animation: 'spin 1s linear infinite' }} />
+              )}
+            </div>
+
+            {/* Search Results Dropdown */}
+            {showSearchResults && (
+              <div style={{
+                position: 'absolute',
+                top: '100%',
+                left: 0,
+                right: 0,
+                marginTop: '8px',
+                background: 'var(--admin-bg-card)',
+                border: '1px solid var(--admin-border)',
+                borderRadius: '12px',
+                boxShadow: '0 10px 40px rgba(0,0,0,0.3)',
+                zIndex: 100,
+                maxHeight: '400px',
+                overflowY: 'auto',
+              }}>
+                {searchResults.length === 0 && !searchLoading ? (
+                  <div style={{ padding: '20px', textAlign: 'center', color: 'var(--admin-text-muted)' }}>
+                    <Icon name="Search" size={24} style={{ marginBottom: '8px', opacity: 0.5 }} />
+                    <p style={{ margin: 0, fontSize: '14px' }}>No results found for "{searchQuery}"</p>
+                  </div>
+                ) : (
+                  <div style={{ padding: '8px' }}>
+                    {searchResults.map((item, index) => (
+                      <SearchResultItem
+                        key={`${item.type}-${item.name}-${index}`}
+                        item={item}
+                        onClick={() => handleSearchResultClick(item)}
+                      />
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
-      {/* Signup Settings Section */}
-      <div className="bg-card border border-border rounded-lg p-4 sm:p-6 mb-6 sm:mb-8">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
-          <div>
-            <h3 className="text-base sm:text-lg font-semibold text-foreground flex items-center gap-2">
-              <Icon name="ShieldAlert" size={18} className="text-accent sm:hidden" />
-              <Icon name="ShieldAlert" size={20} className="text-accent hidden sm:block" />
-              Signup Control
-            </h3>
-            <p className="text-xs sm:text-sm text-muted-foreground mt-1">Block new account registrations</p>
-          </div>
-          {signupBlockSuccess && (
-            <div className="px-2 sm:px-3 py-1 sm:py-1.5 bg-green-100 border border-green-300 text-green-700 rounded-lg text-xs sm:text-sm font-medium flex items-center gap-2">
-              <Icon name="CheckCircle2" size={14} />
-              {signupBlockSuccess}
-            </div>
-          )}
-        </div>
-
-        <div className="flex flex-col sm:flex-row gap-4">
-          {/* Block User Signup Button */}
-          <button
-            onClick={() => updateSignupBlock('user', !signupBlock.blockUserSignup)}
-            disabled={signupBlockLoading}
-            className={`flex-1 flex items-center justify-center gap-3 px-4 py-3 rounded-lg border-2 transition-all font-medium ${signupBlock.blockUserSignup
-              ? 'bg-red-50 border-red-300 text-red-700 hover:bg-red-100'
-              : 'bg-green-50 border-green-300 text-green-700 hover:bg-green-100'
-              } ${signupBlockLoading ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
-          >
-            <Icon
-              name={signupBlock.blockUserSignup ? "UserX" : "UserCheck"}
-              size={20}
-              className={signupBlock.blockUserSignup ? 'text-red-600' : 'text-green-600'}
-            />
-            <div className="text-left">
-              <div className="text-sm">User Signup</div>
-              <div className={`text-xs ${signupBlock.blockUserSignup ? 'text-red-500' : 'text-green-500'}`}>
-                {signupBlock.blockUserSignup ? 'Blocked' : 'Enabled'}
-              </div>
-            </div>
-            {signupBlockLoading && <Icon name="Loader2" size={16} className="animate-spin ml-2" />}
-          </button>
-
-          {/* Block Seller Signup Button */}
-          <button
-            onClick={() => updateSignupBlock('seller', !signupBlock.blockSellerSignup)}
-            disabled={signupBlockLoading}
-            className={`flex-1 flex items-center justify-center gap-3 px-4 py-3 rounded-lg border-2 transition-all font-medium ${signupBlock.blockSellerSignup
-              ? 'bg-red-50 border-red-300 text-red-700 hover:bg-red-100'
-              : 'bg-green-50 border-green-300 text-green-700 hover:bg-green-100'
-              } ${signupBlockLoading ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
-          >
-            <Icon
-              name={signupBlock.blockSellerSignup ? "StoreOff" : "Store"}
-              size={20}
-              className={signupBlock.blockSellerSignup ? 'text-red-600' : 'text-green-600'}
-            />
-            <div className="text-left">
-              <div className="text-sm">Seller Signup</div>
-              <div className={`text-xs ${signupBlock.blockSellerSignup ? 'text-red-500' : 'text-green-500'}`}>
-                {signupBlock.blockSellerSignup ? 'Blocked' : 'Enabled'}
-              </div>
-            </div>
-            {signupBlockLoading && <Icon name="Loader2" size={16} className="animate-spin ml-2" />}
-          </button>
-        </div>
+      {/* Quick Access Buttons */}
+      <div className="admin-quick-access">
+        <Link to="/admin/users" className="admin-quick-btn">
+          <Icon name="Users" size={18} />
+          Users
+        </Link>
+        <Link to="/admin/blogs" className="admin-quick-btn">
+          <Icon name="BookOpen" size={18} />
+          Blogs
+        </Link>
+        <Link to="/admin/messages" className="admin-quick-btn">
+          <Icon name="Mail" size={18} />
+          Messages
+        </Link>
+        <Link to="/admin/products" className="admin-quick-btn">
+          <Icon name="Package" size={18} />
+          Products
+        </Link>
       </div>
 
       {/* Loading State */}
       {loading && (
-        <div className="mb-6 p-4 bg-accent/10 border border-accent/20 rounded-lg flex items-center space-x-3">
-          <Icon name="Loader2" className="animate-spin text-accent" />
-          <span className="text-accent font-medium">Loading statistics…</span>
+        <div className="admin-loading">
+          <div className="admin-loading-spinner"></div>
+          <span className="admin-loading-text">Loading statistics…</span>
         </div>
       )}
 
       {/* Error State */}
       {error && !loading && (
-        <div className="mb-6 p-4 bg-destructive/10 border border-destructive/20 rounded-lg flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <Icon name="AlertTriangle" className="text-destructive" />
-            <span className="text-destructive font-medium">{error}</span>
+        <div className="admin-error">
+          <div className="admin-error-content">
+            <Icon name="AlertTriangle" size={20} style={{ color: 'var(--admin-danger)' }} />
+            <span className="admin-error-text">{error}</span>
           </div>
-          <Button size="sm" variant="ghost" onClick={fetchStats}>
+          <button className="admin-quick-btn" onClick={fetchStats}>
+            <Icon name="RefreshCw" size={16} />
             Retry
-          </Button>
+          </button>
         </div>
       )}
 
-      {/* Key Metrics */}
+      {/* Stats Cards Grid */}
       {stats && (
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6 sm:mb-8">
+        <div className="admin-stats-grid">
           <StatCard
             title="Total Users"
             value={stats.total ?? 0}
@@ -269,6 +500,7 @@ const Dashboard = () => {
             note={`${getActivePercentage()}% of total`}
             icon="UserCheck"
             color="green"
+            percentage={getActivePercentage()}
           />
           <StatCard
             title="Disabled Users"
@@ -282,52 +514,111 @@ const Dashboard = () => {
             note={`${getSubscriptionPercentage()}% of total`}
             icon="CreditCard"
             color="purple"
+            percentage={getSubscriptionPercentage()}
           />
         </div>
       )}
 
-      {/* Plans Breakdown */}
-      {stats && (
-        <div className="bg-card border border-border rounded-lg p-4 sm:p-6 mb-6 sm:mb-8">
-          <div className="flex items-center justify-between mb-4 sm:mb-6">
-            <div>
-              <h3 className="text-base sm:text-lg font-semibold text-foreground">Subscription Plans</h3>
-              <p className="text-xs sm:text-sm text-muted-foreground mt-1">Active subscriptions by plan</p>
+      {/* Two Column Layout: Signup Control & Plans */}
+      <div className="admin-two-col">
+        {/* Signup Control Panel */}
+        <div className="admin-signup-control">
+          <div className="admin-signup-control-header">
+            <div className="admin-signup-control-title">
+              <Icon name="ShieldAlert" size={22} style={{ color: 'var(--admin-warning)' }} />
+              Signup Control
             </div>
-            <Icon name="PieChart" className="text-accent" size={20} />
+            {signupBlockSuccess && (
+              <div className="admin-success-alert">
+                <Icon name="CheckCircle2" size={16} />
+                {signupBlockSuccess}
+              </div>
+            )}
           </div>
+          <p style={{ fontSize: '13px', color: 'var(--admin-text-muted)', marginBottom: '20px' }}>
+            Block new account registrations for users or sellers
+          </p>
 
-          {Object.keys(stats.planBreakdown || {}).length === 0 ? (
-            <div className="text-center py-8">
-              <Icon name="TrendingUp" className="mx-auto text-muted-foreground mb-3" size={32} />
-              <p className="text-sm text-muted-foreground">No active subscriptions yet</p>
+          <div className="admin-signup-control-buttons">
+            <button
+              onClick={() => updateSignupBlock('user', !signupBlock.blockUserSignup)}
+              disabled={signupBlockLoading}
+              className={`admin-signup-btn ${signupBlock.blockUserSignup ? 'blocked' : 'enabled'}`}
+            >
+              <Icon
+                name={signupBlock.blockUserSignup ? "UserX" : "UserCheck"}
+                size={24}
+              />
+              <div style={{ textAlign: 'left' }}>
+                <div className="admin-signup-btn-label">User Signup</div>
+                <div className="admin-signup-btn-status">
+                  {signupBlock.blockUserSignup ? 'Blocked' : 'Enabled'}
+                </div>
+              </div>
+              {signupBlockLoading && <Icon name="Loader2" size={18} className="animate-spin" />}
+            </button>
+
+            <button
+              onClick={() => updateSignupBlock('seller', !signupBlock.blockSellerSignup)}
+              disabled={signupBlockLoading}
+              className={`admin-signup-btn ${signupBlock.blockSellerSignup ? 'blocked' : 'enabled'}`}
+            >
+              <Icon
+                name={signupBlock.blockSellerSignup ? "StoreOff" : "Store"}
+                size={24}
+              />
+              <div style={{ textAlign: 'left' }}>
+                <div className="admin-signup-btn-label">Seller Signup</div>
+                <div className="admin-signup-btn-status">
+                  {signupBlock.blockSellerSignup ? 'Blocked' : 'Enabled'}
+                </div>
+              </div>
+              {signupBlockLoading && <Icon name="Loader2" size={18} className="animate-spin" />}
+            </button>
+          </div>
+        </div>
+
+        {/* Subscription Plans */}
+        {stats && (
+          <div className="admin-plans-section">
+            <div className="admin-content-card-header">
+              <div>
+                <h3 className="admin-content-card-title">Subscription Plans</h3>
+                <p className="admin-content-card-subtitle">Active subscriptions by plan</p>
+              </div>
+              <Icon name="PieChart" size={22} style={{ color: 'var(--admin-accent)' }} />
             </div>
-          ) : (
-            <div className="space-y-4">
-              {Object.entries(stats.planBreakdown).map(([plan, count]) => {
-                const maxCount = Math.max(...Object.values(stats.planBreakdown));
-                const percentage = (count / maxCount) * 100;
-                return (
-                  <div key={plan} className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium text-foreground">
+
+            {Object.keys(stats.planBreakdown || {}).length === 0 ? (
+              <div style={{ textAlign: 'center', padding: '40px 0', color: 'var(--admin-text-muted)' }}>
+                <Icon name="TrendingUp" size={40} style={{ marginBottom: '12px', opacity: 0.5 }} />
+                <p style={{ fontSize: '14px' }}>No active subscriptions yet</p>
+              </div>
+            ) : (
+              <div style={{ marginTop: '16px' }}>
+                {Object.entries(stats.planBreakdown).map(([plan, count]) => {
+                  const maxCount = Math.max(...Object.values(stats.planBreakdown));
+                  const percentage = (count / maxCount) * 100;
+                  return (
+                    <div key={plan} className="admin-plan-item">
+                      <span className="admin-plan-name">
                         {plan === 'none' ? 'No Plan' : plan.charAt(0).toUpperCase() + plan.slice(1)}
                       </span>
-                      <span className="text-lg font-bold text-accent">{count}</span>
+                      <div className="admin-plan-bar">
+                        <div
+                          className="admin-plan-bar-fill"
+                          style={{ width: `${Math.max(5, percentage)}%` }}
+                        />
+                      </div>
+                      <span className="admin-plan-count">{count}</span>
                     </div>
-                    <div className="w-full bg-muted rounded-full h-3 overflow-hidden">
-                      <div
-                        className="h-3 bg-gradient-to-r from-accent to-secondary rounded-full transition-all duration-500"
-                        style={{ width: `${Math.max(5, percentage)}%` }}
-                      />
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </div>
-      )}
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        )}
+      </div>
 
       {/* Analytics Section */}
       {!loading && stats && <AdminAnalytics />}

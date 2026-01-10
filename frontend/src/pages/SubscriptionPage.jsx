@@ -4,6 +4,7 @@ import { supabase, subscriptionService } from '../lib/supabase';
 import Header from '../components/ui/Header';
 import Button from '../components/ui/Button';
 import Icon from '../components/AppIcon';
+import SEO, { createFAQSchema } from '../components/SEO';
 
 const SubscriptionPage = () => {
   const { userProfile, subscription, user, isAdmin } = useAuth();
@@ -120,6 +121,17 @@ const SubscriptionPage = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEO
+        title="Skincare Subscription Plans"
+        description="Choose your Glowimatch skincare subscription plan. Get unlimited AI skin analysis, personalized recommendations, and premium beauty features."
+        keywords="skincare subscription, beauty membership, premium skincare plan, اشتراك العناية بالبشرة, abonnement soins"
+        url="/subscription"
+        jsonLd={createFAQSchema([
+          { question: 'How many times can I take the quiz?', answer: 'Each plan comes with a specific number of quiz attempts per month. Free plan includes 5 attempts, while paid plans offer unlimited attempts.' },
+          { question: 'Can I cancel my subscription anytime?', answer: 'Yes, you can cancel your subscription at any time. Your plan will remain active until the end of your current billing period.' },
+          { question: 'What payment methods do you accept?', answer: 'We accept all major credit cards through Stripe, PayPal, and Payoneer for your convenience.' }
+        ])}
+      />
       <Header />
       <main className="max-w-6xl mx-auto px-5 lg:px-8 py-8">
         <div className="text-center mb-12">
@@ -127,7 +139,7 @@ const SubscriptionPage = () => {
             Choose Your Skincare Plan
           </h1>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Get personalized skin analysis with our comprehensive quiz system. 
+            Get personalized skin analysis with our comprehensive quiz system.
             Choose the plan that fits your skincare journey.
           </p>
         </div>
@@ -139,7 +151,7 @@ const SubscriptionPage = () => {
               <div>
                 <h3 className="text-lg font-semibold text-foreground">Current Plan</h3>
                 <p className="text-accent font-medium capitalize">
-                  {subscription?.subscription_plans?.name} - 
+                  {subscription?.subscription_plans?.name} -
                   {subscription?.quiz_attempts_used}/{subscription?.quiz_attempts_limit} attempts used
                 </p>
               </div>
@@ -158,14 +170,13 @@ const SubscriptionPage = () => {
           {plans?.map((plan) => {
             const isCurrentPlan = subscription?.subscription_plans?.id === plan?.id;
             const features = Array.isArray(plan?.features) ? plan?.features : JSON.parse(plan?.features || '[]');
-            
+
             return (
               <div
                 key={plan?.id}
-                className={`relative bg-card rounded-xl border-2 p-6 transition-all duration-300 hover:shadow-lg ${
-                  isCurrentPlan 
-                    ? 'border-accent bg-accent/5' :'border-border hover:border-accent/50'
-                }`}
+                className={`relative bg-card rounded-xl border-2 p-6 transition-all duration-300 hover:shadow-lg ${isCurrentPlan
+                    ? 'border-accent bg-accent/5' : 'border-border hover:border-accent/50'
+                  }`}
               >
                 {isCurrentPlan && (
                   <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
@@ -202,7 +213,7 @@ const SubscriptionPage = () => {
                       </div>
                     </div>
                   </div>
-                  
+
                   <ul className="space-y-3">
                     {features?.map((feature, index) => (
                       <li key={index} className="flex items-start space-x-3">
@@ -221,20 +232,20 @@ const SubscriptionPage = () => {
                     processingPlan === plan?.id
                       ? 'Loader2'
                       : isCurrentPlan
-                      ? 'Check'
-                      : plan?.price === 0
-                      ? 'ArrowRight'
-                      : 'CreditCard'
+                        ? 'Check'
+                        : plan?.price === 0
+                          ? 'ArrowRight'
+                          : 'CreditCard'
                   }
                   iconClassName={processingPlan === plan?.id ? 'animate-spin' : ''}
                 >
                   {processingPlan === plan?.id
                     ? 'Processing...'
                     : isCurrentPlan
-                    ? 'Current Plan'
-                    : plan?.price === 0
-                    ? 'Get Started'
-                    : 'Subscribe Now'}
+                      ? 'Current Plan'
+                      : plan?.price === 0
+                        ? 'Get Started'
+                        : 'Subscribe Now'}
                 </Button>
               </div>
             );
@@ -338,7 +349,7 @@ const SubscriptionPage = () => {
                 How many times can I take the quiz?
               </h4>
               <p className="text-muted-foreground">
-                Each plan comes with a specific number of quiz attempts per month. 
+                Each plan comes with a specific number of quiz attempts per month.
                 Free plan includes 5 attempts, while paid plans offer 25-80 attempts depending on your subscription.
               </p>
             </div>

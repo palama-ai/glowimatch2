@@ -6,6 +6,7 @@ import { Link } from 'react-router-dom';
 import { useI18n } from '../../contexts/I18nContext';
 import { IMAGES, GRADIENTS } from '../../utils/imageConstants';
 import Icon from '../../components/AppIcon';
+import SEO from '../../components/SEO';
 
 const Feature = ({ icon, title, desc }) => (
   <div className="group bg-card border border-border rounded-xl p-5 sm:p-8 hover:shadow-lg hover:border-accent transition-all duration-300 hover:scale-105">
@@ -28,6 +29,12 @@ const Home = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEO
+        title="AI Skincare Analysis & Beauty Products"
+        description="Discover your perfect skincare routine with AI-powered skin analysis. Take our skin type quiz and get personalized beauty product recommendations tailored to your unique skin needs."
+        keywords="skincare, AI skin analysis, beauty products, skin type quiz, personalized skincare routine, cosmetics store, beauty shop, العناية بالبشرة, منتجات التجميل, soins de la peau"
+        url="/"
+      />
       <SplashLoader isVisible={showSplash} onComplete={handleSplashComplete} />
 
       {!showSplash && (

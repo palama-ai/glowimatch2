@@ -250,7 +250,11 @@ const ProductModal = ({ product, products, currentIndex, onClose, onNavigate }) 
     };
 
     const handlePurchaseClick = () => {
-        const url = product?.purchaseUrl || product?.purchase_url || '#';
+        let url = product?.purchaseUrl || product?.purchase_url || '#';
+        // Normalize URL: add https:// if no protocol is specified
+        if (url && url !== '#' && !url.startsWith('http://') && !url.startsWith('https://')) {
+            url = `https://${url}`;
+        }
         window.open(url, '_blank', 'noopener,noreferrer');
     };
 

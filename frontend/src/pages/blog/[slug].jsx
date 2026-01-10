@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { useI18n } from '../../contexts/I18nContext';
 import Header from '../../components/ui/Header';
 import Icon from '../../components/AppIcon';
+import SEO, { createBlogPostSchema } from '../../components/SEO';
 
 const API_BASE = import.meta.env?.VITE_BACKEND_URL || 'https://backend-three-sigma-81.vercel.app/api';
 
@@ -66,6 +67,20 @@ const BlogPost = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEO
+        title={post.title}
+        description={post.excerpt || post.content?.substring(0, 160)}
+        keywords={`skincare tips, ${post.category || 'beauty'}, skincare article, نصائح العناية بالبشرة, ${post.title?.toLowerCase()}`}
+        url={`/blog/${slug}`}
+        image={post.image_url}
+        type="article"
+        jsonLd={createBlogPostSchema({
+          title: post.title,
+          excerpt: post.excerpt || post.content?.substring(0, 160),
+          image: post.image_url,
+          date: post.created_at
+        })}
+      />
       <Header />
       <main className="max-w-3xl mx-auto px-5 lg:px-8 py-16">
         {/* Back Link */}

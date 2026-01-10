@@ -3,11 +3,18 @@ import { Link } from 'react-router-dom';
 import Icon from '../../components/AppIcon';
 import Footer from '../../components/Footer';
 import { useI18n } from '../../contexts/I18nContext';
+import SEO from '../../components/SEO';
 
 const TermsOfService = () => {
     const { t } = useI18n();
     return (
         <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-pink-50/30 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 flex flex-col">
+            <SEO
+                title="Terms of Service & Privacy Policy"
+                description="Read Glowimatch's terms of service and privacy policy. Learn how we protect your data, our user agreements, and seller guidelines."
+                keywords="terms of service, privacy policy, user agreement, skincare platform terms, شروط الخدمة, سياسة الخصوصية"
+                url="/terms"
+            />
             {/* Header */}
             <header className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-lg border-b border-slate-200 dark:border-slate-700 sticky top-0 z-10">
                 <div className="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">

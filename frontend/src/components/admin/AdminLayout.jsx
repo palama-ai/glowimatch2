@@ -1,93 +1,138 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import Icon from '../AppIcon';
+import '../../styles/admin-dashboard.css';
 
 export default function AdminLayout({ children }) {
   const loc = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  const links = [
+  const mainLinks = [
     { to: '/admin', label: 'Dashboard', icon: 'LayoutDashboard' },
     { to: '/admin/users', label: 'Users', icon: 'Users' },
     { to: '/admin/products', label: 'Products', icon: 'Package' },
     { to: '/admin/blogs', label: 'Blogs', icon: 'BookOpen' },
-    { to: '/admin/messages', label: 'Messages', icon: 'Mail' },
+  ];
+
+  const settingsLinks = [
+    { to: '/admin/messages', label: 'Messages', icon: 'Mail', badge: null },
     { to: '/admin/notifications', label: 'Notifications', icon: 'Bell' },
     { to: '/admin/sessions', label: 'Sessions', icon: 'Activity' },
     { to: '/admin/safety', label: 'Safety', icon: 'Shield' },
   ];
 
+  const isActive = (path) => {
+    if (path === '/admin') {
+      return loc.pathname === '/admin';
+    }
+    return loc.pathname.startsWith(path);
+  };
+
   return (
-    <div className="min-h-screen bg-background">
-      <div className="flex">
-        {/* Desktop Sidebar */}
-        <aside className="w-64 hidden md:block border-r border-border bg-card px-4 py-6 min-h-screen sticky top-0">
-          <div className="mb-6">
-            <div className="text-lg font-bold">Admin</div>
-            <div className="text-sm text-muted-foreground">Control panel</div>
+    <div className="admin-layout">
+      {/* Mobile Overlay */}
+      <div
+        className={`admin-mobile-overlay ${mobileMenuOpen ? 'active' : ''}`}
+        onClick={() => setMobileMenuOpen(false)}
+      />
+
+      {/* Mobile Header */}
+      <div className="admin-mobile-header">
+        <button
+          className="admin-mobile-menu-btn"
+          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+        >
+          <Icon name={mobileMenuOpen ? "X" : "Menu"} size={24} />
+        </button>
+        <div style={{ fontSize: '18px', fontWeight: '600' }}>GlowMatch Admin</div>
+        <Link to="/" className="admin-mobile-menu-btn">
+          <Icon name="Home" size={20} />
+        </Link>
+      </div>
+
+      {/* Sidebar */}
+      <aside className={`admin-sidebar ${mobileMenuOpen ? 'open' : ''}`}>
+        {/* Logo Section */}
+        <div className="admin-sidebar-logo">
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <div className="admin-sidebar-logo-icon">
+              <Icon name="Sparkles" size={22} />
+            </div>
+            <div>
+              <div className="admin-sidebar-logo-text">GlowMatch</div>
+              <div className="admin-sidebar-logo-subtitle">Admin Panel</div>
+            </div>
           </div>
-          <nav className="space-y-1">
-            {links.map(l => (
+          {/* Close button for mobile */}
+          <button
+            className="admin-sidebar-close"
+            onClick={() => setMobileMenuOpen(false)}
+          >
+            <Icon name="X" size={20} />
+          </button>
+        </div>
+
+        {/* Navigation */}
+        <nav className="admin-nav">
+          {/* Main Section */}
+          <div className="admin-nav-section">
+            <div className="admin-nav-section-title">Main Menu</div>
+            {mainLinks.map(link => (
               <Link
-                key={l.to}
-                to={l.to}
-                className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${loc.pathname === l.to ? 'bg-accent/10 text-accent font-semibold' : 'hover:bg-muted/50 text-foreground'}`}
+                key={link.to}
+                to={link.to}
+                onClick={() => setMobileMenuOpen(false)}
+                className={`admin-nav-link ${isActive(link.to) ? 'active' : ''}`}
               >
-                <Icon name={l.icon} size={18} />
-                {l.label}
+                <span className="admin-nav-link-icon">
+                  <Icon name={link.icon} size={20} />
+                </span>
+                {link.label}
               </Link>
             ))}
-          </nav>
-        </aside>
-
-        <div className="flex-1">
-          {/* Header */}
-          <div className="px-3 sm:px-4 py-3 sm:py-4 border-b border-border bg-background sticky top-0 z-40">
-            <div className="max-w-6xl mx-auto flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                {/* Mobile Menu Button */}
-                <button
-                  className="md:hidden p-2 rounded-lg hover:bg-muted transition-colors"
-                  onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                  aria-label="Toggle menu"
-                >
-                  <Icon name={mobileMenuOpen ? "X" : "Menu"} size={24} />
-                </button>
-                <div className="text-lg sm:text-xl font-semibold">GlowMatch Admin</div>
-              </div>
-              <div className="flex items-center gap-2 sm:gap-3">
-                <div className="text-xs sm:text-sm text-muted-foreground hidden sm:block">Admin</div>
-                <Link to="/" className="p-2 rounded-lg hover:bg-muted transition-colors">
-                  <Icon name="Home" size={18} />
-                </Link>
-              </div>
-            </div>
           </div>
 
-          {/* Mobile Menu Drawer */}
-          {mobileMenuOpen && (
-            <div className="md:hidden border-b border-border bg-card animate-fade-in">
-              <nav className="p-3 space-y-1">
-                {links.map(l => (
-                  <Link
-                    key={l.to}
-                    to={l.to}
-                    onClick={() => setMobileMenuOpen(false)}
-                    className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${loc.pathname === l.to ? 'bg-accent/10 text-accent font-semibold' : 'hover:bg-muted/50 text-foreground'}`}
-                  >
-                    <Icon name={l.icon} size={20} />
-                    {l.label}
-                  </Link>
-                ))}
-              </nav>
-            </div>
-          )}
+          {/* Settings Section */}
+          <div className="admin-nav-section">
+            <div className="admin-nav-section-title">Settings & Tools</div>
+            {settingsLinks.map(link => (
+              <Link
+                key={link.to}
+                to={link.to}
+                onClick={() => setMobileMenuOpen(false)}
+                className={`admin-nav-link ${isActive(link.to) ? 'active' : ''}`}
+              >
+                <span className="admin-nav-link-icon">
+                  <Icon name={link.icon} size={20} />
+                </span>
+                {link.label}
+                {link.badge && (
+                  <span className="admin-nav-link-badge">{link.badge}</span>
+                )}
+              </Link>
+            ))}
+          </div>
+        </nav>
 
-          <main className="max-w-6xl mx-auto px-3 sm:px-4 py-4 sm:py-8">
-            {children}
-          </main>
+        {/* User Profile */}
+        <div className="admin-sidebar-profile">
+          <div className="admin-sidebar-avatar">
+            <Icon name="User" size={20} />
+          </div>
+          <div className="admin-sidebar-user-info">
+            <div className="admin-sidebar-user-name">Administrator</div>
+            <div className="admin-sidebar-user-role">Super Admin</div>
+          </div>
+          <Link to="/" style={{ color: 'var(--admin-text-muted)' }}>
+            <Icon name="LogOut" size={18} />
+          </Link>
         </div>
-      </div>
+      </aside>
+
+      {/* Main Content */}
+      <main className="admin-main">
+        {children}
+      </main>
     </div>
   );
 }

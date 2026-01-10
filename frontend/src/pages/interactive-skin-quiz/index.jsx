@@ -14,6 +14,7 @@ import QuestionCard from './components/QuestionCard';
 import QuizProgress from './components/QuizProgress';
 import QuizComplete from './components/QuizComplete';
 import Icon from '../../components/AppIcon';
+import SEO from '../../components/SEO';
 
 const InteractiveSkinQuiz = () => {
   const navigate = useNavigate();
@@ -827,6 +828,12 @@ const InteractiveSkinQuiz = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEO
+        title="Skin Type Quiz - Discover Your Skin Profile"
+        description="Take our free AI-powered skin type quiz to discover your unique skin profile. Get personalized skincare recommendations and find the perfect products for your skin concerns."
+        keywords="skin type quiz, skin analysis test, find my skin type, personalized skincare quiz, اختبار نوع البشرة, تحليل البشرة, quiz type de peau"
+        url="/interactive-skin-quiz"
+      />
       <Header />
       <ProgressIndicator />
       <main className="flex-1">

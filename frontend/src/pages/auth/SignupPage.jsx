@@ -7,6 +7,7 @@ import Button from '../../components/ui/Button';
 import Input from '../../components/ui/Input';
 import Icon from '../../components/AppIcon';
 import GoogleSignInButton from '../../components/GoogleSignInButton';
+import SEO from '../../components/SEO';
 
 const API_BASE = import.meta.env?.VITE_BACKEND_URL || 'https://backend-three-sigma-81.vercel.app/api';
 
@@ -128,6 +129,12 @@ const SignupPage = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-accent/5 flex items-center justify-center p-3 sm:p-4">
+      <SEO
+        title="Create Your Account"
+        description="Join Glowimatch today and discover your perfect skincare routine. Create a free account to access AI-powered skin analysis and personalized beauty recommendations."
+        keywords="signup, create account, join glowimatch, skincare registration, إنشاء حساب, inscription"
+        url="/signup"
+      />
       <div className="max-w-md w-full">
         {/* Logo Section */}
         <div className="text-center mb-4 sm:mb-8">

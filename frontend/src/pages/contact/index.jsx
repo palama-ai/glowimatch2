@@ -3,6 +3,7 @@ import Header from '../../components/ui/Header';
 import { useI18n } from '../../contexts/I18nContext';
 import Icon from '../../components/AppIcon';
 import { GRADIENTS } from '../../utils/imageConstants';
+import SEO, { createFAQSchema } from '../../components/SEO';
 
 const API_BASE = import.meta.env?.VITE_BACKEND_URL || 'https://backend-three-sigma-81.vercel.app/api';
 
@@ -27,6 +28,17 @@ const Contact = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEO
+        title="Contact Us - Get Skincare Advice"
+        description="Get in touch with Glowimatch's skincare experts. Contact us for personalized beauty advice, product recommendations, and customer support."
+        keywords="contact skincare experts, beauty consultation, customer support, skincare advice, تواصل معنا, استشارة تجميل"
+        url="/contact"
+        jsonLd={createFAQSchema([
+          { question: t('faq_1_q'), answer: t('faq_1_a') },
+          { question: t('faq_2_q'), answer: t('faq_2_a') },
+          { question: t('faq_3_q'), answer: t('faq_3_a') }
+        ])}
+      />
       <Header />
       <main className="py-20 px-5 lg:px-8">
         {/* Hero Section */}

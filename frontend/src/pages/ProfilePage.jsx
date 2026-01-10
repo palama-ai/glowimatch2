@@ -6,6 +6,7 @@ import Header from '../components/ui/Header';
 import Button from '../components/ui/Button';
 import Input from '../components/ui/Input';
 import Icon from '../components/AppIcon';
+import SEO from '../components/SEO';
 
 const ProfilePage = () => {
   const { user, userProfile, subscription, signOut, updateProfile, loading } = useAuth();
@@ -83,7 +84,13 @@ const ProfilePage = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <div></div>
+      <SEO
+        title="My Profile"
+        description="Manage your Glowimatch account settings, view your referral stats, and update your profile information."
+        keywords="my skincare profile, beauty account, skincare dashboard, حسابي, الملف الشخصي"
+        url="/profile"
+        noindex={true}
+      />
       <Header />
       <main className="max-w-4xl mx-auto px-4 sm:px-5 lg:px-8 py-6 sm:py-8">
         <div className="space-y-6 sm:space-y-8">

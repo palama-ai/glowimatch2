@@ -6,6 +6,7 @@ import { useTheme } from '../../contexts/ThemeContext';
 import { useModal } from '../../contexts/ModalContext';
 import Button from './Button';
 import Icon from '../AppIcon';
+import ChristmasLogo from '../ChristmasLogo';
 
 const API_BASE = import.meta.env?.VITE_BACKEND_URL || 'https://backend-three-sigma-81.vercel.app/api';
 
@@ -142,7 +143,7 @@ const Header = () => {
 
           {/* Logo - Left */}
           <Link to="/" className="flex items-center space-x-2 group flex-shrink-0">
-            <span className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-pink-500 to-rose-500 bg-clip-text text-transparent">Glowimatch</span>
+            <ChristmasLogo />
           </Link>
 
           {/* Navigation - Center */}
@@ -158,8 +159,8 @@ const Header = () => {
             </div>
           </nav>
 
-          {/* Right Section */}
-          <div className="flex items-center gap-2 flex-shrink-0">
+          {/* Right Section - Hidden on mobile, shown on desktop */}
+          <div className="hidden lg:flex items-center gap-2 flex-shrink-0">
             {user ? (
               <>
                 {/* Notifications - Circular */}
@@ -307,7 +308,7 @@ const Header = () => {
               <>
                 <button
                   onClick={() => navigate('/login')}
-                  className="hidden sm:block px-4 sm:px-6 py-2 sm:py-2.5 text-gray-700 font-semibold hover:text-pink-600 transition-all duration-300 hover:bg-pink-50 rounded-full border border-pink-200 hover:border-pink-400 text-sm sm:text-base"
+                  className="px-4 sm:px-6 py-2 sm:py-2.5 text-gray-700 font-semibold hover:text-pink-600 transition-all duration-300 hover:bg-pink-50 rounded-full border border-pink-200 hover:border-pink-400 text-sm sm:text-base"
                 >
                   {t('sign_in')}
                 </button>
@@ -388,6 +389,85 @@ const Header = () => {
                   {t('admin')}
                 </Link>
               )}
+              {user && (
+                <>
+                  <div className="border-t border-pink-100 mt-2 pt-2">
+                    <Link
+                      to="/profile"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="flex items-center gap-3 px-5 py-3 text-gray-700 hover:bg-pink-50 hover:text-pink-600 transition-colors"
+                    >
+                      <Icon name="User" size={18} />
+                      {t('profile')}
+                    </Link>
+                    <Link
+                      to="/notifications"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="flex items-center gap-3 px-5 py-3 text-gray-700 hover:bg-pink-50 hover:text-pink-600 transition-colors"
+                    >
+                      <Icon name="Bell" size={18} />
+                      {t('notifications')}
+                      {unreadCount > 0 && (
+                        <span className="ml-auto bg-pink-500 text-white text-xs rounded-full px-2 py-0.5">{unreadCount}</span>
+                      )}
+                    </Link>
+                    {(!isSeller || !isSeller()) && (
+                      <Link
+                        to="/quiz-history"
+                        onClick={() => setMobileMenuOpen(false)}
+                        className="flex items-center gap-3 px-5 py-3 text-gray-700 hover:bg-pink-50 hover:text-pink-600 transition-colors"
+                      >
+                        <Icon name="History" size={18} />
+                        {t('quiz_history')}
+                      </Link>
+                    )}
+                  </div>
+                </>
+              )}
+
+              {/* Settings Section */}
+              <div className="border-t border-pink-100 mt-2 pt-2">
+                <div className="px-5 py-2 text-xs font-semibold text-gray-400 uppercase">{t('settings') || 'Settings'}</div>
+
+                {/* Language Toggle */}
+                <div className="flex items-center gap-3 px-5 py-3">
+                  <Icon name="Globe" size={18} className="text-gray-500" />
+                  <span className="text-gray-700 flex-1">{t('language') || 'Language'}</span>
+                  <div className="flex gap-1">
+                    {['en', 'fr', 'ar'].map(l => (
+                      <button
+                        key={l}
+                        onClick={() => setLang(l)}
+                        className={`px-2 py-1 text-xs rounded ${lang === l ? 'bg-pink-500 text-white' : 'bg-gray-100 text-gray-600 hover:bg-pink-100'}`}
+                      >
+                        {l.toUpperCase()}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Theme Toggle */}
+                <button
+                  onClick={toggle}
+                  className="flex items-center gap-3 px-5 py-3 w-full text-gray-700 hover:bg-pink-50 transition-colors"
+                >
+                  <Icon name={theme === 'dark' ? 'Moon' : 'Sun'} size={18} className="text-gray-500" />
+                  <span className="flex-1 text-left">{theme === 'dark' ? (t('light_mode') || 'Light Mode') : (t('dark_mode') || 'Dark Mode')}</span>
+                </button>
+              </div>
+
+              {user && (
+                <div className="border-t border-pink-100 mt-2 pt-2">
+                  <button
+                    onClick={() => { handleSignOut(); setMobileMenuOpen(false); }}
+                    className="flex items-center gap-3 px-5 py-3 w-full text-red-600 hover:bg-red-50 transition-colors"
+                  >
+                    <Icon name="LogOut" size={18} />
+                    {t('logout')}
+                  </button>
+                </div>
+              )}
+
               {!user && (
                 <div className="border-t border-pink-100 mt-2 pt-3 px-5">
                   <button

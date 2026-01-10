@@ -10,6 +10,7 @@ import SkinAnalysisBreakdown from './components/SkinAnalysisBreakdown';
 import SkincareRoutine from './components/SkincareRoutine';
 import ProductModal from './components/ProductModal';
 import Icon from '../../components/AppIcon';
+import SEO from '../../components/SEO';
 
 // Generate a fallback routine based on skin type when AI fails
 const generateFallbackRoutine = (skinType) => {
@@ -168,6 +169,7 @@ const ResultsDashboard = () => {
 
   // Fetch AI-recommended products using voting system
   const fetchRecommendedProducts = async (analysis) => {
+    console.log('🚀 [fetchRecommendedProducts] STARTING - skinType:', analysis?.skinType);
     setProductsLoading(true);
     setProductsError(null);
     try {
@@ -195,6 +197,10 @@ const ResultsDashboard = () => {
 
       const json = await resp.json();
       const products = json?.data || [];
+
+      // DEBUG: Log full product data to check AI fields
+      console.log('[AI-Recommend] Full response:', json);
+      console.log('[AI-Recommend] First product aiScore:', products[0]?.aiScore, 'aiReasons:', products[0]?.aiReasons);
 
       // Store voting info for display
       if (json?.votingInfo) {
@@ -435,6 +441,46 @@ const ResultsDashboard = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEO
+        title="Your Skin Analysis Results"
+        description="View your personalized skin analysis results. Get AI-powered skincare recommendations, personalized routine, and product suggestions tailored to your unique skin profile."
+        keywords="skin analysis results, personalized skincare recommendations, my skin profile, skincare routine, نتائج تحليل البشرة, توصيات العناية بالبشرة"
+        url="/results-dashboard"
+        noindex={true}
+        jsonLd={allProducts.length > 0 ? {
+          "@context": "https://schema.org",
+          "@type": "ItemList",
+          "name": "AI-Recommended Skincare Products",
+          "description": "Personalized skincare product recommendations based on AI skin analysis",
+          "numberOfItems": allProducts.length,
+          "itemListElement": allProducts.slice(0, 10).map((product, index) => ({
+            "@type": "ListItem",
+            "position": index + 1,
+            "item": {
+              "@type": "Product",
+              "name": product?.name,
+              "description": product?.description || `${product?.brand} skincare product for ${currentAnalysis?.skinType || 'all'} skin`,
+              "image": product?.image || product?.image_url,
+              "brand": {
+                "@type": "Brand",
+                "name": product?.brand || "Skincare Brand"
+              },
+              "offers": product?.price ? {
+                "@type": "Offer",
+                "price": product.price,
+                "priceCurrency": "USD",
+                "availability": "https://schema.org/InStock",
+                "url": product?.purchaseUrl || product?.purchase_url
+              } : undefined,
+              "aggregateRating": product?.rating ? {
+                "@type": "AggregateRating",
+                "ratingValue": product.rating,
+                "reviewCount": product?.reviewCount || 1
+              } : undefined
+            }
+          }))
+        } : null}
+      />
       <Header />
 
       {/* Hero Section with Gradient */}

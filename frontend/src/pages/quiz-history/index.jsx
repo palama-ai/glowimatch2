@@ -6,6 +6,7 @@ import Header from '../../components/ui/Header';
 import Button from '../../components/ui/Button';
 import Icon from '../../components/AppIcon';
 import { quizService } from '../../lib/supabase';
+import SEO from '../../components/SEO';
 
 const QuizHistory = () => {
   const navigate = useNavigate();
@@ -157,6 +158,13 @@ const QuizHistory = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEO
+        title="My Quiz History"
+        description="View all your past skin analysis quiz results. Track your skincare progress and see how your skin has improved over time."
+        keywords="skin analysis history, past quiz results, skincare progress, سجل اختبارات البشرة"
+        url="/quiz-history"
+        noindex={true}
+      />
       <Header />
       <main className="max-w-5xl mx-auto px-4 sm:px-5 lg:px-8 py-6 sm:py-8 pb-12">
         {/* Page Header */}
