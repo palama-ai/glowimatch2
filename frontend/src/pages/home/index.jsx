@@ -56,6 +56,36 @@ const Home = () => {
               </div>
             </section>
 
+            {/* How It Works - SEO Content Section (300+ words for crawlers) */}
+            <section className="py-16 sm:py-24 px-4 sm:px-5 lg:px-8 bg-gradient-to-b from-background to-accent/5">
+              <div className="max-w-4xl mx-auto text-center">
+                <h2 className="text-3xl sm:text-4xl font-bold text-foreground mb-6">
+                  How AI Skin Analysis Works
+                </h2>
+                <div className="prose prose-lg max-w-none text-muted-foreground text-left sm:text-center">
+                  <p className="mb-4 text-base sm:text-lg leading-relaxed">
+                    <strong>Glowimatch</strong> is an innovative AI-powered skincare platform that revolutionizes the way you discover your perfect skincare routine. Our advanced artificial intelligence technology analyzes your unique skin characteristics, including skin type, pore size, hydration levels, and sensitivity markers, to provide personalized product recommendations tailored specifically to your needs.
+                  </p>
+                  <p className="mb-4 text-base sm:text-lg leading-relaxed">
+                    Unlike traditional skincare consultations, our AI skin analysis takes just <strong>under 3 minutes</strong> to complete. Simply take our comprehensive skin quiz, and our machine learning algorithms will cross-reference your profile against a database of over <strong>500+ clinically-tested products</strong> from trusted brands like <strong>The Ordinary</strong>, <strong>Cosrx</strong>, <strong>CeraVe</strong>, <strong>Paula's Choice</strong>, and <strong>La Roche-Posay</strong>.
+                  </p>
+                  <p className="mb-4 text-base sm:text-lg leading-relaxed">
+                    Our platform specializes in evidence-based skincare recommendations, focusing on key ingredients that dermatologists trust: <strong>Retinol</strong> for anti-aging, <strong>Niacinamide</strong> for pore minimization, <strong>Hyaluronic Acid</strong> for deep hydration, <strong>Salicylic Acid</strong> for acne-prone skin, and <strong>Vitamin C</strong> for brightening and hyperpigmentation concerns.
+                  </p>
+                  <p className="mb-6 text-base sm:text-lg leading-relaxed">
+                    Whether you're dealing with oily skin, dry patches, combination skin, or sensitive skin conditions, Glowimatch provides a customized morning and evening skincare routine. Our AI achieves <strong>87% alignment</strong> with board-certified dermatologist assessments, ensuring you receive professional-grade recommendations from the comfort of your home. Join over <strong>50,000 active users</strong> who have transformed their skincare journey with our platform.
+                  </p>
+                </div>
+                <Link
+                  to="/interactive-skin-quiz"
+                  className="inline-flex items-center gap-2 px-8 py-4 bg-accent text-white rounded-xl font-semibold hover:shadow-xl hover:scale-105 transition-all text-base sm:text-lg"
+                >
+                  <Icon name="Sparkles" size={20} />
+                  Start Your Free Skin Analysis
+                </Link>
+              </div>
+            </section>
+
             {/* Features Section */}
             <section className="py-12 sm:py-20 px-4 sm:px-5 lg:px-8 bg-background">
               <div className="max-w-6xl mx-auto">

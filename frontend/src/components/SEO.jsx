@@ -54,7 +54,9 @@ const SEO = ({
 
     // Use dynamic pathname for canonical URL if no explicit URL provided
     const currentPath = url || location.pathname;
-    const fullUrl = `${siteUrl}${currentPath === '/' ? '' : currentPath}`;
+    // Enforce proper canonical format: homepage gets trailing slash, other pages don't
+    const canonicalPath = currentPath === '/' ? '' : currentPath.replace(/\/$/, '');
+    const fullUrl = `${siteUrl}${canonicalPath}${currentPath === '/' ? '/' : ''}`;
 
     // Auto-truncate to satisfy Ahrefs: Title < 60 chars, Description < 155 chars
     const truncateText = (text, maxLength) => {

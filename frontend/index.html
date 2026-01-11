@@ -7,46 +7,21 @@
   <meta name="google-site-verification" content="JVWjyHTHiwW1lEqiV8hIhKo3iAEqRffEcZTnF1_KwUg" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#E91E63" />
-  <!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-1BX4NW4Z35"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
 
-  gtag('config', 'G-1BX4NW4Z35');
-</script>
+  <!-- Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-1BX4NW4Z35"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { dataLayer.push(arguments); }
+    gtag('js', new Date());
+    gtag('config', 'G-1BX4NW4Z35');
+  </script>
 
-  <!-- SEO Meta Tags -->
-  <meta name="description"
-    content="Get personalized skincare with AI skin analysis. Discover your skin type, get product recommendations from The Ordinary & Cosrx." />
-  <meta name="keywords"
-    content="skincare, AI skin analysis, beauty products, skin type quiz, personalized skincare, cosmetics, The Ordinary, Cosrx, CeraVe, منتجات التجميل, العناية بالبشرة" />
-  <meta name="author" content="Glowimatch" />
-  <meta name="robots" content="index, follow" />
-
-  <!-- Open Graph / Facebook -->
-  <meta property="og:type" content="website" />
-  <meta property="og:url" content="https://glowimatch.vercel.app/" />
-  <meta property="og:title" content="Glowimatch | AI Skin Analysis & Beauty Tips" />
-  <meta property="og:description"
-    content="Get personalized skincare with AI skin analysis. Discover your skin type and get product recommendations." />
-  <meta property="og:image" content="https://glowimatch.vercel.app/assets/images/og-image.png" />
-  <meta property="og:site_name" content="Glowimatch" />
-  <meta property="og:locale" content="en_US" />
-  <meta property="og:locale:alternate" content="fr_FR" />
-  <meta property="og:locale:alternate" content="ar_MA" />
-
-  <!-- Twitter -->
-  <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:url" content="https://glowimatch.vercel.app/" />
-  <meta name="twitter:title" content="Glowimatch | AI Skin Analysis & Beauty Tips" />
-  <meta name="twitter:description"
-    content="Get personalized skincare with AI skin analysis. Discover your skin type and get product recommendations." />
-  <meta name="twitter:image" content="https://glowimatch.vercel.app/assets/images/og-image.png" />
-
-  <!-- Canonical URL -->
-  <link rel="canonical" href="https://glowimatch.vercel.app/" />
+  <!-- 
+    NOTE: Meta description, keywords, canonical, and OG tags are managed dynamically 
+    by the SEO.jsx component to prevent duplicate tag errors.
+    Only essential static tags are kept here.
+  -->
 
   <!-- Favicon and Icons -->
   <link rel="icon" type="image/png" href="/assets/images/favicon.png" />
@@ -97,6 +72,19 @@
   <style>
     :root[lang="ar"] {
       font-family: 'Tajawal', sans-serif;
+    }
+
+    /* Screen reader only - for SEO H1 tags */
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
     }
   </style>
 </head>
