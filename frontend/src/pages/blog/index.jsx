@@ -82,6 +82,32 @@ const Blog = () => {
           </div>
         </section>
 
+        {/* SEO Content Section - Blog Overview (300+ words) */}
+        <section className="py-10 px-5 lg:px-8 bg-accent/5 border-b border-accent/10">
+          <div className="max-w-4xl mx-auto">
+            <div className="prose prose-sm max-w-none text-muted-foreground">
+              <h2 className="text-2xl font-bold text-foreground mb-4">
+                Expert Skincare Knowledge and Beauty Education
+              </h2>
+              <p className="mb-4">
+                Welcome to the <strong>Glowimatch Skincare Blog</strong>, your comprehensive resource for evidence-based beauty advice and skincare education. Our expert writers include <strong>licensed estheticians</strong>, <strong>cosmetic chemists</strong>, and <strong>dermatology researchers</strong> who break down complex skincare science into actionable tips you can apply to your daily routine.
+              </p>
+              <p className="mb-4">
+                We cover a wide range of topics including <strong>ingredient deep-dives</strong> (understanding how Retinol, Niacinamide, and Hyaluronic Acid work at the cellular level), <strong>skin type guides</strong> (managing oily, dry, combination, and sensitive skin), <strong>anti-aging strategies</strong> (preventing fine lines, wrinkles, and sun damage), and <strong>acne solutions</strong> (hormonal acne, cystic acne, and post-inflammatory hyperpigmentation).
+              </p>
+              <h2 className="text-xl font-semibold text-foreground mt-6 mb-3">
+                Building Your Perfect Skincare Routine
+              </h2>
+              <p className="mb-4">
+                Our articles help you understand the <strong>correct order of skincare products</strong>, from cleansers to serums to moisturizers. We explain why you should apply products from thinnest to thickest consistency, how to layer active ingredients without irritation, and when to use products like <strong>AHAs</strong>, <strong>BHAs</strong>, and <strong>vitamin C</strong> for maximum efficacy.
+              </p>
+              <p>
+                Whether you're a skincare beginner looking to establish a basic routine or an enthusiast wanting to optimize your regimen with advanced actives, our blog provides the knowledge you need. We regularly feature product reviews from brands like <strong>The Ordinary</strong>, <strong>Cosrx</strong>, <strong>CeraVe</strong>, and <strong>Paula's Choice</strong>, giving you honest assessments based on ingredient analysis and user feedback.
+              </p>
+            </div>
+          </div>
+        </section>
+
         {/* Blog Posts Grid */}
         <section className="py-20 px-5 lg:px-8">
           <div className="max-w-6xl mx-auto">

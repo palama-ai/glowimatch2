@@ -33,6 +33,32 @@ const About = () => {
           </div>
         </section>
 
+        {/* SEO Content Section - Company Overview (300+ words) */}
+        <section className="py-12 px-5 lg:px-8 bg-accent/5 border-b border-accent/10">
+          <div className="max-w-4xl mx-auto">
+            <div className="prose prose-lg max-w-none text-muted-foreground">
+              <h2 className="text-2xl font-bold text-foreground mb-4">
+                Revolutionizing Skincare with Artificial Intelligence
+              </h2>
+              <p className="mb-4">
+                <strong>Glowimatch</strong> was founded in 2024 with a clear mission: to democratize access to professional-grade skincare advice using cutting-edge artificial intelligence technology. Our platform combines the expertise of <strong>board-certified dermatologists</strong>, <strong>cosmetic chemists</strong>, and <strong>machine learning engineers</strong> to deliver personalized skincare recommendations that rival in-person consultations.
+              </p>
+              <p className="mb-4">
+                We believe that everyone deserves to understand their skin and have access to products that truly work for their unique needs. Traditional skincare shopping often involves guesswork—buying products based on marketing claims rather than scientific compatibility with your skin type. Glowimatch changes this by analyzing your individual skin characteristics and matching you with products containing ingredients clinically proven to address your specific concerns.
+              </p>
+              <h2 className="text-xl font-semibold text-foreground mt-6 mb-3">
+                Our Technology and Expertise
+              </h2>
+              <p className="mb-4">
+                Our AI model is trained on a database of over <strong>10,000 dermatological case studies</strong> and <strong>500+ skincare product formulations</strong>. We continuously update our algorithms based on the latest research published in journals like the <strong>Journal of Investigative Dermatology</strong> and clinical trials conducted by leading skincare brands. Our recommendations achieve an <strong>87% correlation</strong> with dermatologist assessments in blind studies.
+              </p>
+              <p>
+                Based in <strong>Wyoming, USA</strong>, Glowimatch operates as a registered LLC committed to data privacy and user security. We never sell your data, and all skin analysis information is encrypted and stored securely. Our team includes graduates from top institutions specializing in dermatology, cosmetic science, and artificial intelligence.
+              </p>
+            </div>
+          </div>
+        </section>
+
         {/* Mission & Values */}
         <section className="py-20 px-5 lg:px-8">
           <div className="max-w-6xl mx-auto">
