@@ -272,10 +272,6 @@ const Header = () => {
                           <Icon name="User" size={16} className="text-pink-500" />
                           <span>{t('profile')}</span>
                         </Link>
-                        <Link to="/subscription" className="flex items-center space-x-3 px-4 py-2.5 text-sm text-gray-700 hover:text-pink-600 hover:bg-pink-50 transition-colors" onClick={() => setShowUserMenu(false)}>
-                          <Icon name="Zap" size={16} className="text-pink-500" />
-                          <span>{t('plans')}</span>
-                        </Link>
                         {(!isSeller || !isSeller()) && (
                           <Link to="/quiz-history" className="flex items-center space-x-3 px-4 py-2.5 text-sm text-gray-700 hover:text-pink-600 hover:bg-pink-50 transition-colors" onClick={() => setShowUserMenu(false)}>
                             <Icon name="History" size={16} className="text-pink-500" />
