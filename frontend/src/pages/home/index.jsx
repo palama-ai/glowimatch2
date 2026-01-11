@@ -138,8 +138,12 @@ const Home = () => {
                         <p className="text-muted-foreground text-sm">{t('avg_rating')}</p>
                       </div>
                     </div>
-                    <Link to="/contact" className="inline-block px-5 sm:px-6 py-2.5 sm:py-3 bg-accent text-white rounded-lg font-semibold hover:shadow-lg transition-all text-sm sm:text-base">
-                      {t('learn_more')}
+                    <Link
+                      to="/contact"
+                      className="inline-block px-5 sm:px-6 py-2.5 sm:py-3 bg-accent text-white rounded-lg font-semibold hover:shadow-lg transition-all text-sm sm:text-base"
+                      aria-label="Contact Glowimatch skincare experts for personalized advice"
+                    >
+                      Contact Our Skincare Experts
                     </Link>
                   </div>
                   <div className="relative">
