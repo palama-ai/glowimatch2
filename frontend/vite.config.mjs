@@ -9,8 +9,17 @@ export default defineConfig({
   build: {
     outDir: "build",
     chunkSizeWarningLimit: 2000,
+    // Generate static HTML for SEO crawlers
+    rollupOptions: {
+      input: {
+        main: './index.html',
+      },
+    },
   },
-  plugins: [tsconfigPaths(), react()],
+  plugins: [
+    tsconfigPaths(),
+    react(),
+  ],
   server: {
     port: "4028",
     host: "0.0.0.0",
@@ -23,5 +32,11 @@ export default defineConfig({
         secure: true
       }
     }
-  }
+  },
+  // SSG routes for pre-rendering
+  // Note: For full static generation, consider using vite-plugin-ssr or vite-ssg
+  // These routes will be available for Vercel's pre-rendering
+  ssr: {
+    noExternal: ['react-helmet'],
+  },
 });
