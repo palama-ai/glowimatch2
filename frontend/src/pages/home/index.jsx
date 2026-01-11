@@ -56,33 +56,69 @@ const Home = () => {
               </div>
             </section>
 
-            {/* How It Works - SEO Content Section (300+ words for crawlers) */}
-            <section className="py-16 sm:py-24 px-4 sm:px-5 lg:px-8 bg-gradient-to-b from-background to-accent/5">
-              <div className="max-w-4xl mx-auto text-center">
-                <h2 className="text-3xl sm:text-4xl font-bold text-foreground mb-6">
-                  The Science Behind AI Skin Analysis
+            {/* How It Works - Visual Cards Section */}
+            <section className="py-12 sm:py-16 px-4 sm:px-5 lg:px-8 bg-gradient-to-b from-background to-accent/5">
+              <div className="max-w-6xl mx-auto">
+                <h2 className="text-2xl sm:text-3xl font-bold text-foreground text-center mb-8">
+                  How AI Skin Analysis Works
                 </h2>
-                <div className="prose prose-lg max-w-none text-muted-foreground text-left sm:text-center">
-                  <p className="mb-4 text-base sm:text-lg leading-relaxed">
-                    <strong>Glowimatch</strong> is an innovative AI-powered skincare platform that revolutionizes the way you discover your perfect skincare routine. Our advanced artificial intelligence technology analyzes your unique skin characteristics, including skin type, pore size, hydration levels, and sensitivity markers, to provide personalized product recommendations tailored specifically to your needs. According to research published by the <a href="https://www.aad.org/public/everyday-care/skin-care-basics/care" target="_blank" rel="noopener noreferrer" className="text-accent hover:underline">American Academy of Dermatology</a>, understanding your skin type is the foundation of effective skincare.
-                  </p>
-                  <p className="mb-4 text-base sm:text-lg leading-relaxed">
-                    Unlike traditional skincare consultations, our AI skin analysis takes just <strong>under 3 minutes</strong> to complete. Simply take our comprehensive skin quiz, and our machine learning algorithms will cross-reference your profile against a database of over <strong>500+ clinically-tested products</strong> from trusted brands like <strong>The Ordinary</strong>, <strong>Cosrx</strong>, <strong>CeraVe</strong>, <strong>Paula's Choice</strong>, and <strong>La Roche-Posay</strong>. These brands are known for their science-backed formulations and dermatologist recommendations.
-                  </p>
-                  <p className="mb-4 text-base sm:text-lg leading-relaxed">
-                    Our platform specializes in evidence-based skincare recommendations, focusing on key ingredients that dermatologists trust: <strong>Retinol</strong> for anti-aging, <strong>Niacinamide</strong> for pore minimization, <strong>Hyaluronic Acid</strong> for deep hydration, <strong>Salicylic Acid</strong> for acne-prone skin, and <strong>Vitamin C</strong> for brightening and hyperpigmentation concerns. Studies published in the <a href="https://pubmed.ncbi.nlm.nih.gov/" target="_blank" rel="noopener noreferrer" className="text-accent hover:underline">National Library of Medicine</a> confirm the effectiveness of these active ingredients for various skin conditions.
-                  </p>
-                  <p className="mb-6 text-base sm:text-lg leading-relaxed">
-                    Whether you're dealing with oily skin, dry patches, combination skin, or sensitive skin conditions, Glowimatch provides a customized morning and evening skincare routine. Our AI achieves <strong>87% alignment</strong> with board-certified dermatologist assessments, ensuring you receive professional-grade recommendations from the comfort of your home. Join over <strong>50,000 active users</strong> who have transformed their skincare journey with our platform.
-                  </p>
+
+                {/* Steps Grid */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+                  {/* Step 1 */}
+                  <div className="bg-card border border-border rounded-xl p-6 text-center hover:border-accent transition-colors">
+                    <div className="w-14 h-14 bg-accent/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <Icon name="ClipboardList" size={28} className="text-accent" />
+                    </div>
+                    <h3 className="font-semibold text-foreground mb-2">Take the Quiz</h3>
+                    <p className="text-sm text-muted-foreground">Answer questions about your skin in under 3 minutes</p>
+                  </div>
+
+                  {/* Step 2 */}
+                  <div className="bg-card border border-border rounded-xl p-6 text-center hover:border-accent transition-colors">
+                    <div className="w-14 h-14 bg-accent/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <Icon name="Brain" size={28} className="text-accent" />
+                    </div>
+                    <h3 className="font-semibold text-foreground mb-2">AI Analysis</h3>
+                    <p className="text-sm text-muted-foreground">Our AI matches you with 500+ dermatologist-approved products</p>
+                  </div>
+
+                  {/* Step 3 */}
+                  <div className="bg-card border border-border rounded-xl p-6 text-center hover:border-accent transition-colors">
+                    <div className="w-14 h-14 bg-accent/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <Icon name="Sparkles" size={28} className="text-accent" />
+                    </div>
+                    <h3 className="font-semibold text-foreground mb-2">Get Your Routine</h3>
+                    <p className="text-sm text-muted-foreground">Receive personalized morning & evening skincare routine</p>
+                  </div>
                 </div>
-                <Link
-                  to="/interactive-skin-quiz"
-                  className="inline-flex items-center gap-2 px-8 py-4 bg-accent text-white rounded-xl font-semibold hover:shadow-xl hover:scale-105 transition-all text-base sm:text-lg"
-                >
-                  <Icon name="Sparkles" size={20} />
-                  Start Your Free Skin Analysis
-                </Link>
+
+                {/* Stats Row */}
+                <div className="flex flex-wrap justify-center gap-8 mb-8">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold text-accent">87%</p>
+                    <p className="text-sm text-muted-foreground">Dermatologist Accuracy</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold text-accent">50K+</p>
+                    <p className="text-sm text-muted-foreground">Active Users</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold text-accent">500+</p>
+                    <p className="text-sm text-muted-foreground">Products Analyzed</p>
+                  </div>
+                </div>
+
+                {/* CTA */}
+                <div className="text-center">
+                  <Link
+                    to="/interactive-skin-quiz"
+                    className="inline-flex items-center gap-2 px-8 py-4 bg-accent text-white rounded-xl font-semibold hover:shadow-xl hover:scale-105 transition-all"
+                  >
+                    <Icon name="Sparkles" size={20} />
+                    Start Your Free Skin Analysis
+                  </Link>
+                </div>
               </div>
             </section>
 
