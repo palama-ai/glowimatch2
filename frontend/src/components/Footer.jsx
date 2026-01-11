@@ -54,21 +54,31 @@ const Footer = () => {
                                     Blog
                                 </Link>
                             </li>
+                            <li>
+                                <Link to="/interactive-skin-quiz" className="text-slate-400 hover:text-pink-400 text-sm transition-colors">
+                                    Skin Quiz
+                                </Link>
+                            </li>
                         </ul>
                     </div>
 
-                    {/* For Sellers */}
+                    {/* Account */}
                     <div>
-                        <h4 className="font-semibold mb-4 text-white">For Sellers</h4>
+                        <h4 className="font-semibold mb-4 text-white">Account</h4>
                         <ul className="space-y-2">
                             <li>
+                                <Link to="/login" className="text-slate-400 hover:text-pink-400 text-sm transition-colors">
+                                    Sign In
+                                </Link>
+                            </li>
+                            <li>
                                 <Link to="/signup" className="text-slate-400 hover:text-pink-400 text-sm transition-colors">
-                                    Become a Seller
+                                    Create Account
                                 </Link>
                             </li>
                             <li>
                                 <Link to="/terms" className="text-slate-400 hover:text-pink-400 text-sm transition-colors">
-                                    Seller Terms
+                                    Terms of Service
                                 </Link>
                             </li>
                         </ul>

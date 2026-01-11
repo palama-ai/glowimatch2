@@ -1,5 +1,6 @@
 import React from 'react';
 import { Helmet } from 'react-helmet';
+import { useLocation } from 'react-router-dom';
 import { useI18n } from '../contexts/I18nContext';
 
 /**
@@ -18,26 +19,27 @@ const SEO = ({
     children
 }) => {
     const { language } = useI18n();
+    const location = useLocation();
 
     const siteUrl = 'https://glowimatch.vercel.app';
     const defaultImage = `${siteUrl}/assets/images/og-image.png`;
 
-    // Default SEO content based on language
+    // Default SEO content based on language (optimized lengths: title <60, desc <155)
     const defaultContent = {
         en: {
-            title: 'Glowimatch | AI Skincare Analysis & Personalized Beauty Recommendations',
-            description: 'Discover your perfect skincare routine with AI-powered skin analysis. Get personalized beauty product recommendations, skin type quiz, and expert skincare tips. Find the best cosmetics for your skin.',
-            keywords: 'skincare, AI skin analysis, beauty products, skin type quiz, personalized skincare, cosmetics, beauty shop, skincare routine, skin care tips, facial care, anti-aging, moisturizer, cleanser, serum'
+            title: 'Glowimatch | AI Skin Analysis & Beauty Tips',
+            description: 'Get personalized skincare with AI skin analysis. Discover your skin type, get product recommendations from The Ordinary & Cosrx.',
+            keywords: 'skincare, AI skin analysis, beauty products, skin type quiz, personalized skincare, cosmetics, The Ordinary, Cosrx, CeraVe'
         },
         fr: {
-            title: 'Glowimatch | Analyse de Peau par IA & Recommandations Beauté Personnalisées',
-            description: 'Découvrez votre routine de soin parfaite grâce à l\'analyse de peau par IA. Obtenez des recommandations de produits de beauté personnalisées, un quiz sur votre type de peau et des conseils d\'experts.',
-            keywords: 'soins de la peau, analyse de peau IA, produits de beauté, quiz type de peau, soins personnalisés, cosmétiques, boutique beauté, routine beauté, conseils soins'
+            title: 'Glowimatch | Analyse de Peau IA & Conseils Beauté',
+            description: 'Découvrez votre routine parfaite avec l\'analyse IA. Quiz type de peau et recommandations personnalisées.',
+            keywords: 'soins de la peau, analyse de peau IA, produits de beauté, quiz type de peau, cosmétiques, routine beauté'
         },
         ar: {
-            title: 'جلوماتش | تحليل البشرة بالذكاء الاصطناعي وتوصيات جمالية مخصصة',
-            description: 'اكتشفي روتين العناية بالبشرة المثالي مع تحليل البشرة بالذكاء الاصطناعي. احصلي على توصيات منتجات تجميل مخصصة، اختبار نوع البشرة، ونصائح خبراء العناية بالبشرة. اعثري على أفضل مستحضرات التجميل لبشرتك.',
-            keywords: 'العناية بالبشرة, تحليل البشرة بالذكاء الاصطناعي, منتجات التجميل, متاجر التجميل, اختبار نوع البشرة, مستحضرات التجميل, روتين العناية بالبشرة, كريم مرطب, سيروم, غسول الوجه'
+            title: 'جلوماتش | تحليل البشرة بالذكاء الاصطناعي',
+            description: 'اكتشفي روتين العناية المثالي مع تحليل البشرة بالذكاء الاصطناعي. توصيات منتجات مخصصة لبشرتك.',
+            keywords: 'العناية بالبشرة, تحليل البشرة, منتجات التجميل, اختبار نوع البشرة, مستحضرات التجميل'
         }
     };
 
@@ -48,7 +50,9 @@ const SEO = ({
     const fullDescription = description || defaults.description;
     const fullKeywords = keywords || defaults.keywords;
     const fullImage = image || defaultImage;
-    const fullUrl = url ? `${siteUrl}${url}` : siteUrl;
+    // Use dynamic pathname for canonical URL if no explicit URL provided
+    const currentPath = url || location.pathname;
+    const fullUrl = `${siteUrl}${currentPath === '/' ? '' : currentPath}`;
 
     // Language codes for hreflang
     const langCodes = {
