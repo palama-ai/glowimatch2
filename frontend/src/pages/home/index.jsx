@@ -93,22 +93,6 @@ const Home = () => {
                   </div>
                 </div>
 
-                {/* Stats Row */}
-                <div className="flex flex-wrap justify-center gap-8 mb-8">
-                  <div className="text-center">
-                    <p className="text-3xl font-bold text-accent">87%</p>
-                    <p className="text-sm text-muted-foreground">Dermatologist Accuracy</p>
-                  </div>
-                  <div className="text-center">
-                    <p className="text-3xl font-bold text-accent">50K+</p>
-                    <p className="text-sm text-muted-foreground">Active Users</p>
-                  </div>
-                  <div className="text-center">
-                    <p className="text-3xl font-bold text-accent">500+</p>
-                    <p className="text-sm text-muted-foreground">Products Analyzed</p>
-                  </div>
-                </div>
-
                 {/* CTA */}
                 <div className="text-center">
                   <Link
