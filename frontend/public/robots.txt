@@ -1,0 +1,32 @@
+# Glowimatch Robots.txt
+# AI-Powered Skincare Analysis Platform
+
+User-agent: *
+Allow: /
+
+# Block system and build files
+Disallow: /static/
+Disallow: /node_modules/
+Disallow: /build/
+Disallow: /src/
+Disallow: /.git/
+
+# Block private user pages from indexing
+Disallow: /profile
+Disallow: /quiz-history
+Disallow: /notifications
+Disallow: /admin
+Disallow: /seller
+
+# Allow important pages explicitly
+Allow: /
+Allow: /about
+Allow: /blog
+Allow: /contact
+Allow: /interactive-skin-quiz
+Allow: /login
+Allow: /signup
+Allow: /terms
+
+# Sitemap location
+Sitemap: https://glowimatch.vercel.app/sitemap.xml
