@@ -44,11 +44,13 @@ const Home = () => {
           {/* Hero Section */}
           <main className="animate-fadeIn">
             <section className="relative min-h-[-10px] flex items-center overflow-hidden">
+              {/* Hidden H1 for SEO - visually hidden but readable by search engines */}
+              <h1 className="sr-only">Glowimatch - AI Skin Analysis & Personalized Skincare Recommendations</h1>
               {/* Home Image */}
               <div className="w-full h-full relative">
                 <img
                   src="/assets/images/home.png"
-                  alt="home"
+                  alt="AI-powered skincare analysis and personalized beauty recommendations"
                   className="w-full h-full object-cover"
                 />
               </div>

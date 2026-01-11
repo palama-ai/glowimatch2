@@ -46,13 +46,24 @@ const SEO = ({
     const currentLang = language || 'en';
     const defaults = defaultContent[currentLang] || defaultContent.en;
 
-    const fullTitle = title ? `${title} | Glowimatch` : defaults.title;
-    const fullDescription = description || defaults.description;
+    // Build raw title and description
+    const rawTitle = title ? `${title} | Glowimatch` : defaults.title;
+    const rawDescription = description || defaults.description;
     const fullKeywords = keywords || defaults.keywords;
     const fullImage = image || defaultImage;
+
     // Use dynamic pathname for canonical URL if no explicit URL provided
     const currentPath = url || location.pathname;
     const fullUrl = `${siteUrl}${currentPath === '/' ? '' : currentPath}`;
+
+    // Auto-truncate to satisfy Ahrefs: Title < 60 chars, Description < 155 chars
+    const truncateText = (text, maxLength) => {
+        if (!text) return '';
+        return text.length > maxLength ? text.substring(0, maxLength - 3) + '...' : text;
+    };
+
+    const fullTitle = truncateText(rawTitle, 60);
+    const fullDescription = truncateText(rawDescription, 155);
 
     // Language codes for hreflang
     const langCodes = {
