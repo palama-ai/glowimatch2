@@ -41,15 +41,9 @@ const Home = () => {
         <>
           <Header />
 
-          {/* Hero Section with Visible H1 */}
+          {/* Hero Section */}
           <main className="animate-fadeIn">
             <section className="relative flex flex-col items-center overflow-hidden">
-              {/* Visible H1 for SEO - at top of DOM hierarchy */}
-              <div className="w-full bg-gradient-to-r from-pink-600 via-rose-500 to-pink-600 py-4 sm:py-6 text-center">
-                <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-white px-4 leading-tight">
-                  AI-Powered Skincare Analysis & Personalized Beauty Recommendations | Glowimatch
-                </h1>
-              </div>
               {/* Home Image */}
               <div className="w-full relative">
                 <img
