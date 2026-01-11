@@ -41,17 +41,23 @@ const Home = () => {
         <>
           <Header />
 
-          {/* Hero Section */}
+          {/* Hero Section with Visible H1 */}
           <main className="animate-fadeIn">
-            <section className="relative min-h-[-10px] flex items-center overflow-hidden">
-              {/* Hidden H1 for SEO - visually hidden but readable by search engines */}
-              <h1 className="sr-only">Glowimatch - AI Skin Analysis & Personalized Skincare Recommendations</h1>
+            <section className="relative flex flex-col items-center overflow-hidden">
+              {/* Visible H1 for SEO - at top of DOM hierarchy */}
+              <div className="w-full bg-gradient-to-r from-pink-600 via-rose-500 to-pink-600 py-4 sm:py-6 text-center">
+                <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-white px-4 leading-tight">
+                  AI-Powered Skincare Analysis & Personalized Beauty Recommendations | Glowimatch
+                </h1>
+              </div>
               {/* Home Image */}
-              <div className="w-full h-full relative">
+              <div className="w-full relative">
                 <img
                   src="/assets/images/home.png"
-                  alt="AI-powered skincare analysis and personalized beauty recommendations"
-                  className="w-full h-full object-cover"
+                  alt="AI-powered skincare analysis showing personalized beauty product recommendations for all skin types"
+                  width="1920"
+                  height="1080"
+                  className="w-full h-auto object-cover"
                 />
               </div>
             </section>
@@ -60,17 +66,17 @@ const Home = () => {
             <section className="py-16 sm:py-24 px-4 sm:px-5 lg:px-8 bg-gradient-to-b from-background to-accent/5">
               <div className="max-w-4xl mx-auto text-center">
                 <h2 className="text-3xl sm:text-4xl font-bold text-foreground mb-6">
-                  How AI Skin Analysis Works
+                  The Science Behind AI Skin Analysis
                 </h2>
                 <div className="prose prose-lg max-w-none text-muted-foreground text-left sm:text-center">
                   <p className="mb-4 text-base sm:text-lg leading-relaxed">
-                    <strong>Glowimatch</strong> is an innovative AI-powered skincare platform that revolutionizes the way you discover your perfect skincare routine. Our advanced artificial intelligence technology analyzes your unique skin characteristics, including skin type, pore size, hydration levels, and sensitivity markers, to provide personalized product recommendations tailored specifically to your needs.
+                    <strong>Glowimatch</strong> is an innovative AI-powered skincare platform that revolutionizes the way you discover your perfect skincare routine. Our advanced artificial intelligence technology analyzes your unique skin characteristics, including skin type, pore size, hydration levels, and sensitivity markers, to provide personalized product recommendations tailored specifically to your needs. According to research published by the <a href="https://www.aad.org/public/everyday-care/skin-care-basics/care" target="_blank" rel="noopener noreferrer" className="text-accent hover:underline">American Academy of Dermatology</a>, understanding your skin type is the foundation of effective skincare.
                   </p>
                   <p className="mb-4 text-base sm:text-lg leading-relaxed">
-                    Unlike traditional skincare consultations, our AI skin analysis takes just <strong>under 3 minutes</strong> to complete. Simply take our comprehensive skin quiz, and our machine learning algorithms will cross-reference your profile against a database of over <strong>500+ clinically-tested products</strong> from trusted brands like <strong>The Ordinary</strong>, <strong>Cosrx</strong>, <strong>CeraVe</strong>, <strong>Paula's Choice</strong>, and <strong>La Roche-Posay</strong>.
+                    Unlike traditional skincare consultations, our AI skin analysis takes just <strong>under 3 minutes</strong> to complete. Simply take our comprehensive skin quiz, and our machine learning algorithms will cross-reference your profile against a database of over <strong>500+ clinically-tested products</strong> from trusted brands like <strong>The Ordinary</strong>, <strong>Cosrx</strong>, <strong>CeraVe</strong>, <strong>Paula's Choice</strong>, and <strong>La Roche-Posay</strong>. These brands are known for their science-backed formulations and dermatologist recommendations.
                   </p>
                   <p className="mb-4 text-base sm:text-lg leading-relaxed">
-                    Our platform specializes in evidence-based skincare recommendations, focusing on key ingredients that dermatologists trust: <strong>Retinol</strong> for anti-aging, <strong>Niacinamide</strong> for pore minimization, <strong>Hyaluronic Acid</strong> for deep hydration, <strong>Salicylic Acid</strong> for acne-prone skin, and <strong>Vitamin C</strong> for brightening and hyperpigmentation concerns.
+                    Our platform specializes in evidence-based skincare recommendations, focusing on key ingredients that dermatologists trust: <strong>Retinol</strong> for anti-aging, <strong>Niacinamide</strong> for pore minimization, <strong>Hyaluronic Acid</strong> for deep hydration, <strong>Salicylic Acid</strong> for acne-prone skin, and <strong>Vitamin C</strong> for brightening and hyperpigmentation concerns. Studies published in the <a href="https://pubmed.ncbi.nlm.nih.gov/" target="_blank" rel="noopener noreferrer" className="text-accent hover:underline">National Library of Medicine</a> confirm the effectiveness of these active ingredients for various skin conditions.
                   </p>
                   <p className="mb-6 text-base sm:text-lg leading-relaxed">
                     Whether you're dealing with oily skin, dry patches, combination skin, or sensitive skin conditions, Glowimatch provides a customized morning and evening skincare routine. Our AI achieves <strong>87% alignment</strong> with board-certified dermatologist assessments, ensuring you receive professional-grade recommendations from the comfort of your home. Join over <strong>50,000 active users</strong> who have transformed their skincare journey with our platform.
