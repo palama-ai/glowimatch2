@@ -837,6 +837,12 @@ const InteractiveSkinQuiz = () => {
       <Header />
       <ProgressIndicator />
       <main className="flex-1">
+        {/* SEO H1 - Visible header for crawlers */}
+        <div className="bg-gradient-to-r from-pink-600 via-rose-500 to-pink-600 py-4 text-center">
+          <h1 className="text-xl sm:text-2xl font-bold text-white px-4">
+            Free AI Skin Type Quiz - Discover Your Perfect Skincare Routine
+          </h1>
+        </div>
         <div className="max-w-4xl mx-auto px-5 lg:px-8 py-8">
           <Breadcrumbs />
           {lastSaveError && (
