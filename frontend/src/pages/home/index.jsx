@@ -124,7 +124,7 @@ const Home = () => {
                   <p className="text-sm sm:text-lg text-muted-foreground">{t('skincare_tips_sub')}</p>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-8">
-                  <Link to="/blog/simple-skincare-routine" className="group block overflow-hidden bg-card rounded-xl border border-border hover:border-accent transition-all hover:shadow-xl">
+                  <Link to="/blog" className="group block overflow-hidden bg-card rounded-xl border border-border hover:border-accent transition-all hover:shadow-xl">
                     <div className="relative h-64 overflow-hidden bg-muted">
                       <img
                         src={IMAGES.blog_routine}
@@ -140,7 +140,7 @@ const Home = () => {
                       </span>
                     </div>
                   </Link>
-                  <Link to="/blog/understanding-skin-types" className="group block overflow-hidden bg-card rounded-xl border border-border hover:border-accent transition-all hover:shadow-xl">
+                  <Link to="/blog" className="group block overflow-hidden bg-card rounded-xl border border-border hover:border-accent transition-all hover:shadow-xl">
                     <div className="relative h-64 overflow-hidden bg-muted">
                       <img
                         src={IMAGES.blog_skincare_tips}
