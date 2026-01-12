@@ -24,21 +24,21 @@ const SEO = ({
     const siteUrl = 'https://glowimatch.vercel.app';
     const defaultImage = `${siteUrl}/assets/images/og-image.png`;
 
-    // Default SEO content based on language (optimized lengths: title <60, desc <155)
+    // Default SEO content based on language (optimized lengths: title <60, desc 150-160)
     const defaultContent = {
         en: {
             title: 'Glowimatch | AI Skin Analysis & Beauty Tips',
-            description: 'Get personalized skincare with AI skin analysis. Discover your skin type, get product recommendations from The Ordinary & Cosrx.',
+            description: 'Discover your perfect skincare routine with Glowimatch AI skin analysis. Get personalized product recommendations from The Ordinary, Cosrx & CeraVe for your skin type.',
             keywords: 'skincare, AI skin analysis, beauty products, skin type quiz, personalized skincare, cosmetics, The Ordinary, Cosrx, CeraVe'
         },
         fr: {
             title: 'Glowimatch | Analyse de Peau IA & Conseils Beauté',
-            description: 'Découvrez votre routine parfaite avec l\'analyse IA. Quiz type de peau et recommandations personnalisées.',
+            description: 'Découvrez votre routine parfaite avec l\'analyse de peau IA Glowimatch. Quiz type de peau et recommandations personnalisées de produits cosmétiques.',
             keywords: 'soins de la peau, analyse de peau IA, produits de beauté, quiz type de peau, cosmétiques, routine beauté'
         },
         ar: {
             title: 'جلوماتش | تحليل البشرة بالذكاء الاصطناعي',
-            description: 'اكتشفي روتين العناية المثالي مع تحليل البشرة بالذكاء الاصطناعي. توصيات منتجات مخصصة لبشرتك.',
+            description: 'اكتشفي روتين العناية بالبشرة المثالي مع تحليل الذكاء الاصطناعي من جلوماتش. احصلي على توصيات منتجات مخصصة لنوع بشرتك.',
             keywords: 'العناية بالبشرة, تحليل البشرة, منتجات التجميل, اختبار نوع البشرة, مستحضرات التجميل'
         }
     };

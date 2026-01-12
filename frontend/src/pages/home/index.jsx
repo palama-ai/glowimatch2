@@ -54,6 +54,15 @@ const Home = () => {
                   className="w-full h-auto object-cover"
                 />
               </div>
+              {/* H1 Tag for SEO - Primary Keyword */}
+              <div className="w-full bg-gradient-to-r from-accent/10 to-pink-100 py-6 text-center">
+                <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground px-4">
+                  Personalized AI Skincare Routine for Every Skin Type
+                </h1>
+                <p className="text-muted-foreground mt-2 px-4 max-w-2xl mx-auto">
+                  Discover your perfect skincare products with our AI-powered skin analysis
+                </p>
+              </div>
             </section>
 
             {/* How It Works - Visual Cards Section */}
@@ -231,6 +240,44 @@ const Home = () => {
                   </Link>
                   <Link to="/contact" className="px-6 sm:px-8 py-3 sm:py-4 bg-white/10 backdrop-blur border border-white/30 text-white rounded-lg font-semibold hover:bg-white/20 transition-all text-sm sm:text-base">
                     {t('get_in_touch')}
+                  </Link>
+                </div>
+              </div>
+            </section>
+
+            {/* Cross-Linking Section for SEO Internal Outlinks */}
+            <section className="py-12 px-4 sm:px-5 lg:px-8 bg-accent/5 border-t border-accent/10">
+              <div className="max-w-4xl mx-auto text-center">
+                <h2 className="text-xl sm:text-2xl font-bold text-foreground mb-6">
+                  Explore More About Glowimatch
+                </h2>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <Link
+                    to="/about"
+                    className="flex flex-col items-center p-4 bg-card border border-border rounded-xl hover:border-accent transition-colors"
+                    aria-label="Learn more about Glowimatch and our AI skincare technology"
+                  >
+                    <Icon name="Users" size={24} className="text-accent mb-2" />
+                    <span className="font-semibold text-foreground">About Us</span>
+                    <span className="text-sm text-muted-foreground">Our mission & team</span>
+                  </Link>
+                  <Link
+                    to="/blog"
+                    className="flex flex-col items-center p-4 bg-card border border-border rounded-xl hover:border-accent transition-colors"
+                    aria-label="Read our latest skincare tips and beauty blog posts"
+                  >
+                    <Icon name="BookOpen" size={24} className="text-accent mb-2" />
+                    <span className="font-semibold text-foreground">Latest Blog Posts</span>
+                    <span className="text-sm text-muted-foreground">Skincare tips & guides</span>
+                  </Link>
+                  <Link
+                    to="/contact"
+                    className="flex flex-col items-center p-4 bg-card border border-border rounded-xl hover:border-accent transition-colors"
+                    aria-label="Contact Glowimatch support team for skincare advice"
+                  >
+                    <Icon name="MessageCircle" size={24} className="text-accent mb-2" />
+                    <span className="font-semibold text-foreground">Contact Support</span>
+                    <span className="text-sm text-muted-foreground">Get skincare advice</span>
                   </Link>
                 </div>
               </div>
