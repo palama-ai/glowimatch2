@@ -14,6 +14,7 @@ const path = require('path');
 
 // Routes to pre-render with their unique titles
 const routes = [
+    { path: '/', title: 'Glowimatch | AI Skin Analysis & Personalized Beauty Recommendations' },
     { path: '/about', title: 'About Us - AI Skincare Experts | Glowimatch' },
     { path: '/blog', title: 'Skincare Tips & Beauty Blog | Glowimatch' },
     { path: '/contact', title: 'Contact Us - Get Skincare Advice | Glowimatch' },
@@ -41,23 +42,30 @@ const indexHtml = fs.readFileSync(indexPath, 'utf8');
 
 // Generate HTML for each route
 routes.forEach(route => {
-    const dir = path.join(buildDir, route.path);
-
-    // Create directory if it doesn't exist
-    if (!fs.existsSync(dir)) {
-        fs.mkdirSync(dir, { recursive: true });
-    }
-
     // Replace title in HTML
     const modifiedHtml = indexHtml.replace(
         /<title>.*?<\/title>/,
         `<title>${route.title}</title>`
     );
 
-    // Write the HTML file
-    const outputFile = path.join(dir, 'index.html');
-    fs.writeFileSync(outputFile, modifiedHtml);
-    console.log(`✅ Created: ${route.path}/index.html`);
+    if (route.path === '/') {
+        // For homepage, overwrite the existing index.html
+        fs.writeFileSync(indexPath, modifiedHtml);
+        console.log('✅ Updated: /index.html (homepage)');
+    } else {
+        // For other routes, create subdirectory with index.html
+        const dir = path.join(buildDir, route.path);
+
+        // Create directory if it doesn't exist
+        if (!fs.existsSync(dir)) {
+            fs.mkdirSync(dir, { recursive: true });
+        }
+
+        // Write the HTML file
+        const outputFile = path.join(dir, 'index.html');
+        fs.writeFileSync(outputFile, modifiedHtml);
+        console.log(`✅ Created: ${route.path}/index.html`);
+    }
 });
 
 console.log('\n✨ Pre-rendering complete!');
