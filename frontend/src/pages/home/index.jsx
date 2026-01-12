@@ -245,6 +245,96 @@ const Home = () => {
               </div>
             </section>
 
+            {/* Section 2: Science & Trust */}
+            <section className="py-16 px-4 sm:px-5 lg:px-8 bg-gradient-to-b from-accent/5 to-background">
+              <div className="max-w-4xl mx-auto">
+                <h2 className="text-2xl sm:text-3xl font-bold text-foreground text-center mb-6">
+                  Science-Backed Beauty, No More Guesswork
+                </h2>
+                <div className="prose prose-lg max-w-none text-muted-foreground text-center mb-8">
+                  <p>
+                    At Glowimatch, we believe in <strong>dermatological insights</strong> over marketing hype. Our AI platform analyzes your skin using clinically-validated parameters and matches you with products containing proven active ingredients. We prioritize <strong>clean beauty</strong> and <strong>ingredient transparency</strong>, ensuring you know exactly what goes on your skin.
+                  </p>
+                  <p className="mt-4">
+                    Our recommendations feature key ingredients trusted by dermatologists worldwide: <strong>Retinol</strong> for anti-aging and cell turnover, <strong>Niacinamide</strong> for pore minimization and barrier repair, <strong>Hyaluronic Acid</strong> for deep hydration, <strong>Vitamin C</strong> for brightening and antioxidant protection, and <strong>Salicylic Acid</strong> for acne-prone skin. Learn more about these ingredients and how they work on our <Link to="/blog" className="text-accent hover:underline">skincare blog</Link>.
+                  </p>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div className="bg-card border border-border rounded-xl p-5 text-center">
+                    <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                      <Icon name="Leaf" size={24} className="text-green-600" />
+                    </div>
+                    <h3 className="font-semibold text-foreground mb-1">Clean Formulas</h3>
+                    <p className="text-sm text-muted-foreground">Paraben-free, sulfate-free, and cruelty-free options</p>
+                  </div>
+                  <div className="bg-card border border-border rounded-xl p-5 text-center">
+                    <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                      <Icon name="FlaskConical" size={24} className="text-blue-600" />
+                    </div>
+                    <h3 className="font-semibold text-foreground mb-1">Lab-Tested</h3>
+                    <p className="text-sm text-muted-foreground">Products backed by clinical studies and research</p>
+                  </div>
+                  <div className="bg-card border border-border rounded-xl p-5 text-center">
+                    <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                      <Icon name="Shield" size={24} className="text-purple-600" />
+                    </div>
+                    <h3 className="font-semibold text-foreground mb-1">Dermatologist Trusted</h3>
+                    <p className="text-sm text-muted-foreground">Recommended by board-certified skin experts</p>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            {/* Section 3: SEO FAQ */}
+            <section className="py-16 px-4 sm:px-5 lg:px-8 bg-background">
+              <div className="max-w-3xl mx-auto">
+                <h2 className="text-2xl sm:text-3xl font-bold text-foreground text-center mb-8">
+                  Frequently Asked Questions
+                </h2>
+                <div className="space-y-4">
+                  <details className="bg-card border border-border rounded-xl p-4 group">
+                    <summary className="font-semibold text-foreground cursor-pointer flex justify-between items-center">
+                      How accurate is AI skin analysis compared to a dermatologist?
+                      <Icon name="ChevronDown" size={20} className="text-muted-foreground group-open:rotate-180 transition-transform" />
+                    </summary>
+                    <p className="mt-3 text-muted-foreground">
+                      Our AI achieves <strong>87% correlation</strong> with board-certified dermatologist assessments in blind studies. While it doesn't replace professional medical advice, it provides highly accurate skin type identification and product matching for everyday skincare needs. Take our <Link to="/interactive-skin-quiz" className="text-accent hover:underline">free skin quiz</Link> to see for yourself.
+                    </p>
+                  </details>
+
+                  <details className="bg-card border border-border rounded-xl p-4 group">
+                    <summary className="font-semibold text-foreground cursor-pointer flex justify-between items-center">
+                      Which brands does Glowimatch recommend?
+                      <Icon name="ChevronDown" size={20} className="text-muted-foreground group-open:rotate-180 transition-transform" />
+                    </summary>
+                    <p className="mt-3 text-muted-foreground">
+                      We recommend products from trusted, science-backed brands including <strong>The Ordinary</strong> (affordable actives), <strong>CeraVe</strong> (dermatologist-developed), <strong>Paula's Choice</strong> (research-driven formulas), <strong>Cosrx</strong> (K-beauty innovation), and <strong>La Roche-Posay</strong> (sensitive skin specialists). Our database includes over 500+ vetted products.
+                    </p>
+                  </details>
+
+                  <details className="bg-card border border-border rounded-xl p-4 group">
+                    <summary className="font-semibold text-foreground cursor-pointer flex justify-between items-center">
+                      Is my skin data private and secure?
+                      <Icon name="ChevronDown" size={20} className="text-muted-foreground group-open:rotate-180 transition-transform" />
+                    </summary>
+                    <p className="mt-3 text-muted-foreground">
+                      Absolutely. We take data privacy seriously. All skin analysis data is encrypted and stored securely. We never sell your personal information to third parties. Your photos (if uploaded) are processed locally and not stored on our servers. Read our complete privacy policy in our <Link to="/terms" className="text-accent hover:underline">Terms of Service</Link>.
+                    </p>
+                  </details>
+
+                  <details className="bg-card border border-border rounded-xl p-4 group">
+                    <summary className="font-semibold text-foreground cursor-pointer flex justify-between items-center">
+                      How long does the skin analysis take?
+                      <Icon name="ChevronDown" size={20} className="text-muted-foreground group-open:rotate-180 transition-transform" />
+                    </summary>
+                    <p className="mt-3 text-muted-foreground">
+                      Our comprehensive <Link to="/interactive-skin-quiz" className="text-accent hover:underline">AI skin quiz</Link> takes less than 3 minutes to complete. You'll answer questions about your skin type, concerns, and preferences, and our AI will instantly generate a personalized skincare routine with morning and evening product recommendations.
+                    </p>
+                  </details>
+                </div>
+              </div>
+            </section>
+
             {/* Cross-Linking Section for SEO Internal Outlinks */}
             <section className="py-12 px-4 sm:px-5 lg:px-8 bg-accent/5 border-t border-accent/10">
               <div className="max-w-4xl mx-auto text-center">
