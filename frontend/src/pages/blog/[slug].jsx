@@ -120,12 +120,95 @@ const BlogPost = () => {
           </div>
         )}
 
-        {/* Content */}
-        <div className="prose prose-invert max-w-none text-foreground">
-          <div className="whitespace-pre-wrap text-base leading-relaxed">
-            {post.content}
-          </div>
-        </div>
+        {/* Content - Render HTML from Rich Text Editor */}
+        <article className="prose prose-lg max-w-none">
+          <style>{`
+            .blog-content {
+              color: var(--color-foreground);
+              line-height: 1.8;
+            }
+            .blog-content h1 {
+              font-size: 2rem;
+              font-weight: 700;
+              margin: 2rem 0 1rem;
+              color: var(--color-foreground);
+            }
+            .blog-content h2 {
+              font-size: 1.5rem;
+              font-weight: 700;
+              margin: 1.75rem 0 0.75rem;
+              color: var(--color-foreground);
+            }
+            .blog-content h3 {
+              font-size: 1.25rem;
+              font-weight: 600;
+              margin: 1.5rem 0 0.5rem;
+              color: var(--color-foreground);
+            }
+            .blog-content p {
+              margin: 1rem 0;
+              color: var(--color-muted-foreground);
+            }
+            .blog-content strong {
+              font-weight: 600;
+              color: var(--color-foreground);
+            }
+            .blog-content em {
+              font-style: italic;
+            }
+            .blog-content a {
+              color: var(--color-accent);
+              text-decoration: underline;
+              transition: opacity 0.2s;
+            }
+            .blog-content a:hover {
+              opacity: 0.8;
+            }
+            .blog-content blockquote {
+              border-left: 4px solid var(--color-accent);
+              padding: 1rem 1.5rem;
+              margin: 1.5rem 0;
+              background: var(--color-accent-foreground);
+              background: rgba(236, 72, 153, 0.1);
+              border-radius: 0 8px 8px 0;
+              font-style: italic;
+            }
+            .blog-content blockquote strong {
+              color: var(--color-accent);
+            }
+            .blog-content ul, .blog-content ol {
+              margin: 1rem 0;
+              padding-left: 2rem;
+            }
+            .blog-content li {
+              margin: 0.5rem 0;
+              color: var(--color-muted-foreground);
+            }
+            .blog-content img {
+              max-width: 100%;
+              border-radius: 12px;
+              margin: 1.5rem 0;
+            }
+            .blog-content pre, .blog-content code {
+              background: var(--color-muted);
+              padding: 0.25rem 0.5rem;
+              border-radius: 4px;
+              font-family: monospace;
+            }
+            .blog-content pre {
+              padding: 1rem;
+              overflow-x: auto;
+            }
+            .blog-content [style*="background-color"] {
+              padding: 0.125rem 0.375rem;
+              border-radius: 4px;
+            }
+          `}</style>
+          <div
+            className="blog-content"
+            dangerouslySetInnerHTML={{ __html: post.content }}
+          />
+        </article>
       </main>
     </div>
   );
