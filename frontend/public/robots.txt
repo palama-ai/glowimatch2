@@ -28,5 +28,5 @@ Allow: /login
 Allow: /signup
 Allow: /terms
 
-# Sitemap location
-Sitemap: https://glowimatch.vercel.app/sitemap.xml
+# Sitemap location (dynamic sitemap includes all blog posts)
+Sitemap: https://backend-three-sigma-81.vercel.app/api/sitemap.xml
