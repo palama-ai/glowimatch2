@@ -112,19 +112,50 @@ const Blogs = () => {
       setError('Please select a valid image file');
       return;
     }
+
+    // File size check (5MB max)
+    if (file.size > 5 * 1024 * 1024) {
+      setError('File too large. Maximum size is 5MB.');
+      return;
+    }
+
     setUploadingImage(true);
     setError('');
+
     try {
-      const reader = new FileReader();
-      reader.onload = async (event) => {
-        const base64Image = event.target?.result;
-        setImagePreview(base64Image);
-        setFormData(prev => ({ ...prev, image_url: base64Image }));
-        setUploadingImage(false);
-      };
-      reader.readAsDataURL(file);
+      // Create form data for Cloudinary upload
+      const formDataUpload = new FormData();
+      formDataUpload.append('image', file);
+
+      const raw = localStorage.getItem('gm_auth');
+      const headers = raw ? { Authorization: `Bearer ${JSON.parse(raw).token}` } : {};
+
+      // Upload to Cloudinary via backend API
+      const response = await fetch(`${API_BASE}/upload/image`, {
+        method: 'POST',
+        headers,
+        body: formDataUpload
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to upload image');
+      }
+
+      const result = await response.json();
+
+      if (result.success && result.data?.url) {
+        setImagePreview(result.data.url);
+        setFormData(prev => ({ ...prev, image_url: result.data.url }));
+        setSuccess('Image uploaded successfully!');
+        setTimeout(() => setSuccess(''), 3000);
+      } else {
+        throw new Error('Invalid response from server');
+      }
     } catch (err) {
-      setError('Failed to process image');
+      console.error('[Blogs] Image upload error:', err);
+      setError(err.message || 'Failed to upload image. Please try again.');
+    } finally {
       setUploadingImage(false);
     }
   };

@@ -10,20 +10,26 @@ const API_BASE = import.meta.env?.VITE_BACKEND_URL || 'https://backend-three-sig
 
 // Blog Card Component - Modern minimal design
 const BlogCard = ({ post }) => {
+  const hasImage = post.image && post.image.trim() !== '';
+
   return (
     <Link
       to={`/blog/${post.slug}`}
       className="group relative overflow-hidden rounded-2xl h-64 block bg-card border border-border hover:border-accent/50 transition-all duration-500"
     >
-      {/* Background Image */}
-      <img
-        src={post.image}
-        alt={post.title}
-        className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-      />
+      {/* Background Image or Gradient Placeholder */}
+      {hasImage ? (
+        <img
+          src={post.image}
+          alt={post.title}
+          className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+        />
+      ) : (
+        <div className="absolute inset-0 bg-gradient-to-br from-accent/20 via-pink-100 to-rose-100" />
+      )}
 
       {/* Subtle Gradient Overlay */}
-      <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-black/10" />
+      <div className={`absolute inset-0 ${hasImage ? 'bg-gradient-to-t from-black/90 via-black/40 to-black/10' : 'bg-gradient-to-t from-black/70 to-transparent'}`} />
 
       {/* Content */}
       <div className="absolute bottom-0 left-0 right-0 p-5">
@@ -54,20 +60,26 @@ const FeaturedArticle = ({ post }) => {
     );
   }
 
+  const hasImage = post.image && post.image.trim() !== '';
+
   return (
     <Link
       to={`/blog/${post.slug}`}
       className="group block h-full min-h-[480px] rounded-3xl overflow-hidden relative bg-card border border-border hover:border-accent/50 transition-all duration-500"
     >
-      {/* Full Image Background */}
-      <img
-        src={post.image}
-        alt={post.title}
-        className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-      />
+      {/* Full Image Background or Gradient */}
+      {hasImage ? (
+        <img
+          src={post.image}
+          alt={post.title}
+          className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+        />
+      ) : (
+        <div className="absolute inset-0 bg-gradient-to-br from-accent/30 via-pink-200 to-rose-200" />
+      )}
 
       {/* Elegant Gradient Overlay */}
-      <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent" />
+      <div className={`absolute inset-0 ${hasImage ? 'bg-gradient-to-t from-black via-black/50 to-transparent' : 'bg-gradient-to-t from-black/80 via-black/30 to-transparent'}`} />
 
       {/* Top Badge */}
       <div className="absolute top-6 left-6 right-6 flex items-center justify-between">
@@ -140,7 +152,7 @@ const Blog = () => {
             title: blog.title,
             slug: blog.slug,
             excerpt: blog.excerpt || blog.content?.substring(0, 150) + '...',
-            image: blog.image_url || IMAGES.blog_routine,
+            image: blog.image_url || null, // Don't use default image - keep null if no image
             category: blog.category || t('blog_category_default'),
             date: new Date(blog.created_at || Date.now()).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }),
             readTime: `${Math.ceil((blog.content?.length || 0) / 200)} ${t('min_read')}`
