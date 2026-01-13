@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import AdminLayout from '../../components/admin/AdminLayout';
 import Icon from '../../components/AppIcon';
+import RichTextEditor from '../../components/admin/RichTextEditor';
 
 const API_BASE = import.meta.env?.VITE_BACKEND_URL || 'https://backend-three-sigma-81.vercel.app/api';
 
@@ -17,7 +18,8 @@ const Blogs = () => {
     excerpt: '',
     content: '',
     image_url: '',
-    published: true
+    published: true,
+    layout: 'classic'
   });
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -64,7 +66,7 @@ const Blogs = () => {
 
   const openCreateModal = () => {
     setEditingBlog(null);
-    setFormData({ title: '', slug: '', excerpt: '', content: '', image_url: '', published: true });
+    setFormData({ title: '', slug: '', excerpt: '', content: '', image_url: '', published: true, layout: 'classic' });
     setImagePreview('');
     setError('');
     setSuccess('');
@@ -79,12 +81,23 @@ const Blogs = () => {
       excerpt: b.excerpt || '',
       content: b.content || '',
       image_url: b.image_url || '',
-      published: b.published === 1 || b.published === true
+      published: b.published === 1 || b.published === true,
+      layout: b.layout || 'classic'
     });
     setImagePreview(b.image_url || '');
     setError('');
     setSuccess('');
     setShowModal(true);
+  };
+
+  // Handle rich text content change
+  const handleContentChange = (content) => {
+    setFormData(prev => ({ ...prev, content }));
+  };
+
+  // Handle layout template change
+  const handleLayoutChange = (layout) => {
+    setFormData(prev => ({ ...prev, layout }));
   };
 
   const handleInputChange = (e) => {
@@ -614,29 +627,14 @@ const Blogs = () => {
                   </div>
                 </div>
 
-                {/* Content */}
+                {/* Content - Rich Text Editor */}
                 <div>
-                  <label style={{ display: 'block', fontSize: '13px', fontWeight: '500', color: 'var(--admin-text-primary)', marginBottom: '8px' }}>
-                    Content
-                  </label>
-                  <textarea
-                    name="content"
+                  <RichTextEditor
                     value={formData.content}
-                    onChange={handleInputChange}
+                    onChange={handleContentChange}
                     placeholder="Write your blog post content here..."
-                    rows="8"
-                    style={{
-                      width: '100%',
-                      padding: '12px 16px',
-                      borderRadius: '10px',
-                      border: '1px solid var(--admin-border)',
-                      background: 'var(--admin-bg-primary)',
-                      color: 'var(--admin-text-primary)',
-                      fontSize: '14px',
-                      fontFamily: 'monospace',
-                      outline: 'none',
-                      resize: 'vertical',
-                    }}
+                    selectedLayout={formData.layout}
+                    onLayoutChange={handleLayoutChange}
                   />
                 </div>
 
