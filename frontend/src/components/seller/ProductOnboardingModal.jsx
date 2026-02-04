@@ -50,7 +50,7 @@ const ProductOnboardingModal = ({ onClose, onSave }) => {
     // Step 1: Barcode Lookup
     const handleBarcodeLookup = async () => {
         if (!barcode || barcode.length < 8) {
-            setError('الرجاء إدخال باركود صحيح (8-14 رقم)');
+            setError('Please enter a valid barcode (8-14 digits)');
             return;
         }
 
@@ -83,7 +83,7 @@ const ProductOnboardingModal = ({ onClose, onSave }) => {
             }
         } catch (err) {
             console.error('Barcode lookup error:', err);
-            setError('فشل في البحث عن الباركود. يرجى المحاولة مرة أخرى.');
+            setError('Failed to lookup barcode. Please try again.');
         } finally {
             setLoading(false);
         }
@@ -97,13 +97,13 @@ const ProductOnboardingModal = ({ onClose, onSave }) => {
         // Validate file type
         const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
         if (!allowedTypes.includes(file.type)) {
-            setError('نوع الملف غير مدعوم. يرجى استخدام JPEG أو PNG أو WebP.');
+            setError('Unsupported file type. Please use JPEG, PNG, or WebP.');
             return;
         }
 
         // Validate file size (10MB max)
         if (file.size > 10 * 1024 * 1024) {
-            setError('حجم الملف كبير جداً. الحد الأقصى 10 ميجابايت.');
+            setError('File too large. Maximum size is 10MB.');
             return;
         }
 
@@ -121,7 +121,7 @@ const ProductOnboardingModal = ({ onClose, onSave }) => {
     // Step 2: AI Image Analysis
     const handleAIAnalysis = async () => {
         if (!selectedFile) {
-            setError('الرجاء اختيار صورة للتحليل');
+            setError('Please select an image to analyze');
             return;
         }
 
@@ -157,23 +157,23 @@ const ProductOnboardingModal = ({ onClose, onSave }) => {
                         setAnalysisResult(data.data);
                         setStep(3);
                     } else {
-                        throw new Error(data.error || 'فشل في تحليل الصورة');
+                        throw new Error(data.error || 'Failed to analyze image');
                     }
                 } catch (err) {
                     console.error('AI analysis error:', err);
-                    setError(err.message || 'فشل في تحليل الصورة. يرجى المحاولة مرة أخرى.');
+                    setError(err.message || 'Failed to analyze image. Please try again.');
                 } finally {
                     setLoading(false);
                 }
             };
 
             reader.onerror = () => {
-                setError('فشل في قراءة الصورة');
+                setError('Failed to read the image');
                 setLoading(false);
             };
         } catch (err) {
             console.error('File read error:', err);
-            setError('فشل في قراءة الملف');
+            setError('Failed to read the file');
             setLoading(false);
         }
     };
@@ -184,15 +184,15 @@ const ProductOnboardingModal = ({ onClose, onSave }) => {
 
         // Validation
         if (!formData.name) {
-            setError('اسم المنتج مطلوب');
+            setError('Product name is required');
             return;
         }
         if (!formData.price) {
-            setError('السعر مطلوب');
+            setError('Price is required');
             return;
         }
         if (!formData.purchase_url) {
-            setError('رابط الشراء مطلوب');
+            setError('Purchase URL is required');
             return;
         }
 
@@ -207,7 +207,7 @@ const ProductOnboardingModal = ({ onClose, onSave }) => {
                 setError(result.error);
             }
         } catch (err) {
-            setError(err.message || 'فشل في حفظ المنتج');
+            setError(err.message || 'Failed to save product');
         } finally {
             setLoading(false);
         }
@@ -225,12 +225,12 @@ const ProductOnboardingModal = ({ onClose, onSave }) => {
                 <div className="p-6 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
                     <div>
                         <h2 className="text-xl font-bold text-slate-900 dark:text-white">
-                            إضافة منتج جديد
+                            Add New Product
                         </h2>
                         <p className="text-sm text-slate-500 mt-0.5">
-                            {step === 1 && 'الخطوة 1: البحث بالباركود'}
-                            {step === 2 && 'الخطوة 2: تحليل صورة المنتج'}
-                            {step === 3 && 'الخطوة 3: مراجعة وإكمال البيانات'}
+                            {step === 1 && 'Step 1: Barcode Lookup'}
+                            {step === 2 && 'Step 2: AI Image Analysis'}
+                            {step === 3 && 'Step 3: Review & Complete'}
                         </p>
                     </div>
                     <button
@@ -278,10 +278,10 @@ const ProductOnboardingModal = ({ onClose, onSave }) => {
                                 <Icon name="ScanBarcode" size={32} className="text-pink-500" />
                             </div>
                             <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2">
-                                أدخل باركود المنتج
+                                Enter Product Barcode
                             </h3>
                             <p className="text-sm text-slate-500">
-                                سنبحث عن معلومات المنتج تلقائياً في قاعدة البيانات
+                                We'll automatically search for product information in our database
                             </p>
                         </div>
 
@@ -290,7 +290,7 @@ const ProductOnboardingModal = ({ onClose, onSave }) => {
                                 type="text"
                                 value={barcode}
                                 onChange={(e) => setBarcode(e.target.value.replace(/\D/g, ''))}
-                                placeholder="أدخل الباركود (مثال: 4005808220557)"
+                                placeholder="Enter barcode (e.g., 4005808220557)"
                                 className="rounded-xl text-center text-lg tracking-widest"
                                 maxLength={14}
                             />
@@ -302,17 +302,17 @@ const ProductOnboardingModal = ({ onClose, onSave }) => {
                                     <Icon name="AlertTriangle" size={20} className="text-amber-500 flex-shrink-0 mt-0.5" />
                                     <div>
                                         <h4 className="font-semibold text-amber-700 dark:text-amber-400">
-                                            لم نتعرف على هذا الباركود
+                                            Barcode Not Recognized
                                         </h4>
                                         <p className="text-sm text-amber-600 dark:text-amber-300 mt-1">
-                                            لا تقلق! التقط صورة واضحة للجهة الخلفية للمنتج (حيث توجد المكونات واسم المنتج) وسيتولى الذكاء الاصطناعي الباقي.
+                                            Don't worry! Take a clear photo of the back of the product (where the ingredients and product name are) and AI will handle the rest.
                                         </p>
                                         <button
                                             onClick={() => setStep(2)}
                                             className="mt-3 text-sm font-semibold text-amber-700 dark:text-amber-400 flex items-center gap-1 hover:underline"
                                         >
                                             <Icon name="Camera" size={16} />
-                                            تحليل صورة المنتج
+                                            Analyze Product Image
                                         </button>
                                     </div>
                                 </div>
@@ -330,7 +330,7 @@ const ProductOnboardingModal = ({ onClose, onSave }) => {
                                 ) : (
                                     <Icon name="Search" size={18} />
                                 )}
-                                بحث
+                                Search
                             </button>
                         </div>
 
@@ -339,7 +339,7 @@ const ProductOnboardingModal = ({ onClose, onSave }) => {
                                 onClick={handleSkipToManual}
                                 className="text-sm text-slate-500 hover:text-slate-700 dark:hover:text-slate-300"
                             >
-                                تخطي، سأدخل البيانات يدوياً
+                                Skip, I'll enter details manually
                             </button>
                         </div>
                     </div>
@@ -353,10 +353,10 @@ const ProductOnboardingModal = ({ onClose, onSave }) => {
                                 <Icon name="Sparkles" size={32} className="text-purple-500" />
                             </div>
                             <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2">
-                                تحليل الصورة بالذكاء الاصطناعي
+                                AI Image Analysis
                             </h3>
                             <p className="text-sm text-slate-500">
-                                التقط صورة واضحة للجهة الخلفية للمنتج
+                                Take a clear photo of the back of the product
                             </p>
                         </div>
 
@@ -399,10 +399,10 @@ const ProductOnboardingModal = ({ onClose, onSave }) => {
                                         <Icon name="ImagePlus" size={28} className="text-slate-400" />
                                     </div>
                                     <p className="text-sm font-medium text-slate-600 dark:text-slate-400">
-                                        اضغط لاختيار صورة
+                                        Click to select an image
                                     </p>
                                     <p className="text-xs text-slate-400 mt-1">
-                                        JPEG, PNG, WebP (الحد الأقصى 10MB)
+                                        JPEG, PNG, WebP (Max 10MB)
                                     </p>
                                 </div>
                             )}
@@ -413,7 +413,7 @@ const ProductOnboardingModal = ({ onClose, onSave }) => {
                                 onClick={() => setStep(1)}
                                 className="flex-1 px-4 py-3 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-700 dark:text-slate-300 font-semibold hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
                             >
-                                رجوع
+                                Back
                             </button>
                             <button
                                 onClick={handleAIAnalysis}
@@ -423,12 +423,12 @@ const ProductOnboardingModal = ({ onClose, onSave }) => {
                                 {loading ? (
                                     <>
                                         <Icon name="Loader2" size={18} className="animate-spin" />
-                                        جاري التحليل...
+                                        Analyzing...
                                     </>
                                 ) : (
                                     <>
                                         <Icon name="Sparkles" size={18} />
-                                        تحليل بالذكاء الاصطناعي
+                                        Analyze with AI
                                     </>
                                 )}
                             </button>
@@ -439,7 +439,7 @@ const ProductOnboardingModal = ({ onClose, onSave }) => {
                                 onClick={handleSkipToManual}
                                 className="text-sm text-slate-500 hover:text-slate-700 dark:hover:text-slate-300"
                             >
-                                تخطي، سأدخل البيانات يدوياً
+                                Skip, I'll enter details manually
                             </button>
                         </div>
                     </div>
@@ -453,17 +453,17 @@ const ProductOnboardingModal = ({ onClose, onSave }) => {
                             <div className="p-3 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 rounded-xl text-sm text-emerald-700 dark:text-emerald-400 flex items-center gap-2">
                                 <Icon name="CheckCircle" size={16} />
                                 {barcodeStatus === 'found'
-                                    ? 'تم ملء البيانات تلقائياً من قاعدة البيانات'
-                                    : 'تم استخراج البيانات بنجاح بواسطة الذكاء الاصطناعي'}
+                                    ? 'Data auto-filled from database'
+                                    : 'Data successfully extracted by AI'}
                             </div>
                         )}
 
                         <div>
-                            <label className="block text-sm font-semibold text-slate-900 dark:text-white mb-2">اسم المنتج *</label>
+                            <label className="block text-sm font-semibold text-slate-900 dark:text-white mb-2">Product Name *</label>
                             <Input
                                 value={formData.name}
                                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                                placeholder="مثال: سيروم فيتامين سي"
+                                placeholder="e.g., Vitamin C Serum"
                                 required
                                 className="rounded-xl"
                             />
@@ -471,37 +471,37 @@ const ProductOnboardingModal = ({ onClose, onSave }) => {
 
                         <div className="grid grid-cols-2 gap-4">
                             <div>
-                                <label className="block text-sm font-semibold text-slate-900 dark:text-white mb-2">العلامة التجارية</label>
+                                <label className="block text-sm font-semibold text-slate-900 dark:text-white mb-2">Brand</label>
                                 <Input
                                     value={formData.brand}
                                     onChange={(e) => setFormData({ ...formData, brand: e.target.value })}
-                                    placeholder="اسم العلامة"
+                                    placeholder="Brand name"
                                     className="rounded-xl"
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-semibold text-slate-900 dark:text-white mb-2">الفئة</label>
+                                <label className="block text-sm font-semibold text-slate-900 dark:text-white mb-2">Category</label>
                                 <select
                                     value={formData.category}
                                     onChange={(e) => setFormData({ ...formData, category: e.target.value })}
                                     className="w-full px-4 py-2.5 border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-pink-500/50"
                                 >
-                                    <option value="">اختر</option>
-                                    <option value="cleanser">غسول</option>
-                                    <option value="toner">تونر</option>
-                                    <option value="serum">سيروم</option>
-                                    <option value="moisturizer">مرطب</option>
-                                    <option value="sunscreen">واقي شمس</option>
-                                    <option value="mask">ماسك</option>
-                                    <option value="treatment">علاج</option>
+                                    <option value="">Select</option>
+                                    <option value="cleanser">Cleanser</option>
+                                    <option value="toner">Toner</option>
+                                    <option value="serum">Serum</option>
+                                    <option value="moisturizer">Moisturizer</option>
+                                    <option value="sunscreen">Sunscreen</option>
+                                    <option value="mask">Mask</option>
+                                    <option value="treatment">Treatment</option>
                                 </select>
                             </div>
                         </div>
 
                         <div>
                             <label className="block text-sm font-semibold text-slate-900 dark:text-white mb-2">
-                                المكونات
-                                <span className="text-xs font-normal text-slate-400 mr-2">(مفصولة بفواصل)</span>
+                                Ingredients
+                                <span className="text-xs font-normal text-slate-400 ml-2">(comma-separated)</span>
                             </label>
                             <textarea
                                 value={formData.ingredients}
@@ -512,17 +512,17 @@ const ProductOnboardingModal = ({ onClose, onSave }) => {
                         </div>
 
                         <div>
-                            <label className="block text-sm font-semibold text-slate-900 dark:text-white mb-2">الوصف</label>
+                            <label className="block text-sm font-semibold text-slate-900 dark:text-white mb-2">Description</label>
                             <textarea
                                 value={formData.description}
                                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                                placeholder="وصف المنتج..."
+                                placeholder="Product description..."
                                 className="w-full px-4 py-3 border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 text-slate-900 dark:text-white min-h-[80px] focus:outline-none focus:ring-2 focus:ring-pink-500/50"
                             />
                             {analysisResult?.suggestedDescription && (
                                 <p className="text-xs text-slate-400 mt-1 flex items-center gap-1">
                                     <Icon name="Sparkles" size={12} />
-                                    تم توليد الوصف بالذكاء الاصطناعي
+                                    Description generated by AI
                                 </p>
                             )}
                         </div>
@@ -531,12 +531,12 @@ const ProductOnboardingModal = ({ onClose, onSave }) => {
                         <div className="border-t border-slate-200 dark:border-slate-800 pt-5">
                             <h4 className="text-sm font-semibold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
                                 <Icon name="DollarSign" size={16} className="text-pink-500" />
-                                معلومات البيع (إلزامية)
+                                Sale Information (Required)
                             </h4>
 
                             <div className="grid grid-cols-2 gap-4 mb-4">
                                 <div>
-                                    <label className="block text-sm font-semibold text-slate-900 dark:text-white mb-2">السعر ($) *</label>
+                                    <label className="block text-sm font-semibold text-slate-900 dark:text-white mb-2">Price ($) *</label>
                                     <Input
                                         type="number"
                                         step="0.01"
@@ -548,19 +548,19 @@ const ProductOnboardingModal = ({ onClose, onSave }) => {
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-semibold text-slate-900 dark:text-white mb-2">صورة المنتج</label>
+                                    <label className="block text-sm font-semibold text-slate-900 dark:text-white mb-2">Product Image</label>
                                     <Input
                                         type="url"
                                         value={formData.image_url}
                                         onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
-                                        placeholder="رابط الصورة"
+                                        placeholder="Image URL"
                                         className="rounded-xl"
                                     />
                                 </div>
                             </div>
 
                             <div>
-                                <label className="block text-sm font-semibold text-slate-900 dark:text-white mb-2">رابط الشراء *</label>
+                                <label className="block text-sm font-semibold text-slate-900 dark:text-white mb-2">Purchase URL *</label>
                                 <Input
                                     type="url"
                                     value={formData.purchase_url}
@@ -581,7 +581,7 @@ const ProductOnboardingModal = ({ onClose, onSave }) => {
                                 className="w-5 h-5 accent-pink-500 rounded"
                             />
                             <label htmlFor="published" className="text-sm font-medium text-slate-900 dark:text-white">
-                                نشر المنتج (يظهر للمستخدمين)
+                                Publish product (visible to users)
                             </label>
                         </div>
 
@@ -591,7 +591,7 @@ const ProductOnboardingModal = ({ onClose, onSave }) => {
                                 onClick={() => setStep(barcodeStatus === 'not-found' || analysisResult ? 2 : 1)}
                                 className="flex-1 px-4 py-3 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-700 dark:text-slate-300 font-semibold hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
                             >
-                                رجوع
+                                Back
                             </button>
                             <button
                                 type="submit"
@@ -603,7 +603,7 @@ const ProductOnboardingModal = ({ onClose, onSave }) => {
                                 ) : (
                                     <Icon name="Check" size={18} />
                                 )}
-                                حفظ المنتج
+                                Save Product
                             </button>
                         </div>
                     </form>
