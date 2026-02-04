@@ -5,6 +5,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import Button from '../../components/ui/Button';
 import Input from '../../components/ui/Input';
 import SellerAgreement from '../../components/seller/SellerAgreement';
+import ProductOnboardingModal from '../../components/seller/ProductOnboardingModal';
 
 // Modern Sidebar (shared with Dashboard)
 const SellerSidebar = ({ activePage }) => {
@@ -559,6 +560,7 @@ const ProductsPage = () => {
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [showModal, setShowModal] = useState(false);
+    const [showOnboardingModal, setShowOnboardingModal] = useState(false);
     const [editingProduct, setEditingProduct] = useState(null);
     const [showTermsModal, setShowTermsModal] = useState(false);
     const [termsAccepted, setTermsAccepted] = useState(null); // null = loading, false = not accepted, true = accepted
@@ -694,7 +696,7 @@ const ProductsPage = () => {
                                 <p className="text-slate-500 mt-1">Manage your product catalog</p>
                             </div>
                             <button
-                                onClick={() => { setEditingProduct(null); setShowModal(true); }}
+                                onClick={() => setShowOnboardingModal(true)}
                                 className="flex items-center gap-2 px-5 py-3 bg-gradient-to-r from-pink-500 to-rose-500 text-white rounded-xl font-semibold shadow-lg shadow-pink-500/25 hover:shadow-xl hover:shadow-pink-500/30 hover:-translate-y-0.5 transition-all duration-200"
                             >
                                 <Icon name="Plus" size={18} />
@@ -761,7 +763,7 @@ const ProductsPage = () => {
                             <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2">No products yet</h3>
                             <p className="text-slate-500 mb-6 max-w-sm mx-auto">Start by adding your first product to showcase on Glowimatch</p>
                             <button
-                                onClick={() => setShowModal(true)}
+                                onClick={() => setShowOnboardingModal(true)}
                                 className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-pink-500 to-rose-500 text-white rounded-xl font-semibold shadow-lg shadow-pink-500/25"
                             >
                                 <Icon name="Plus" size={18} />
@@ -775,6 +777,21 @@ const ProductsPage = () => {
                             product={editingProduct}
                             onClose={() => { setShowModal(false); setEditingProduct(null); }}
                             onSave={handleSave}
+                        />
+                    )}
+
+                    {/* Smart Product Onboarding Modal (for adding new products) */}
+                    {showOnboardingModal && (
+                        <ProductOnboardingModal
+                            onClose={() => setShowOnboardingModal(false)}
+                            onSave={async (productData) => {
+                                const result = await handleSave(productData);
+                                if (result?.success) {
+                                    setShowOnboardingModal(false);
+                                    return { success: true };
+                                }
+                                return result;
+                            }}
                         />
                     )}
                 </main>
