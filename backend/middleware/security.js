@@ -4,6 +4,7 @@
  */
 
 // ==================== IP BLACKLIST MANAGER ====================
+const { sendWebhook } = require('../utils/webhook');
 const ipBlacklist = new Map(); // IP -> { blockedAt, reason, permanent }
 const BLACKLIST_DURATION_MS = 24 * 60 * 60 * 1000; // 24 hours
 
@@ -30,6 +31,7 @@ function blacklistIP(ip, reason, permanent = false) {
         permanent
     });
     console.log(`[SECURITY] 🚫 IP Blacklisted: ${ip} - Reason: ${reason}`);
+    sendWebhook('security_alert', { type: 'IP_BLACKLISTED', ip, reason, permanent });
 }
 
 function unblacklistIP(ip) {
@@ -81,6 +83,7 @@ function recordFailedLogin(ip, email) {
     if (record.attempts >= MAX_LOGIN_ATTEMPTS) {
         record.lockedUntil = Date.now() + LOCKOUT_DURATION_MS;
         console.log(`[SECURITY] 🔒 Account locked: ${email} from IP ${ip}`);
+        sendWebhook('security_alert', { type: 'ACCOUNT_LOCKED', ip, email, reason: 'Brute force attempts' });
 
         // Auto-blacklist IP after repeated lockouts
         const ipLockouts = getIPLockoutCount(ip);

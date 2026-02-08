@@ -72,6 +72,7 @@ const ProductOnboardingModal = ({ onClose, onSave }) => {
                     name: data.product.name || '',
                     brand: data.product.brand || '',
                     ingredients: data.product.ingredients || '',
+                    description: data.product.suggestedDescription || '',
                     category: data.product.category || '',
                     image_url: data.product.imageUrl || ''
                 }));
@@ -247,10 +248,10 @@ const ProductOnboardingModal = ({ onClose, onSave }) => {
                         {[1, 2, 3].map((s) => (
                             <div key={s} className="flex items-center">
                                 <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold transition-all ${s === step
-                                        ? 'bg-gradient-to-r from-pink-500 to-rose-500 text-white shadow-lg shadow-pink-500/25'
-                                        : s < step
-                                            ? 'bg-emerald-500 text-white'
-                                            : 'bg-slate-200 dark:bg-slate-700 text-slate-500'
+                                    ? 'bg-gradient-to-r from-pink-500 to-rose-500 text-white shadow-lg shadow-pink-500/25'
+                                    : s < step
+                                        ? 'bg-emerald-500 text-white'
+                                        : 'bg-slate-200 dark:bg-slate-700 text-slate-500'
                                     }`}>
                                     {s < step ? <Icon name="Check" size={16} /> : s}
                                 </div>

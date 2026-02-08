@@ -1,0 +1,20 @@
+export default {
+  dark: {
+    background: '#0f172a',
+    surface: '#1e293b',
+    surfaceLight: '#334155',
+    border: '#475569',
+    text: '#f1f5f9',
+    textSecondary: '#94a3b8',
+    textMuted: '#64748b',
+    primary: '#3b82f6',
+    primaryDark: '#2563eb',
+    success: '#10b981',
+    warning: '#f59e0b',
+    error: '#ef4444',
+    info: '#06b6d4',
+    tint: '#3b82f6',
+    tabIconDefault: '#64748b',
+    tabIconSelected: '#3b82f6',
+  },
+};

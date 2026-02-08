@@ -23,7 +23,7 @@ const SellerSidebar = ({ activePage }) => {
     };
 
     return (
-        <aside className="w-72 min-h-screen bg-gradient-to-b from-slate-900 to-slate-950 flex flex-col">
+        <aside className="w-72 h-full bg-gradient-to-b from-slate-900 to-slate-950 flex flex-col overflow-y-auto">
             <div className="p-8">
                 <Link to="/seller" className="flex items-center gap-4">
                     <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-rose-500 via-pink-500 to-fuchsia-500 flex items-center justify-center shadow-lg shadow-pink-500/25">
@@ -153,10 +153,10 @@ const ProfilePage = () => {
     };
 
     return (
-        <div className="flex min-h-screen bg-slate-50 dark:bg-slate-950">
+        <div className="flex h-screen bg-slate-50 dark:bg-slate-950 seller-layout overflow-hidden">
             <SellerSidebar activePage="profile" />
 
-            <main className="flex-1 p-8 lg:p-10">
+            <main className="flex-1 p-8 lg:p-10 overflow-y-auto">
                 <div className="max-w-2xl">
                     {/* Header */}
                     <header className="mb-8">

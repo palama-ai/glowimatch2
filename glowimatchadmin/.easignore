@@ -1,0 +1,20 @@
+# EAS Build Ignore File
+# Files listed here won't be uploaded to EAS build servers
+
+# Local machine-specific SDK/NDK paths
+android/local.properties
+local.properties
+
+# Build outputs
+android/.gradle/
+android/app/build/
+android/build/
+.gradle/
+
+# IDE files
+.idea/
+*.iml
+
+# Temp files
+*.log
+*.tmp

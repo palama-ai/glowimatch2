@@ -22,7 +22,7 @@ const SellerSidebar = ({ activePage }) => {
     };
 
     return (
-        <aside className="w-72 min-h-screen bg-gradient-to-b from-slate-900 to-slate-950 flex flex-col">
+        <aside className="w-72 h-full bg-gradient-to-b from-slate-900 to-slate-950 flex flex-col overflow-y-auto">
             <div className="p-8">
                 <Link to="/seller" className="flex items-center gap-4">
                     <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-rose-500 via-pink-500 to-fuchsia-500 flex items-center justify-center shadow-lg shadow-pink-500/25">
@@ -244,10 +244,10 @@ const ViolationsPage = () => {
     };
 
     return (
-        <div className="flex min-h-screen bg-slate-50 dark:bg-slate-950">
+        <div className="flex h-screen bg-slate-50 dark:bg-slate-950 seller-layout overflow-hidden">
             <SellerSidebar activePage="violations" />
 
-            <main className="flex-1 p-8 lg:p-10">
+            <main className="flex-1 p-8 lg:p-10 overflow-y-auto">
                 {/* Header */}
                 <header className="mb-8">
                     <h1 className="text-3xl font-bold text-slate-900 dark:text-white">Violations & Appeals</h1>
@@ -257,8 +257,8 @@ const ViolationsPage = () => {
                 {/* Message */}
                 {message && (
                     <div className={`mb-6 p-4 rounded-xl flex items-center gap-3 ${message.type === 'success'
-                            ? 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400'
-                            : 'bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400'
+                        ? 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400'
+                        : 'bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400'
                         }`}>
                         <Icon name={message.type === 'success' ? 'CheckCircle' : 'AlertCircle'} size={20} />
                         <p>{message.text}</p>
@@ -271,16 +271,16 @@ const ViolationsPage = () => {
                 {/* Account Status Card */}
                 {accountStatus && (
                     <div className={`mb-8 rounded-2xl p-6 border ${accountStatus.status === 'BANNED' ? 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800' :
-                            accountStatus.status === 'LOCKED' ? 'bg-orange-50 dark:bg-orange-900/20 border-orange-200 dark:border-orange-800' :
-                                accountStatus.isOnProbation ? 'bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800' :
-                                    accountStatus.violationCount > 0 ? 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800' :
-                                        'bg-emerald-50 dark:bg-emerald-900/20 border-emerald-200 dark:border-emerald-800'
+                        accountStatus.status === 'LOCKED' ? 'bg-orange-50 dark:bg-orange-900/20 border-orange-200 dark:border-orange-800' :
+                            accountStatus.isOnProbation ? 'bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800' :
+                                accountStatus.violationCount > 0 ? 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800' :
+                                    'bg-emerald-50 dark:bg-emerald-900/20 border-emerald-200 dark:border-emerald-800'
                         }`}>
                         <div className="flex items-center justify-between">
                             <div>
                                 <h2 className="text-lg font-bold text-slate-900 dark:text-white">Account Status</h2>
                                 <p className={`text-sm mt-1 ${accountStatus.status === 'ACTIVE' ? 'text-emerald-600' :
-                                        accountStatus.status === 'LOCKED' ? 'text-orange-600' : 'text-red-600'
+                                    accountStatus.status === 'LOCKED' ? 'text-orange-600' : 'text-red-600'
                                     }`}>
                                     {accountStatus.status === 'ACTIVE' && !accountStatus.isOnProbation ? '✓ Good Standing' :
                                         accountStatus.status === 'ACTIVE' && accountStatus.isOnProbation ? '⚠️ On Probation' :
@@ -292,8 +292,8 @@ const ViolationsPage = () => {
                                     <div
                                         key={i}
                                         className={`w-4 h-4 rounded-full ${i <= (accountStatus.violationCount || 0)
-                                                ? 'bg-red-500'
-                                                : 'bg-slate-200 dark:bg-slate-700'
+                                            ? 'bg-red-500'
+                                            : 'bg-slate-200 dark:bg-slate-700'
                                             }`}
                                     />
                                 ))}

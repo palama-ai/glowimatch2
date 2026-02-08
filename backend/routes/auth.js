@@ -89,11 +89,11 @@ router.post('/signup', async (req, res) => {
       referrer = result && result.length > 0 ? result[0] : null;
     }
 
-    // Generate email verification code
+    // Generate email verification code for all users
     const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
     const verificationExpires = new Date(Date.now() + 15 * 60 * 1000).toISOString(); // 15 minutes
 
-    // Insert new user with the specified role (email_verified = 0 by default)
+    // Insert new user with email_verified = 0 (all users must verify)
     await sql`
       INSERT INTO users (id, email, password_hash, full_name, role, referral_code, referrer_id, email_verified, verification_code, verification_code_expires)
       VALUES (${id}, ${email}, ${password_hash}, ${fullName || null}, ${role}, ${myReferralCode}, ${referrer ? referrer.id : null}, 0, ${verificationCode}, ${verificationExpires})
@@ -200,7 +200,7 @@ router.post('/signup', async (req, res) => {
       }
     }
 
-    // Send verification email
+    // Send verification email for all users (including sellers)
     const emailResult = await sendVerificationCode(email, verificationCode, fullName);
     if (emailResult.success) {
       console.log(`[auth] Verification code sent to ${email}`);
@@ -211,8 +211,7 @@ router.post('/signup', async (req, res) => {
     // Return success but require verification (no token until verified)
     res.json({
       data: {
-        user: { id, email, full_name: fullName, role, referral_code: myReferralCode, email_verified: false },
-        requiresVerification: true,
+        email,
         message: 'Account created! Please check your email for the verification code.'
       }
     });
@@ -266,8 +265,8 @@ router.post('/login', async (req, res) => {
     // Successful login - clear failed attempts
     if (req.security) req.security.clearLoginAttempts(email);
 
-    // Check if email is verified
-    if (!user.email_verified) {
+    // Check if email is verified (skip for sellers)
+    if (!user.email_verified && user.role !== 'seller') {
       // Generate new verification code if expired or doesn't exist
       let currentCode = user.verification_code;
       const codeExpired = !user.verification_code_expires || new Date(user.verification_code_expires) < new Date();

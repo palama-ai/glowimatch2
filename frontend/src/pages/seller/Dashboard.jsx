@@ -22,7 +22,7 @@ const SellerSidebar = ({ activePage }) => {
     };
 
     return (
-        <aside className="w-72 min-h-screen bg-gradient-to-b from-slate-900 to-slate-950 flex flex-col">
+        <aside className="w-72 h-full bg-gradient-to-b from-slate-900 to-slate-950 flex flex-col overflow-y-auto">
             {/* Logo Area */}
             <div className="p-8">
                 <Link to="/seller" className="flex items-center gap-4">
@@ -359,10 +359,10 @@ const SellerDashboard = () => {
                 <SellerAgreement onAccept={handleAcceptTerms} />
             )}
 
-            <div className="flex min-h-screen bg-slate-50 dark:bg-slate-950">
+            <div className="flex h-screen bg-slate-50 dark:bg-slate-950 seller-layout overflow-hidden">
                 <SellerSidebar activePage={getActivePage()} />
 
-                <main className="flex-1 p-8 lg:p-10">
+                <main className="flex-1 p-8 lg:p-10 overflow-y-auto">
                     {/* Header Section */}
                     <header className="mb-10">
                         <div className="flex items-center justify-between">

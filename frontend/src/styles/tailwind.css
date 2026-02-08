@@ -7,52 +7,145 @@
 @layer base {
   :root {
     /* Core Colors */
-    --color-background: #FEFEFE; /* off-white */
-    --color-foreground: #1A1A1A; /* near-black */
-    --color-border: #E5E7EB; /* gray-200 */
-    --color-input: #F8F9FA; /* gray-50 */
-    --color-ring: #FF69B4; /* hot-pink */
-    
+    --color-background: #FEFEFE;
+    /* off-white */
+    --color-foreground: #1A1A1A;
+    /* near-black */
+    --color-border: #E5E7EB;
+    /* gray-200 */
+    --color-input: #F8F9FA;
+    /* gray-50 */
+    --color-ring: #FF69B4;
+    /* hot-pink */
+
     /* Card Colors */
-    --color-card: #FFFFFF; /* white */
-    --color-card-foreground: #1A1A1A; /* near-black */
-    --color-popover: #FFFFFF; /* white */
-    --color-popover-foreground: #1A1A1A; /* near-black */
-    
+    --color-card: #FFFFFF;
+    /* white */
+    --color-card-foreground: #1A1A1A;
+    /* near-black */
+    --color-popover: #FFFFFF;
+    /* white */
+    --color-popover-foreground: #1A1A1A;
+    /* near-black */
+
     /* Muted Colors */
-    --color-muted: #F8F9FA; /* gray-50 */
-    --color-muted-foreground: #6B7280; /* gray-500 */
-    
+    --color-muted: #F8F9FA;
+    /* gray-50 */
+    --color-muted-foreground: #6B7280;
+    /* gray-500 */
+
     /* Primary Colors */
-    --color-primary: #000000; /* black */
-    --color-primary-foreground: #FFFFFF; /* white */
-    
+    --color-primary: #000000;
+    /* black */
+    --color-primary-foreground: #FFFFFF;
+    /* white */
+
     /* Secondary Colors */
-    --color-secondary: #FFC0CB; /* pink */
-    --color-secondary-foreground: #1A1A1A; /* near-black */
-    
+    --color-secondary: #FFC0CB;
+    /* pink */
+    --color-secondary-foreground: #1A1A1A;
+    /* near-black */
+
     /* Accent Colors */
-    --color-accent: #FF69B4; /* hot-pink */
-    --color-accent-foreground: #FFFFFF; /* white */
-    
+    --color-accent: #FF69B4;
+    /* hot-pink */
+    --color-accent-foreground: #FFFFFF;
+    /* white */
+
     /* State Colors */
-    --color-destructive: #EF4444; /* red-500 */
-    --color-destructive-foreground: #FFFFFF; /* white */
-    --color-success: #10B981; /* emerald-500 */
-    --color-success-foreground: #FFFFFF; /* white */
-    --color-warning: #F59E0B; /* amber-500 */
-    --color-warning-foreground: #FFFFFF; /* white */
-    --color-error: #EF4444; /* red-500 */
-    --color-error-foreground: #FFFFFF; /* white */
+    --color-destructive: #EF4444;
+    /* red-500 */
+    --color-destructive-foreground: #FFFFFF;
+    /* white */
+    --color-success: #10B981;
+    /* emerald-500 */
+    --color-success-foreground: #FFFFFF;
+    /* white */
+    --color-warning: #F59E0B;
+    /* amber-500 */
+    --color-warning-foreground: #FFFFFF;
+    /* white */
+    --color-error: #EF4444;
+    /* red-500 */
+    --color-error-foreground: #FFFFFF;
+    /* white */
   }
 
   * {
     @apply border-border;
   }
-  
+
   body {
     @apply bg-background text-foreground;
     font-feature-settings: "rlig" 1, "calt" 1;
+  }
+
+  /* ──────────────────────────────────────────────────────────────── */
+  /* Global User Scrollbar (B2C) - Applied to body by default        */
+  /* ──────────────────────────────────────────────────────────────── */
+  body::-webkit-scrollbar,
+  html::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  body::-webkit-scrollbar-track,
+  html::-webkit-scrollbar-track {
+    background: linear-gradient(180deg, #FFF5F8 0%, #FFF0F5 100%);
+    border-radius: 10px;
+  }
+
+  body::-webkit-scrollbar-thumb,
+  html::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #FF69B4 0%, #FF85C1 50%, #FFB6D5 100%);
+    border-radius: 10px;
+    border: 2px solid #FFF5F8;
+  }
+
+  body::-webkit-scrollbar-thumb:hover,
+  html::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(135deg, #FF1493 0%, #FF69B4 50%, #FF85C1 100%);
+  }
+
+  html,
+  body {
+    scrollbar-width: thin;
+    scrollbar-color: #FF69B4 #FFF5F8;
+  }
+
+  /* ──────────────────────────────────────────────────────────────── */
+  /* Seller Area Override (B2B) - For seller pages                   */
+  /* ──────────────────────────────────────────────────────────────── */
+  .seller-layout::-webkit-scrollbar,
+  .seller-layout *::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+
+  .seller-layout::-webkit-scrollbar-track,
+  .seller-layout *::-webkit-scrollbar-track {
+    background: #F1F5F9;
+    border-radius: 8px;
+    border: 1px solid #E2E8F0;
+  }
+
+  .seller-layout::-webkit-scrollbar-thumb,
+  .seller-layout *::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #64748B 0%, #475569 100%);
+    border-radius: 8px;
+    border: 2px solid #F1F5F9;
+  }
+
+  .seller-layout::-webkit-scrollbar-thumb:hover,
+  .seller-layout *::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(135deg, #FF69B4 0%, #EC4899 100%);
+    box-shadow: 0 0 8px rgba(255, 105, 180, 0.4);
+  }
+
+  .seller-layout,
+  .seller-layout * {
+    scrollbar-width: thin;
+    scrollbar-color: #64748B #F1F5F9;
   }
 }
 
@@ -60,19 +153,19 @@
   .animate-fade-in {
     animation: fadeIn 300ms cubic-bezier(0.4, 0, 0.2, 1);
   }
-  
+
   .animate-fade-up {
     animation: fadeUp 300ms cubic-bezier(0.4, 0, 0.2, 1);
   }
-  
+
   .animate-pulse-soft {
     animation: pulseSoft 2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
   }
-  
+
   .animate-scale-hover {
     transition: transform 200ms ease-out;
   }
-  
+
   .animate-scale-hover:hover {
     transform: scale(1.02);
   }
@@ -82,6 +175,7 @@
   from {
     opacity: 0;
   }
+
   to {
     opacity: 1;
   }
@@ -92,6 +186,7 @@
     opacity: 0;
     transform: translateY(20px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -99,9 +194,12 @@
 }
 
 @keyframes pulseSoft {
-  0%, 100% {
+
+  0%,
+  100% {
     opacity: 0.6;
   }
+
   50% {
     opacity: 1;
   }
@@ -117,21 +215,26 @@
   0% {
     background-position: -200% 0;
   }
+
   100% {
     background-position: 200% 0;
   }
 }
 
 @keyframes float {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: translateY(0);
   }
+
   50% {
     transform: translateY(-8px);
   }
 }
 
 @layer utilities {
+
   /* Glassmorphism utilities */
   .glass {
     background: rgba(255, 255, 255, 0.7);
@@ -139,34 +242,34 @@
     -webkit-backdrop-filter: blur(12px);
     border: 1px solid rgba(255, 255, 255, 0.3);
   }
-  
+
   .glass-dark {
     background: rgba(15, 23, 36, 0.8);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     border: 1px solid rgba(255, 255, 255, 0.1);
   }
-  
+
   .glass-accent {
     background: linear-gradient(135deg, rgba(255, 105, 180, 0.1), rgba(255, 192, 203, 0.15));
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
     border: 1px solid rgba(255, 105, 180, 0.2);
   }
-  
+
   /* Gradient utilities */
   .gradient-pink {
     background: linear-gradient(135deg, #FF69B4 0%, #FF85C1 50%, #FFB6D5 100%);
   }
-  
+
   .gradient-soft {
     background: linear-gradient(135deg, rgba(255, 105, 180, 0.05) 0%, rgba(255, 192, 203, 0.1) 100%);
   }
-  
+
   .gradient-hero {
     background: linear-gradient(180deg, rgba(255, 105, 180, 0.08) 0%, transparent 60%);
   }
-  
+
   /* Circular progress */
   .circular-progress {
     position: relative;
@@ -174,60 +277,77 @@
     align-items: center;
     justify-content: center;
   }
-  
+
   .circular-progress svg {
     transform: rotate(-90deg);
   }
-  
+
   .circular-progress-track {
     stroke: var(--color-muted);
     fill: none;
   }
-  
+
   .circular-progress-fill {
     fill: none;
     stroke-linecap: round;
     transition: stroke-dashoffset 1s ease-out;
   }
-  
+
   /* Animation utilities */
   .animate-float {
     animation: float 4s ease-in-out infinite;
   }
-  
+
   .animate-shimmer {
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
     background-size: 200% 100%;
     animation: shimmer 2s infinite;
   }
-  
+
   .animate-spin-slow {
     animation: spin-slow 3s linear infinite;
   }
-  
+
   /* Stagger animation children */
-  .stagger-children > * {
+  .stagger-children>* {
     opacity: 0;
     animation: fadeUp 400ms ease-out forwards;
   }
-  
-  .stagger-children > *:nth-child(1) { animation-delay: 0ms; }
-  .stagger-children > *:nth-child(2) { animation-delay: 50ms; }
-  .stagger-children > *:nth-child(3) { animation-delay: 100ms; }
-  .stagger-children > *:nth-child(4) { animation-delay: 150ms; }
-  .stagger-children > *:nth-child(5) { animation-delay: 200ms; }
-  .stagger-children > *:nth-child(6) { animation-delay: 250ms; }
-  
+
+  .stagger-children>*:nth-child(1) {
+    animation-delay: 0ms;
+  }
+
+  .stagger-children>*:nth-child(2) {
+    animation-delay: 50ms;
+  }
+
+  .stagger-children>*:nth-child(3) {
+    animation-delay: 100ms;
+  }
+
+  .stagger-children>*:nth-child(4) {
+    animation-delay: 150ms;
+  }
+
+  .stagger-children>*:nth-child(5) {
+    animation-delay: 200ms;
+  }
+
+  .stagger-children>*:nth-child(6) {
+    animation-delay: 250ms;
+  }
+
   /* Card hover effects */
   .card-hover {
     transition: all 300ms cubic-bezier(0.4, 0, 0.2, 1);
   }
-  
+
   .card-hover:hover {
     transform: translateY(-4px);
     box-shadow: 0 20px 40px rgba(255, 105, 180, 0.15);
   }
-  
+
   /* Text gradient */
   .text-gradient {
     background: linear-gradient(135deg, #FF69B4, #FF85C1);
@@ -241,7 +361,8 @@
 .dark {
   --color-background: #0b1220;
   --color-foreground: #e6eef8;
-  --color-border: #1f2937; /* gray-800 */
+  --color-border: #1f2937;
+  /* gray-800 */
   --color-input: #111827;
   --color-ring: #ff85c1;
 
@@ -270,4 +391,118 @@
   --color-warning-foreground: #0b1220;
   --color-error: #f87171;
   --color-error-foreground: #0b1220;
+}
+
+/* ═══════════════════════════════════════════════════════════════ */
+/* Custom Scrollbar Styles for Glowimatch                         */
+/* ═══════════════════════════════════════════════════════════════ */
+
+/* ──────────────────────────────────────────────────────────────── */
+/* USER (B2C) - Soft Feminine Pink Theme                          */
+/* ──────────────────────────────────────────────────────────────── */
+/* ──────────────────────────────────────────────────────────────── */
+/* USER (B2C) - Soft Feminine Pink Theme (Default)                 */
+/* ──────────────────────────────────────────────────────────────── */
+/* Global application to Body and User elements */
+body::-webkit-scrollbar,
+.scrollbar-user::-webkit-scrollbar {
+  width: 14px;
+  /* Wider to allow for padding (floating effect) */
+  height: 14px;
+}
+
+body::-webkit-scrollbar-track,
+.scrollbar-user::-webkit-scrollbar-track {
+  background: transparent;
+  /* Transparent track for cleaner look */
+}
+
+body::-webkit-scrollbar-thumb,
+.scrollbar-user::-webkit-scrollbar-thumb {
+  background-color: #ff85c1;
+  /* Fallback */
+  background-image: linear-gradient(135deg, #FF69B4 0%, #FF85C1 100%);
+  border-radius: 9999px;
+  /* Fully rounded pill */
+  border: 4px solid rgba(0, 0, 0, 0);
+  /* Transparent border creates padding */
+  background-clip: content-box;
+  /* Clips bg to content, leaving border transparent */
+  transition: background-color 0.3s ease;
+}
+
+body::-webkit-scrollbar-thumb:hover,
+.scrollbar-user::-webkit-scrollbar-thumb:hover {
+  background-color: #FF1493;
+  background-image: linear-gradient(135deg, #FF1493 0%, #FF69B4 100%);
+}
+
+/* Firefox Support - User */
+body,
+.scrollbar-user {
+  scrollbar-width: thin;
+  scrollbar-color: #FF69B4 transparent;
+}
+
+/* ──────────────────────────────────────────────────────────────── */
+/* SELLER (B2B) - Professional Balanced Theme                      */
+/* ──────────────────────────────────────────────────────────────── */
+.seller-layout main {
+  scroll-behavior: smooth;
+}
+
+.scrollbar-seller::-webkit-scrollbar,
+.seller-layout::-webkit-scrollbar,
+.seller-layout *::-webkit-scrollbar {
+  width: 14px;
+  height: 14px;
+}
+
+.scrollbar-seller::-webkit-scrollbar-track,
+.seller-layout::-webkit-scrollbar-track,
+.seller-layout *::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scrollbar-seller::-webkit-scrollbar-thumb,
+.seller-layout::-webkit-scrollbar-thumb,
+.seller-layout *::-webkit-scrollbar-thumb {
+  background-color: #64748B;
+  background-image: linear-gradient(135deg, #94a3b8 0%, #64748B 100%);
+  border-radius: 9999px;
+  border: 4px solid rgba(0, 0, 0, 0);
+  background-clip: content-box;
+  transition: all 0.3s ease;
+}
+
+.scrollbar-seller::-webkit-scrollbar-thumb:hover,
+.seller-layout::-webkit-scrollbar-thumb:hover,
+.seller-layout *::-webkit-scrollbar-thumb:hover {
+  background-color: #FF69B4;
+  background-image: linear-gradient(135deg, #FF69B4 0%, #EC4899 100%);
+}
+
+.scrollbar-seller::-webkit-scrollbar-corner,
+.seller-layout::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+/* Firefox Support - Seller */
+.scrollbar-seller,
+.seller-layout,
+.seller-layout * {
+  scrollbar-width: thin;
+  scrollbar-color: #94a3b8 transparent;
+}
+
+/* ──────────────────────────────────────────────────────────────── */
+/* UTILITY - Hidden Scrollbar                                       */
+/* ──────────────────────────────────────────────────────────────── */
+.scrollbar-hidden::-webkit-scrollbar {
+  display: none;
+}
+
+.scrollbar-hidden {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
