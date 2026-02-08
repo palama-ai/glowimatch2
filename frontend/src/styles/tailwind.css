@@ -467,8 +467,10 @@ body,
 .scrollbar-seller::-webkit-scrollbar-thumb,
 .seller-layout::-webkit-scrollbar-thumb,
 .seller-layout *::-webkit-scrollbar-thumb {
-  background-color: #64748B;
-  background-image: linear-gradient(135deg, #94a3b8 0%, #64748B 100%);
+  background-color: #f43f5e;
+  /* Rose-500 */
+  background-image: linear-gradient(135deg, #fb7185 0%, #f43f5e 50%, #c026d3 100%);
+  /* Rose-400 -> Rose-500 -> Fuchsia-600 */
   border-radius: 9999px;
   border: 4px solid rgba(0, 0, 0, 0);
   background-clip: content-box;
@@ -478,8 +480,10 @@ body,
 .scrollbar-seller::-webkit-scrollbar-thumb:hover,
 .seller-layout::-webkit-scrollbar-thumb:hover,
 .seller-layout *::-webkit-scrollbar-thumb:hover {
-  background-color: #FF69B4;
-  background-image: linear-gradient(135deg, #FF69B4 0%, #EC4899 100%);
+  background-color: #e11d48;
+  /* Rose-600 */
+  background-image: linear-gradient(135deg, #f43f5e 0%, #e11d48 50%, #a21caf 100%);
+  /* Darker Rose/Fuchsia */
 }
 
 .scrollbar-seller::-webkit-scrollbar-corner,
