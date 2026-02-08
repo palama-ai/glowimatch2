@@ -453,20 +453,26 @@ body,
 
 .scrollbar-seller::-webkit-scrollbar,
 .seller-layout::-webkit-scrollbar,
-.seller-layout *::-webkit-scrollbar {
+.seller-layout *::-webkit-scrollbar,
+.seller-layout main::-webkit-scrollbar,
+.seller-layout aside::-webkit-scrollbar {
   width: 14px;
   height: 14px;
 }
 
 .scrollbar-seller::-webkit-scrollbar-track,
 .seller-layout::-webkit-scrollbar-track,
-.seller-layout *::-webkit-scrollbar-track {
+.seller-layout *::-webkit-scrollbar-track,
+.seller-layout main::-webkit-scrollbar-track,
+.seller-layout aside::-webkit-scrollbar-track {
   background: transparent;
 }
 
 .scrollbar-seller::-webkit-scrollbar-thumb,
 .seller-layout::-webkit-scrollbar-thumb,
-.seller-layout *::-webkit-scrollbar-thumb {
+.seller-layout *::-webkit-scrollbar-thumb,
+.seller-layout main::-webkit-scrollbar-thumb,
+.seller-layout aside::-webkit-scrollbar-thumb {
   background-color: #f43f5e;
   /* Rose-500 */
   background-image: linear-gradient(135deg, #fb7185 0%, #f43f5e 50%, #c026d3 100%);
@@ -479,7 +485,9 @@ body,
 
 .scrollbar-seller::-webkit-scrollbar-thumb:hover,
 .seller-layout::-webkit-scrollbar-thumb:hover,
-.seller-layout *::-webkit-scrollbar-thumb:hover {
+.seller-layout *::-webkit-scrollbar-thumb:hover,
+.seller-layout main::-webkit-scrollbar-thumb:hover,
+.seller-layout aside::-webkit-scrollbar-thumb:hover {
   background-color: #e11d48;
   /* Rose-600 */
   background-image: linear-gradient(135deg, #f43f5e 0%, #e11d48 50%, #a21caf 100%);
